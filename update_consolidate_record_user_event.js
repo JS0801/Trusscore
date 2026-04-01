@@ -28,7 +28,7 @@ function(error,log,record,search,format) {
         var mainSO = '';
         var consolidated_shippingrecord = context.newRecord;
         var recID = consolidated_shippingrecord.id;
-        if (recID = 4491093) return;
+        if (recID == 4491093) return;
         var recType = consolidated_shippingrecord.type;
         log.debug({title:'consolidated_shippingrecord',details:consolidated_shippingrecord})
         

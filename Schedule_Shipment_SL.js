@@ -120,7 +120,7 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
         "We will email a copy of the packing list once your order ships." +
         "</p>" +
         "<p>" +
-        "<b><i><ul>Please note* Unforeseen shipping delays may occur due to longer border wait times, weather disruptions, and driver workforce capacity.</ul></i></b>" +
+        "<b><i><u>Please note* Unforeseen shipping delays may occur due to longer border wait times, weather disruptions, and driver workforce capacity.</u></i></b>" +
         "</p>" +
         "</div>" +
         "<div class='footer'>" +

@@ -1117,8 +1117,8 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
                 ["internalid", "anyof", uniqueSOIds], // use all unique SO IDs
                 "AND",
                 ["mainline", "is", "F"],
-                "AND",
-                ["isclosed", "is", "F"],
+                // "AND",
+                // ["isclosed", "is", "F"],
                 "AND",
                 ["item.custitem_tc_is_crating_item", "is", "F"],
                 "AND",

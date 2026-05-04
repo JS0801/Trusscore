@@ -876,7 +876,7 @@ stateSearchObj.run().each(function(result){
   <input type="hidden" name="existing_id" id="existing_id" value="${esc(existingIdFromUrl)}">
 
   <div style="text-align:center; margin-bottom: 20px;">
-    <img src="https://6518122.app.netsuite.com/core/media/media.nl?id=1491520&c=6518122_SB1&h=Z79P-wNXZPRWcwHNBvpVFfPynmCdYOo-yUvLeV2LE6bsiH-P" alt="Company Logo" style="max-width: 300px; height: auto;" />
+    <img src="https://6518122.app.netsuite.com/core/media/media.nl?id=6122&c=6518122&h=m6_0Vrb_g_AphBfET8BOfpOVIeIbop4Sotx3jZo2T1ewbnzh" alt="Company Logo" style="max-width: 300px; height: auto;" />
   </div>
 
   <div class="row">

@@ -537,6 +537,16 @@ stateSearchObj.run().each(function(result){
         function onRequest(context) {
             if (context.request.method === 'GET') {
                 try {
+
+                    var request = context.request;
+                    var externalUrl = 'https://6518122.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=5804&deploy=1&compid=6518122&ns-at=AAEJ7tMQi6u9BSsGXBpBYNAigeywBkbWHEZcIMttBNGYZM87sqY';
+
+        // Check if request is from internal NetSuite URL
+        if (request.url && request.url.indexOf('system.netsuite.com') !== -1) {
+            redirect.redirect({
+                url: externalUrl
+            });
+        }
                     var form = serverWidget.createForm({ title: 'Vendor Onboarding Form' });
                     var htmlField = form.addField({
                         id: 'custpage_vendor_html',

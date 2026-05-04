@@ -10,7 +10,7 @@ define(['N/ui/serverWidget', 'N/log', 'N/record', 'N/file', 'N/search', 'N/email
         // ===== PDF CONFIG =====
         var PDF_FOLDER_ID = 291182;
         var PDF_FIELD_ID = 'custrecord_vendor_pdf'; // FILE field on customrecord_vendor_onboarding (change to your field id)
-        var COMPANY_LOGO_URL = 'https://6518122.app.netsuite.com/core/media/media.nl?id=1491520&c=6518122_SB1&h=Z79P-wNXZPRWcwHNBvpVFfPynmCdYOo-yUvLeV2LE6bsiH-P';
+        var COMPANY_LOGO_URL = 'https://6518122.app.netsuite.com/core/media/media.nl?id=6122&c=6518122&h=m6_0Vrb_g_AphBfET8BOfpOVIeIbop4Sotx3jZo2T1ewbnzh';
 
         function escXml(s) {
             if (s == null) return '';

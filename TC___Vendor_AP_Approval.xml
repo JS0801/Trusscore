@@ -15,14 +15,8 @@
   <releasestatus>RELEASED</releasestatus>
   <runasadmin>F</runasadmin>
   <initcondition>
-    <formula><![CDATA[isChecked("On Hold [For Payments Only]") = 'T']]></formula>
+    <formula></formula>
     <type>VISUAL_BUILDER</type>
-    <parameters>
-      <parameter>
-        <name>On Hold [For Payments Only]</name>
-        <value>[scriptid=custentity_tc_onhold_payments]</value>
-      </parameter>
-    </parameters>
   </initcondition>
   <workflowstates>
     <workflowstate scriptid="workflowstate179">

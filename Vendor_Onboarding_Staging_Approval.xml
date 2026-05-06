@@ -294,6 +294,47 @@
             </parameters>
           </initcondition>
         </sendemailaction>
+        <sendemailaction scriptid="workflowaction446">
+          <attachmentfield></attachmentfield>
+          <attachmentfile></attachmentfile>
+          <attachmentjoinfield></attachmentjoinfield>
+          <attachmenttype>SPECIFIC</attachmenttype>
+          <body>&lt;p&gt;Hi,&lt;/p&gt;&lt;p&gt;Please review and approve this vendor request.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Legal Company Name: &lt;/strong&gt;{custrecord_vendor_legal_name}&lt;/p&gt;&lt;p&gt;&lt;strong&gt;DBA Name:&lt;/strong&gt;{custrecord_vendor_dba}&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Completed By:&lt;/strong&gt;{custrecord_vendor_auth_name}&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt;{custrecord_vendor_auth_email}&lt;/p&gt;&lt;p&gt;Kindly approve or reject in NetSuite. Thanks!&lt;/p&gt;</body>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <includerecordlink>T</includerecordlink>
+          <isinactive>F</isinactive>
+          <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
+          <recipientbccemail></recipientbccemail>
+          <recipientccemail></recipientccemail>
+          <recipientemail></recipientemail>
+          <recipientfield></recipientfield>
+          <recipientjoinfield></recipientjoinfield>
+          <recipienttype>SPECIFIC</recipienttype>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <sender>[ACCOUNT_SPECIFIC_VALUE]</sender>
+          <senderfield></senderfield>
+          <senderjoinfield></senderjoinfield>
+          <sendertype>SPECIFIC</sendertype>
+          <subject>Approval Needed – Vendor Onboarding: {name}</subject>
+          <template></template>
+          <usetemplate>F</usetemplate>
+          <initcondition>
+            <formula><![CDATA[isChecked("Approval Email Sent") = 'F']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Approval Email Sent</name>
+                <value>[scriptid=customrecord_vendor_onboarding.custrecord_approval_email_sent]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </sendemailaction>
         <setfieldvalueaction scriptid="workflowaction382">
           <clienttriggerfields></clienttriggerfields>
           <conditionsavedsearch></conditionsavedsearch>
@@ -414,6 +455,29 @@
         </setfieldvalueaction>
       </workflowactions>
       <workflowactions triggertype="AFTERSUBMIT">
+        <customaction scriptid="workflowaction438">
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <resultfield></resultfield>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <scripttype>[scriptid=customscript_tc_vendor_record_creation]</scripttype>
+          <initcondition>
+            <formula><![CDATA[isEmpty("Related Vendor") = 'T']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Related Vendor</name>
+                <value>[scriptid=customrecord_vendor_onboarding.custrecord_related_vendor]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </customaction>
         <sendemailaction scriptid="workflowaction385">
           <attachmentfield></attachmentfield>
           <attachmentfile></attachmentfile>
@@ -424,7 +488,7 @@
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
           <includerecordlink>F</includerecordlink>
-          <isinactive>T</isinactive>
+          <isinactive>F</isinactive>
           <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
           <recipientbccemail></recipientbccemail>
           <recipientccemail></recipientccemail>
@@ -455,20 +519,38 @@
             </parameters>
           </initcondition>
         </sendemailaction>
-        <customaction scriptid="workflowaction438">
+        <sendemailaction scriptid="workflowaction447">
+          <attachmentfield></attachmentfield>
+          <attachmentfile></attachmentfile>
+          <attachmentjoinfield></attachmentjoinfield>
+          <attachmenttype>SPECIFIC</attachmenttype>
+          <body>&lt;p&gt;Hello,&lt;/p&gt;&lt;p&gt;Please review and approve this vendor request.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Legal Company Name: &lt;/strong&gt;{custrecord_vendor_legal_name}&lt;/p&gt;&lt;p&gt;&lt;strong&gt;DBA Name:&lt;/strong&gt;{custrecord_vendor_dba}&lt;/p&gt;</body>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <includerecordlink>F</includerecordlink>
           <isinactive>F</isinactive>
-          <resultfield></resultfield>
+          <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
+          <recipientbccemail></recipientbccemail>
+          <recipientccemail></recipientccemail>
+          <recipientemail></recipientemail>
+          <recipientfield></recipientfield>
+          <recipientjoinfield></recipientjoinfield>
+          <recipienttype>SPECIFIC</recipienttype>
           <scheduledelay></scheduledelay>
           <schedulemode>DELAY</schedulemode>
           <schedulerecurrence></schedulerecurrence>
           <scheduletimeofday></scheduletimeofday>
           <scheduletimeunit></scheduletimeunit>
-          <scripttype>[scriptid=customscript_tc_vendor_record_creation]</scripttype>
+          <sender>[ACCOUNT_SPECIFIC_VALUE]</sender>
+          <senderfield></senderfield>
+          <senderjoinfield></senderjoinfield>
+          <sendertype>SPECIFIC</sendertype>
+          <subject>New Vendor Approval Request</subject>
+          <template></template>
+          <usetemplate>F</usetemplate>
           <initcondition>
-            <formula><![CDATA[isEmpty("Related Vendor") = 'T']]></formula>
+            <formula><![CDATA[isEmpty("Related Vendor") = 'F']]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -477,7 +559,7 @@
               </parameter>
             </parameters>
           </initcondition>
-        </customaction>
+        </sendemailaction>
       </workflowactions>
     </workflowstate>
     <workflowstate scriptid="workflowstate169">

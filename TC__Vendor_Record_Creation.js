@@ -77,6 +77,59 @@ define(['N/record', 'N/file', 'N/search', 'N/log'], function(record, file, searc
     });
   }
 
+  function friendlyStatus(status) {
+    if (status === 'COMPLETED_WITH_ERRORS') return 'Vendor created, but some follow-up steps failed';
+    if (status === 'COMPLETED') return 'Vendor created successfully';
+    if (status === 'FAILED') return 'Vendor was not created';
+    return status;
+  }
+
+  function cleanErrorMessage(message) {
+    let text = message == null ? '' : String(message);
+
+    // NetSuite sometimes includes noisy nested JSON or Java stack details.
+    text = text.replace(/\{.*\}/g, '').replace(/\s+/g, ' ').trim();
+
+    if (!text) return 'NetSuite did not provide a detailed message.';
+    if (text.length > 500) return text.substring(0, 500) + '...';
+    return text;
+  }
+
+  function readableErrorName(name) {
+    if (!name || name === 'Error') return '';
+    return String(name).replace(/_/g, ' ').toLowerCase();
+  }
+
+  function friendlyCheckForError(item) {
+    const step = String(item.step || '').toLowerCase();
+    const message = String(item.message || '').toLowerCase();
+    const context = item.context || {};
+
+    if (context.fieldId) {
+      return 'Check field "' + context.fieldId + '" and the value being sent to NetSuite.';
+    }
+    if (step.indexOf('attach') !== -1 || message.indexOf('file') !== -1) {
+      return 'Check that the file exists, is accessible, and can be attached to this record.';
+    }
+    if (step.indexOf('address') !== -1 || message.indexOf('country') !== -1 || message.indexOf('state') !== -1) {
+      return 'Check the address country/state values on the staging record.';
+    }
+    if (step.indexOf('contact') !== -1) {
+      return 'Check the contact name, email, phone, role, and required contact fields.';
+    }
+    if (step.indexOf('bank') !== -1) {
+      return 'Check the payment method and bank detail fields for this vendor.';
+    }
+    if (message.indexOf('mandatory') !== -1 || message.indexOf('required') !== -1) {
+      return 'A required value is missing. Check the staging record and required vendor fields.';
+    }
+    if (message.indexOf('invalid') !== -1) {
+      return 'One of the values is not valid for the NetSuite field.';
+    }
+
+    return 'Review this step on the staging record, then check the NetSuite execution log for technical details.';
+  }
+
   function runStep(errors, step, fn, context) {
     try {
       return fn();
@@ -87,17 +140,29 @@ define(['N/record', 'N/file', 'N/search', 'N/log'], function(record, file, searc
   }
 
   function buildErrorBlock(status, stagingId, vendorId, errors) {
-    return [
+    const lines = [
       '----- Vendor Creation Run -----',
-      JSON.stringify({
-        timestamp: new Date().toISOString(),
-        status: status,
-        stagingId: stagingId,
-        vendorId: vendorId || null,
-        errorCount: errors.length,
-        errors: errors
-      }, null, 2)
-    ].join('\n');
+      'Date/Time: ' + new Date().toISOString(),
+      'Status: ' + friendlyStatus(status),
+      'Staging Record: ' + stagingId,
+      'Vendor Record: ' + (vendorId || 'Not created'),
+      'Error Count: ' + errors.length,
+      '',
+      'Errors:'
+    ];
+
+    errors.forEach(function(item, index) {
+      const readableName = readableErrorName(item.name);
+
+      lines.push(
+        (index + 1) + '. Step: ' + item.step,
+        '   Error: ' + (readableName ? readableName + ' - ' : '') + cleanErrorMessage(item.message),
+        '   Check: ' + friendlyCheckForError(item)
+      );
+    });
+
+    lines.push('----- End Run -----');
+    return lines.join('\n');
   }
 
   function appendErrorsToStaging(stagingRec, stagingId, status, vendorId, errors) {

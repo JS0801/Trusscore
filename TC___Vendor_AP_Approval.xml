@@ -5,7 +5,7 @@
   <initlocalizationcontext></initlocalizationcontext>
   <initoncreate>T</initoncreate>
   <initonvieworupdate>T</initonvieworupdate>
-  <initsavedsearchcondition></initsavedsearchcondition>
+  <initsavedsearchcondition>[scriptid=customsearch_tc_vendor_approval_flow]</initsavedsearchcondition>
   <inittriggertype></inittriggertype>
   <isinactive>F</isinactive>
   <islogenabled>T</islogenabled>

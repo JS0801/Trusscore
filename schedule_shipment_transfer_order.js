@@ -523,14 +523,14 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
       log.debug({title:'selectedSalesOrder',details:selectedSalesOrder})
       //return;
       
-      var get_deploy = isDeploymentRunning();
-      get_deploy = get_deploy.toLowerCase();
-      log.audit('get_deploy', get_deploy);
+      // var get_deploy = isDeploymentRunning();
+      // get_deploy = get_deploy.toLowerCase();
+      // log.audit('get_deploy', get_deploy);
       
       var scheduleMRScriptTask = task.create({
         taskType: task.TaskType.MAP_REDUCE,
         scriptId: 'customscript_ts_mr_to_schedule_ship',  //SD - TO Update
-        deploymentId: get_deploy,
+      //  deploymentId: get_deploy,
         params: {
           'custscript_ts_selec_to_update': selectedSalesOrder  //SD - TO Update
         }

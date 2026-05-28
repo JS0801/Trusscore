@@ -72,6 +72,9 @@ function(error,log,record,search,format) {
           log.debug('No lines found on CSR to process');
           return;
         }
+if (isScrapRecord(scraprec)) 
+  clearScrapRelatedTransactions(array, recID);
+        
        //SD - TO Chnage
         var lookup = search.lookupFields({
           type: search.Type.TRANSACTION,
@@ -885,6 +888,103 @@ for (var i = 0; i < fobValues.length; i++) {
         return false;
       }
     }
+
+
+  function isScrapRecord(value) {
+  return value === true || value === 'true' || value === 'T';
+}
+
+function getTransactionRecordType(tranId) {
+  var lookup = search.lookupFields({
+    type: search.Type.TRANSACTION,
+    id: tranId,
+    columns: ['type']
+  });
+
+  var tranType = lookup && lookup.type && lookup.type[0] ? lookup.type[0].value : '';
+
+  if (tranType === 'SalesOrd') return record.Type.SALES_ORDER;
+  if (tranType === 'TrnfrOrd') return record.Type.TRANSFER_ORDER;
+
+  return '';
+}
+
+function clearScrapRelatedTransactions(lines, csrId) {
+  var grouped = groupByItem(lines, 'salesorder');
+
+  for (var tranId in grouped) {
+    if (!grouped.hasOwnProperty(tranId) || !tranId) continue;
+
+    var recType = getTransactionRecordType(tranId);
+    if (!recType) continue;
+
+    var tranRec = record.load({
+      type: recType,
+      id: tranId,
+      isDynamic: true
+    });
+
+    var changed = false;
+    var data = grouped[tranId];
+
+    for (var i = 0; i < data.length; i++) {
+      var lineNum = tranRec.findSublistLineWithValue({
+        sublistId: 'item',
+        fieldId: 'line',
+        value: data[i].line
+      });
+
+      if (lineNum === -1) continue;
+
+      tranRec.selectLine({ sublistId: 'item', line: lineNum });
+
+      var currentRelated = tranRec.getCurrentSublistValue({
+        sublistId: 'item',
+        fieldId: 'custcol_tc_related_shipping_record'
+      });
+
+      if (currentRelated && String(currentRelated) !== String(csrId)) {
+        log.debug({
+          title: 'Scrap clear skipped - line linked to another CSR',
+          details: { transaction: tranId, line: data[i].line, related: currentRelated }
+        });
+        continue;
+      }
+
+      tranRec.setCurrentSublistValue({
+        sublistId: 'item',
+        fieldId: 'custcol_tc_related_shipping_record',
+        value: ''
+      });
+
+      tranRec.setCurrentSublistValue({
+        sublistId: 'item',
+        fieldId: 'custcol_tc_scheduled_ship_date',
+        value: ''
+      });
+
+      if (recType === record.Type.SALES_ORDER) {
+        try {
+          tranRec.setCurrentSublistValue({
+            sublistId: 'item',
+            fieldId: 'inventorylocation',
+            value: ''
+          });
+        } catch (eLoc) {
+          log.debug({ title: 'Could not clear inventory location', details: eLoc });
+        }
+      }
+
+      tranRec.commitLine({ sublistId: 'item' });
+      changed = true;
+    }
+
+    if (changed) {
+      tranRec.save({ ignoreMandatoryFields: true });
+    }
+  }
+}
+
     
     return {
       afterSubmit: afterSubmit

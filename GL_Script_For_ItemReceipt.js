@@ -94,6 +94,7 @@ if(itemfulfillmentSearch){
     currency = itemfulfillmentSearch[i].getValue('currency');
     subsidiary = itemfulfillmentSearch[i].getValue('subsidiary');
     nlapiLogExecution('DEBUG', 'subsidiary',  subsidiary);
+    nlapiLogExecution('DEBUG', 'entity',  entity);
 
     
           credit_amount = itemfulfillmentSearch[i].getValue('creditamount');

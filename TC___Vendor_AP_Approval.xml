@@ -127,7 +127,7 @@
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula><![CDATA["User" NOT IN ("Employee1","Employee2")]]></formula>
+            <formula><![CDATA["User" NOT IN ("Employee1","Employee2","Employee3")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -141,6 +141,11 @@
               </parameter>
               <parameter>
                 <name>Employee2</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
+              <parameter>
+                <name>Employee3</name>
                 <selectrecordtype>-4</selectrecordtype>
                 <value>[ACCOUNT_SPECIFIC_VALUE]</value>
               </parameter>

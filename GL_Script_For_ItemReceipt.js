@@ -145,7 +145,7 @@ if(itemfulfillmentSearch){
   debit_line.setDebitAmount(credit_amount);
   debit_line.setAccountId(parseInt(account));
   debit_line.setDepartmentId(parseInt(department));
-  debit_line.setEntityId(parseInt(entity));
+  if (entity) debit_line.setEntityId(parseInt(entity));
   debit_line.setLocationId(parseInt(location));
   debit_line.setClassId(parseInt(class_id))
   debit_line.setMemo(memo)
@@ -156,7 +156,7 @@ if(itemfulfillmentSearch){
   credit_line.setCreditAmount(credit_amount);
   credit_line.setAccountId(parseInt(itemAccount));
   credit_line.setDepartmentId(parseInt(department))
-  credit_line.setEntityId(parseInt(entity))
+  if (entity) credit_line.setEntityId(parseInt(entity))
   credit_line.setLocationId(parseInt(location));
   credit_line.setClassId(parseInt(class_id))
   credit_line.setMemo(memo);

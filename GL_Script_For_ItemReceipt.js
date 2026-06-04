@@ -141,7 +141,9 @@ if(itemfulfillmentSearch){
   }
 
 
-  var debit_line = customLines.addNewLine();
+
+  if (entity){
+      var debit_line = customLines.addNewLine();
   debit_line.setDebitAmount(credit_amount);
   debit_line.setAccountId(parseInt(account));
   debit_line.setDepartmentId(parseInt(department));
@@ -160,6 +162,9 @@ if(itemfulfillmentSearch){
   credit_line.setLocationId(parseInt(location));
   credit_line.setClassId(parseInt(class_id))
   credit_line.setMemo(memo);
+  }
+
+
 
 
 }

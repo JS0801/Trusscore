@@ -1647,7 +1647,7 @@ toggleIndividualUI();
                         try {
                             if (recipient) {
                                 var draftUrl = tokenForLinks;
-                                var subjectDraft = 'Vendor Onboarding Draft Saved: ' + (req.parameters.dba_name || req.parameters.legal_company_name || 'Untitled') + ' (Draft #' + tokenForLinks + ')';
+                                var subjectDraft = 'Trusscore Inc | Vendor Onboarding Draft Saved: ' + (req.parameters.legal_company_name || req.parameters.dba_name || 'Untitled') + ' (Draft #' + tokenForLinks + ')';
                                 var bodyDraft =
                                     '<html><head><meta charset="UTF-8"><style>' +
                                     'body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:24px;background:#f6f8fb;color:#222}' +
@@ -1798,7 +1798,7 @@ toggleIndividualUI();
                                 '</table>'
                             ) : '';
 
-                            const subject = 'Vendor Onboarding Submitted: ' + (req.parameters.dba_name || req.parameters.legal_company_name || '') + ' (Ref #' + recId + ')';
+                            const subject = 'Trusscore Inc | Vendor Onboarding Submitted: ' + (req.parameters.legal_company_name || req.parameters.dba_name || '') + ' (Ref #' + recId + ')';
                             const body = `
   <html>
     <head>

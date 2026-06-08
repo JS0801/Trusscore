@@ -2004,7 +2004,6 @@ toggleIndividualUI();
         }
 
         function showSuiteletError(context, message) {
-            var serverWidget = require('N/ui/serverWidget');
 
             // Create a form
             var form = serverWidget.createForm({ title: 'Error' });

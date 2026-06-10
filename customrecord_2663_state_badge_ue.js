@@ -3,10 +3,12 @@
  * @NScriptType UserEventScript
  */
 define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) => {
-    const RECORD_TYPE = 'customrecord_2663_entity_bank_details';
+    const BANK_DETAILS_RECORD_TYPE = 'customrecord_2663_entity_bank_details';
+    const VENDOR_RECORD_TYPE = 'vendor';
+    const VENDOR_WORKFLOW_INTERNAL_ID = '471';
     const DEFAULT_BADGE_THEME = 'neutral';
 
-    const STATE_BADGE_MAP = {
+    const BANK_DETAILS_STATE_BADGE_MAP = {
         'submit': {
           label: 'Pending Submission',
           theme: 'warning'
@@ -41,6 +43,29 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
           }
     };
 
+    const VENDOR_STATE_BADGE_MAP = {
+        'finance approval': {
+          label: 'Pending Approval (Finance)',
+          theme: 'warning'
+         },
+         'ap approval and review': {
+             label: 'Pending Approval (AP)',
+             theme: 'warning'
+         },
+        'finance approval': {
+            label: 'Pending Approval (Finance)',
+            theme: 'warning'
+        },
+        'rejected': {
+            label: 'Rejected',
+            theme: 'danger'
+        },
+        'approved': {
+            label: 'Approved',
+            theme: 'success'
+        }
+    };
+
     const STATE_COLUMN = search.createColumn({
         name: 'currentstate',
         join: 'workflow',
@@ -60,13 +85,19 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
                 return;
             }
 
-            const stateName = getWorkflowStateName(context.newRecord.id);
+            const recordConfig = getRecordConfig(context.newRecord.type);
+
+            if (!recordConfig) {
+                return;
+            }
+
+            const stateName = getWorkflowStateName(recordConfig, context.newRecord.id);
 
             if (!stateName) {
                 return;
             }
 
-            const badgeConfig = getBadgeConfig(stateName);
+            const badgeConfig = getBadgeConfig(recordConfig.badgeMap, stateName);
 
             addWorkflowStateBadge(context.form, badgeConfig);
         } catch (error) {
@@ -77,14 +108,32 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
         }
     }
 
-    function getWorkflowStateName(recordId) {
+    function getRecordConfig(recordType) {
+        if (recordType === BANK_DETAILS_RECORD_TYPE) {
+            return {
+                searchType: BANK_DETAILS_RECORD_TYPE,
+                workflowInternalId: '',
+                badgeMap: BANK_DETAILS_STATE_BADGE_MAP
+            };
+        }
+
+        if (recordType === VENDOR_RECORD_TYPE) {
+            return {
+                searchType: VENDOR_RECORD_TYPE,
+                workflowInternalId: VENDOR_WORKFLOW_INTERNAL_ID,
+                badgeMap: VENDOR_STATE_BADGE_MAP
+            };
+        }
+
+        return null;
+    }
+
+    function getWorkflowStateName(recordConfig, recordId) {
         let stateName = '';
 
         const stateSearch = search.create({
-            type: RECORD_TYPE,
-            filters: [
-                ['internalid', 'anyof', recordId]
-            ],
+            type: recordConfig.searchType,
+            filters: getWorkflowStateFilters(recordConfig, recordId),
             columns: [
                 STATE_COLUMN
             ]
@@ -102,6 +151,20 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
         return stateName;
     }
 
+    function getWorkflowStateFilters(recordConfig, recordId) {
+        if (recordConfig.workflowInternalId) {
+            return [
+                ['workflow.internalid', 'anyof', recordConfig.workflowInternalId],
+                'AND',
+                ['internalid', 'anyof', recordId]
+            ];
+        }
+
+        return [
+            ['internalid', 'anyof', recordId]
+        ];
+    }
+
     function normalizeSearchValue(value) {
         if (Array.isArray(value)) {
             return value.join(', ').trim();
@@ -110,8 +173,8 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
         return String(value || '').trim();
     }
 
-    function getBadgeConfig(stateName) {
-        const mappedConfig = STATE_BADGE_MAP[getStateMapKey(stateName)];
+    function getBadgeConfig(badgeMap, stateName) {
+        const mappedConfig = (badgeMap || {})[getStateMapKey(stateName)];
 
         if (!mappedConfig) {
             return {

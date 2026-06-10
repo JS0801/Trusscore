@@ -139,8 +139,10 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
                 STATE_COLUMN
             ]
         });
+        
 
         stateSearch.run().each((result) => {
+            log.debug('stateSearch', stateSearch)
             const stateText = result.getText(STATE_COLUMN);
             const stateValue = result.getValue(STATE_COLUMN);
 

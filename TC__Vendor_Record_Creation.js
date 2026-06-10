@@ -270,7 +270,7 @@ define(['N/record', 'N/file', 'N/search', 'N/log'], function(record, file, searc
   function addAddress(rec, addr, opts, errors, step) {
     if (!addr) return false;
 
-    const hasAny = addr.addr1 || addr.addr2 || addr.city || addr.state || addr.zip || addr.country;
+    const hasAny = addr.addr1;
     if (!hasAny) return false;
 
     try {

@@ -92,6 +92,7 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
             }
 
             const stateName = getWorkflowStateName(recordConfig, context.newRecord.id);
+            log.debug('stateName', stateName)
 
             if (!stateName) {
                 return;

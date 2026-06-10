@@ -139,6 +139,8 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
                 STATE_COLUMN
             ]
         });
+
+        log.debug('stateSearch', stateSearch)
         
 
         stateSearch.run().each((result) => {

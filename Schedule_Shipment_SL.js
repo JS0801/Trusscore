@@ -188,6 +188,11 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
         value: '61',
         text: 'Calgary - Daren Industries'
       });
+      seLocation.addSelectOption({
+        value: '72',
+        text: 'Calgary - Agway'
+      });
+      
       var shipreqby = formObj.addField({id:'custpage_shipreqby', type: serverWidget.FieldType.DATE, label: 'SUPPLY REQUIRED BY DATE(ON OR AFTER)',container: 'filters'});
       var shipDate = formObj.addField({id:'custpage_shipdate', type: serverWidget.FieldType.DATE, label: 'SCHEDULED SHIP DATE(ON OR AFTER)',container: 'filters'});
       var purchaseOrderNumber = formObj.addField({id:'custpage_sonumber', type: serverWidget.FieldType.TEXT, label: 'SEARCH SALES ORDER',container: 'filters'});
@@ -255,6 +260,10 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
       locationField.addSelectOption({
         value: '61',
         text: 'Calgary - Daren Industries'
+      });
+      locationField.addSelectOption({
+        value: '72',
+        text: 'Calgary - Agway'
       });
       
       var reschedule = formObj.addField({

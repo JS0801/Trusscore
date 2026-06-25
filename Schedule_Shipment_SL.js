@@ -862,10 +862,10 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
           recipients: [to],
           cc: ccArray,
           subject: emailsubject,
-          body: emailbody
-          // relatedRecords: {
-          //     transactionId: selectedSalesOrder[0].internalID
-          // }
+          body: emailbody,
+          relatedRecords: {
+              transactionId: selectedSalesOrder[0].internalID
+          }
         });
 
         log.debug('email', 'send')

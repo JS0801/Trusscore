@@ -1,0 +1,400 @@
+<?xml version="1.0"?><!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd"><#-- Translation Collection --><#assign tc = nstranslation.load({
+	"collections":[{
+	"alias": "default",
+	"collection": "custcollection_bol_tc_translations",
+	"keys": ["OJ_BOL_NOT_NEGOTIABLE_HEADING","OJ_PAGE_HEADING","OJ_OF_HEADING","OJ_BOL_SHIP_FROM","OJ_BOL_SHIP_TO","OJ_BOL_BILL_OF_LADING_NUMBER","OJ_BOL_CUSTOMER_PO_NUMBER","OJ_BOL_CARRIER_NAME","OJ_BOL_THIRD_PARTY_FREIGHT_CHARGES_BILL_TO","OJ_BOL_PRO_NUMBER","OJ_BOL_ACCOUNT","OJ_BOL_DELIVERY_INSTRUCTIONS","OJ_BOL_FREIGHT_CHARGE_TERMS","OJ_BOL_NOTES_TITLE","OJ_BOL_ACCESSORIALS_TITLE","OJ_BOL_CARRIER_INFORMATION","OJ_BOL_HANDLING_UNIT","OJ_BOL_PIECES","OJ_BOL_LTL_ONLY","OJ_BOL_QTY","OJ_BOL_TYPE","OJ_BOL_WEIGHT","OJ_BOL_COMMODITY_DESC_TITLE","OJ_BOL_COMMODITY_DESCRIPTION","OJ_BOL_NMFC_NO","OJ_BOL_CLASS","OJ_BOL_SHIPPER_NOTES","OJ_BOL_COLLECT","OJ_BOL_PREPAID","OJ_BOL_CUSTOMER_CHECK_ACCEPTABLE","OJ_BOL_LIABILITY_NOTES","OJ_BOL_RECEIVED_NOTES","OJ_BOL_CARRIER_SHIPMENT_NOTES","OJ_BOL_SHIPPER_SIGNATURE","OJ_BOL_SHIPPER_SIGNATURE_DATE","OJ_BOL_TRAILER_LOADED","OJ_BOL_FREIGHT_COUNTED","OJ_BOL_CARRIER_SIGNATURE","OJ_BOL_NOTES_OF_APPLICABLE_REGULATIONS","OJ_BOL_BY_SHIPPER","OJ_BOL_BY_DRIVER","OJ_BOL_BY_DRIVER_PALLETS_NOTES","OJ_BOL_BY_DRIVER_PIECES_CHECK","OJ_BOL_CARRIER_ACK_RECEIPT_NOTES","OJ_BOL_COD_AMT","OJ_BOL_FEE_TERMS"],
+	"locale": .locale
+	}]
+})><#assign localizedTC = nstranslation.selectLocale({
+"handle": tc,
+"locale": .locale
+})><#function translate x><#return localizedTC.default[x]></#function>
+<pdf>
+<head>
+	<link name="NotoSans" type="font" subtype="truetype" src="${nsfont.NotoSans_Regular}" src-bold="${nsfont.NotoSans_Bold}" src-italic="${nsfont.NotoSans_Italic}" src-bolditalic="${nsfont.NotoSans_BoldItalic}" bytes="2" />
+	<#if .locale == "zh_CN">
+		<link name="NotoSansCJKsc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKsc_Regular}" src-bold="${nsfont.NotoSansCJKsc_Bold}" bytes="2" />
+	<#elseif .locale == "zh_TW">
+		<link name="NotoSansCJKtc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKtc_Regular}" src-bold="${nsfont.NotoSansCJKtc_Bold}" bytes="2" />
+	<#elseif .locale == "ja_JP">
+		<link name="NotoSansCJKjp" type="font" subtype="opentype" src="${nsfont.NotoSansCJKjp_Regular}" src-bold="${nsfont.NotoSansCJKjp_Bold}" bytes="2" />
+	<#elseif .locale == "ko_KR">
+		<link name="NotoSansCJKkr" type="font" subtype="opentype" src="${nsfont.NotoSansCJKkr_Regular}" src-bold="${nsfont.NotoSansCJKkr_Bold}" bytes="2" />
+	<#elseif .locale == "th_TH">
+		<link name="NotoSansThai" type="font" subtype="opentype" src="${nsfont.NotoSansThai_Regular}" src-bold="${nsfont.NotoSansThai_Bold}" bytes="2" />
+	</#if>
+    <macrolist>
+        <macro id="nlheader">
+            <table class="header" style="width: 100%; font-size: 10pt;">
+	<tr>
+    <#if record.custbody_tc_csr_non_branded_cust != true>
+	<td align="left" width="30%"><img height="45px" src="https://6518122.app.netsuite.com/core/media/media.nl?id=6122&amp;c=6518122&amp;h=m6_0Vrb_g_AphBfET8BOfpOVIeIbop4Sotx3jZo2T1ewbnzh" style="float: left; margin: 7px" width="140px" /></td>
+    <#else><td align="left" width="30%">&nbsp;</td>
+    </#if>
+	<td width="25%" align="center">&nbsp;</td>
+	<td width="45%" align="right" padding-right="15px" style="font-size:18px;">COMMERCIAL INVOICE</td>
+	</tr></table>
+        </macro>
+    </macrolist>
+    <style type="text/css">table {
+        <#if .locale == "zh_CN">
+            font-family: stsong, sans-serif;
+        <#elseif .locale == "zh_TW">
+            font-family: msung, sans-serif;
+        <#elseif .locale == "ja_JP">
+            font-family: heiseimin, sans-serif;
+        <#elseif .locale == "ko_KR">
+            font-family: hygothic, sans-serif;
+        <#elseif .locale == "ru_RU">
+            font-family: verdana;
+        <#else>
+            font-family: sans-serif;
+        </#if>
+            font-size: 9pt;
+            table-layout: fixed;
+        }
+        .specisl_character{
+			font-family: Tahoma, Geneva, sans-serif;
+          	font-size:23px;
+        }
+        th {
+            font-weight: bold;
+            font-size: 8pt;
+            vertical-align: middle;
+            padding: 5px 6px 3px;
+            background-color: #e3e3e3;
+            color: #333333;
+        }
+        td {
+            padding: 4px 6px;
+          	font-size: 8pt;
+        }
+        b {
+            font-weight: bold;
+            color: #333333;
+        }
+        table.header td {
+            padding: 0;
+            font-size: 10pt;
+        }
+      	table.inTable{
+           padding: 0;
+           font-size: 8pt;
+           padding-bottom: 0px;
+            padding-top: 0px;
+        }
+        table.footer td {
+            padding: 0;
+            font-size: 8pt;
+        }
+        table.itemtable th {
+            padding-bottom: 10px;
+            padding-top: 10px;
+        }
+        table.body td {
+            padding-top: 2px;
+        }
+        td.addressheader {
+            font-size: 9pt;
+            font-weight: bold;
+            padding-top: 4px;
+            padding-bottom: 2px;
+            background-color: #E0E0E0;
+            align: center;
+        }
+        td.address {
+            padding-top: 2px;
+        }
+      	p.myp{
+           width: 100%;
+           font-size: 10pt;
+           font-weight: bold;
+           align: center;
+        }
+      	p.check{
+          font-size: 7pt;
+          align: left;
+          valign: middle;
+        }
+        span.title {
+            font-size: 28pt;
+        }
+        span.number {
+            font-size: 16pt;
+        }
+        span.itemname {
+            font-weight: bold;
+            line-height: 150%;
+        }
+        hr {
+            border-top: 1px solid black;
+            width: 100%;
+        }
+      table.topdown{
+         font-size: 8pt;
+         border-collapse: collapse;
+      }
+</style>
+</head>
+<body header="nlheader" header-height="5%" padding="0.5in 0.5in 0.5in 0.5in" size="Letter">
+    <#-- Table 1 -->
+<table style="width: 100%; margin-top: 0px; border: 1px solid black;">
+  	<tr>
+      <td width="8%" align="left" style="font-size: 9px;"><b>Exporter:</b></td>
+      <td width="26%" align="left">&nbsp;</td>
+      <td width="12%" align="left" border-right="0.1px solid black">&nbsp;</td>
+      <td width="28%" align="left" colspan="3" border-right="0.1px solid black"><b>Customs Clearance By: </b></td>
+      <td width="26%" align="left" colspan="2" border-right="0.1px solid black"><b>Exporter Reference Number: </b></td>
+	</tr>
+  	<tr>
+	<td width="46%" height="50px" align="left" colspan="3" rowspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black"><#if record.custbody_tc_shipping_loc?has_content>${record.custbody_tc_ship_loc_addressee}<br />${record.custbody_tc_ship_loc_addr1}<#if record.custbody_tc_ship_loc_addr2?has_content><br />${record.custbody_tc_ship_loc_addr2}</#if><br />${record.custbody_tc_ship_loc_city}, ${record.custbody_tc_ship_loc_province}&nbsp;${record.custbody_tc_ship_loc_zipcode} <br />${record.custbody_tc_ship_loc_country}<br/><#else>${record.custbody_tc_sub_addressee}<br />${record.custbody_tc_sub_addr1}<br />${record.custbody_tc_sub_city}, ${record.custbody_tc_sub_state}&nbsp;${record.custbody_tc_sub_zipcode} <br />${record.custbody_tc_sub_country}<br/></#if><br/>Tax ID: ${record.custbody_tc_shipping_loc.custrecord_tc_loc_tax_id}</td>
+  	<td width="28%" height="50px" align="left" colspan="3" rowspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black"><#if record.custbody_tc_customs_clearance_by?has_content>${record.custbody_tc_customs_clearance_by}<#else>Cole International</#if></td>
+  	<td width="26%" height="37px" align="left" colspan="2" border-bottom="0.1px solid black">${record.tranid}</td>
+	</tr>
+  	<tr>
+	<td width="26%" height="13px" align="left" colspan="2" border-bottom="0.1px solid black">Number of Invoice Pages: <br/><span padding-left="40px">Page <pagenumber/> of <totalpages/></span></td>
+	</tr>
+  	<tr>
+	<td width="46%" height="60px" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Consignee: </b><br />${record.custbody_tc_shipping_address}<br/><br/>Tax ID: ${record.custbodycustbody_tc_consignee_tax_id}</td>
+  	<td width="54%" height="60px" align="left" colspan="5" border-bottom="0.1px solid black"><b>Buyer, If other than Consignee: </b><br /><#if record.custbody_tc_shipping_address != record.custbody_tc_billing_address>${record.custbody_tc_billing_address}</#if><br/><br/><br/>Tax ID Number: <#if record.custbody_tc_shipping_address != record.custbody_tc_billing_address>${record.custbodycustbody_tc_buyer_tax_id}</#if></td>
+	</tr>
+  	<tr>
+      <td width="46%" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Email: </b><span style="font-size: 9px;"><#if record.custbody_tc_email?has_content>${record.custbody_tc_email}<#elseif record.custbody_tc_customer.email?has_content>${record.custbody_tc_customer.email}<#else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</#if></span><span padding-left="6px"></span><b>Phone: </b><#if record.custbody_tc_phone?has_content>${record.custbody_tc_phone}<#else>${record.custbody_tc_customer.phone}</#if></td>
+      <td width="54%" align="left" colspan="5"><b><u>Terms of Sale - Delivery - Payment: </u></b></td>
+	</tr>
+    <tr>
+      <#assign related = "" />
+      <#assign notrelated = "" />
+      <#if record.custbody_ts_related == true><#assign related = "true" /><#else><#assign related = "false" /></#if>
+      <#if record.custbody_ts_not_related == true><#assign notrelated = "true" /><#else><#assign notrelated = "false" /></#if>
+      <td width="46%" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Title: ${record.custbody_tc_title}</b></td>
+  	  <td width="54%" align="left" colspan="5" class="checkbox-container">Parties to this transaction are:&nbsp;&nbsp;&nbsp;&nbsp;<label for="related"><input display="inline" type="checkbox" id="related" name="related" value="Related" checked="${related}" />&nbsp;&nbsp;&nbsp;Related &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="notrelated"><input display="inline" type="checkbox" id="notrelated" name="notrelated" value="Not Related" checked="${notrelated}"/>&nbsp;&nbsp;&nbsp;Not Related</label></td>
+	</tr>
+    <tr>
+      <#assign brokerage = "" />
+      <#assign freight = "" />
+      <#assign duity = "" />
+      <#if record.custbody_ts_brokerage_fee == true><#assign brokerage = "true" /><#else><#assign brokerage = "false" /></#if>
+      <#if record.custbody_ts_freight == true><#assign freight = "true" /><#else><#assign freight = "false" /></#if>
+      <#if record.custbody_ts_duty_tax == true><#assign duity = "true" /><#else><#assign duity = "false" /></#if>
+      <td width="46%" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Carrier: </b></td>
+      <td width="54%" align="left" colspan="5">Invoice value includes:&nbsp;&nbsp;&nbsp;&nbsp;<label for="brokerage"><input display="inline" type="checkbox" id="brokerage" name="brokerage" value="Brokerage" checked="${brokerage}" />&nbsp;&nbsp;Brokerage fee&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="freight"><input display="inline" type="checkbox" id="freight" name="freight" value="Freight" checked="${freight}" />&nbsp;&nbsp;Freight&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="duity"><input display="inline" type="checkbox" id="duity" name="duity" value="Duity" checked="${duity}" />&nbsp;&nbsp;Duity &amp; Tax </label></td>
+	</tr>
+  	<tr>
+      <td width="46%" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>US Port of Entry: </b></td>
+      <td width="54%" align="left" colspan="5">Total Freight: </td>
+	</tr>
+  	<tr>
+      <#assign ship = record.custbody_tc_shipping_address?string?trim?lower_case />
+      <#assign bill = record.custbody_tc_billing_address?string?trim?lower_case />
+      <#assign exporter = "false" />
+      <#assign consignee = "false" />
+      <#assign buyer = "false" />
+      <#if record.custbody_tc_customer.custentity_market_value_automation == true >
+        <#assign exporter = "true" />
+          <#else>
+            <#if ship != bill >
+              <#assign buyer = "true" />
+                <#else>
+                  <#assign consignee = "true" />
+                    </#if>
+            </#if>
+      <td width="46%" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Destination (Country/State): </b></td>
+      <td width="54%" align="left" colspan="5" border-bottom="0.1px solid black">Bill Customs charges to:&nbsp;&nbsp;&nbsp;&nbsp;<label for="exporter"><input display="inline" type="checkbox" id="exporter" name="exporter" value="Exporter" checked="${exporter}" />&nbsp;&nbsp;Exporter&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="consignee"><input display="inline" type="checkbox" id="consignee" name="consignee" value="Consignee" checked="${consignee}" />&nbsp;&nbsp;Consignee&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="buyer"><input display="inline" type="checkbox" id="buyer" name="buyer" value="Buyer" checked="${buyer}" />&nbsp;&nbsp;Buyer </label></td>
+	</tr>
+        
+	<#assign totalweight = 0>
+    <#assign totalqty = 0>
+    <#assign totalrate = 0>
+    <#assign totalGroupCrates = 0>
+    <#assign totaldiscount = 0>
+    <#assign totalnumberamount = 0 />
+    <#assign sortedLines = record.line?sort_by("custcol_bol_group")>
+             <#list sortedLines as item>       
+        <#assign totalGroupCrates = totalGroupCrates + item.custcol_tc_crate_size/>
+        <#assign totalweight = totalweight + item.custcol_tc_total_item_weight?number/>
+        <#assign totalqty = totalqty + item.custcol_tc_item_qty?number/>
+        <#assign totalrate = totalrate + item.custcol_ts_item_rate?number/>
+        <#assign totaldiscount = totaldiscount + item.custcol_ts_item_discount?number/>
+          <#assign totalnumberamount = totalnumberamount + (item.custcol_tc_item_qty?number * item.custcol_ts_item_rate?number) />
+    </#list>
+        <#assign totaldiscamount = (totalnumberamount?number - totaldiscount?number) />
+        </table>
+<table style="width: 100%; margin-top: 0px; border: 1px solid black;">      
+	<#assign lb = "true" />
+  	<tr>
+      <td width="10%" align="left" rowspan="3" colspan="2" border-right="0.1px solid black" padding-top="30px" border-bottom="0.1px solid black"><b>Country<br/>of<br/>Origin<br/>(MFGR)</b></td>
+      <td width="26%" align="center" colspan="3" border-right="0.1px solid black"><b>Marks and Number: </b></td>
+      <td width="40%" align="center" colspan="4" border-right="0.1px solid black" border-bottom="0.1px solid black" rowspan="2"><b>Number and Kind of Packages: </b><input type="text" id="nakop" name="nakop" value="${totalGroupCrates}" /></td>
+      <td width="21%" align="left" colspan="2" border-bottom="0.1px solid black"><b>Currency of Sale: </b>${record.currency}</td>
+	</tr>
+  	<tr>
+      <td width="26%" align="center" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"></td>
+      <td width="21%" align="left" colspan="2" border-bottom="0.1px solid black"><b>Gross Weight:<br/> </b>&nbsp;<label for="lb"><input display="inline" type="checkbox" id="lb" name="lb" checked="${lb}" />&nbsp;&nbsp;LB &nbsp;&nbsp;</label><label for="box4"><input display="inline" type="checkbox" id="box4" name="box4" value="2" />&nbsp;&nbsp;KG&nbsp;&nbsp;</label>${record.custbody_ds_final_cal_weight?round?string[",##0"]}</td>
+	</tr>
+  	<tr>
+      <td width="35%" align="center" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Product<br/>Description</b></td>
+      <td width="32%" align="center" colspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>HTS Number</b></td>
+      <td width="6%"  align="center" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Total Net<br/>Weight</b></td>
+      <td width="10%" align="center" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Quantity</b></td>
+      <td width="13%" align="center" colspan="2" border-bottom="0.1px solid black"><b>Total</b></td>
+	</tr>
+
+
+       
+
+<#assign prevGroup = "">
+<#assign totalFeet = 0>
+<#assign totalWeight = 0>
+<#assign totalQty = 0>
+<#assign totalAmount = 0>
+<#assign hsCode = "">
+<#assign country = "">
+<#assign boldesc = "">
+<#assign sortedLines = record.line?sort_by("custcol_bol_group")>
+<#list sortedLines as item>
+  <#if item.custcol_tc_item != 'CRATING'>
+     <#assign uniqueId = item.line + item.custcol_tc_line_id/> 
+
+    <#assign currentGroup = item.custcol_bol_group!"">
+
+    <#if prevGroup != "" && currentGroup != prevGroup>
+
+       <tr>
+            <td width="9%" align="left" colspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black">${country}</td>
+            <td width="35%"  align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black">${prevGroup} X ${totalFeet}"<#if boldesc?has_content><br/>{boldesc}</#if></td>
+            <td width="32%" colspan="2" align="left"  border-right="0.1px solid black" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_hsCode" name="${uniqueId}_hsCode" value="${hsCode}" style="width: 125px;"/>
+            </td>
+            <td width="2%" align="left" border-right="0.1px solid black" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_avgFW" name="${uniqueId}_avgFW" value='${totalWeight}' style="width: 50px;"/>
+            </td>
+            <td width="10%" align="left" border-right="0.1px solid black" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_totalQty" name="${uniqueId}_totalQty" value="${totalQty}" style="width: 50px;"/>
+            </td>
+            <td width="13%" align="center" colspan="2" border-bottom="0.1px solid black">
+              
+                <input type="text" id="${uniqueId}_groupAmount" name="${uniqueId}_groupAmount" value="${(totalAmount)?string.currency}" style="width: 85px;"/>
+            </td>
+        </tr>
+      
+      <#-- Reset accumulators for next group -->
+      <#assign totalFeet = 0>
+      <#assign totalWeight = 0>
+      <#assign totalQty = 0>
+      <#assign totalAmount = 0>
+      <#assign hsCode = "">
+      <#assign country = "">
+    </#if>
+
+    <#-- Add current line to group totals -->
+    <#assign totalFeet += (item.custcol_tc_linear_feet?number)!0>
+    <#assign totalWeight += (item.custcol_tc_total_item_weight?number)!0>
+    <#assign totalQty += (item.custcol_tc_item_qty?number)!0>
+    <#assign totalAmount += (item.custcol_ts_item_rate?number * item.custcol_tc_item_qty?number)>
+    <#assign hsCode = item.custcol_line_hs_code>
+    <#assign country = item.custcol_tc_cntry_of_orig>
+    <#assign boldesc = item.custcol_tc_bol_description>
+    <#assign prevGroup = currentGroup>
+  </#if>
+</#list>
+
+<#-- Print final group after loop ends -->
+<#if prevGroup != "">
+   <tr>
+            <td width="9%" align="left" colspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black">${country}</td>
+            <td width="35%"  align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black">${prevGroup} X ${totalFeet}'<#if boldesc?has_content><br/>{boldesc}</#if></td>
+            <td width="32%" colspan="2" align="left"  border-right="0.1px solid black" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_hsCode" name="${uniqueId}_hsCodefinal" value="${hsCode}" style="width: 125px;"/>
+            </td>
+            <td width="2%" align="left" border-right="0.1px solid black" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_avgFW" name="${uniqueId}_avgFWfinal" value='${totalWeight}' style="width: 50px;"/>
+            </td>
+            <td width="10%" align="left" border-right="0.1px solid black" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_totalQty" name="${uniqueId}_totalQtyfinal" value="${totalQty}" style="width: 50px;"/>
+            </td>
+            <td width="13%" align="center" colspan="2" border-bottom="0.1px solid black">
+                <input type="text" id="${uniqueId}_groupAmount" name="${uniqueId}_groupAmountfinal" value="${totalAmount?string.currency}" style="width: 85px;"/>
+            </td>
+        </tr>
+</#if>
+
+<tr>
+    <td width="55%" align="left" colspan="7" border-right="0.1px solid black" style="font-size:9px;">If goods are not sold, state reason for export (loan, repair, processing etc.)</td>
+    <td width="9%" align="center" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Total Net</b></td>
+    <td width="10%" align="center" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Total Qty</b></td>
+    <td width="8%" align="center" rowspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black" padding-top="15px"><b>Total All<br/>Items</b></td>
+    <td width="13%" align="center" rowspan="2" border-bottom="0.1px solid black" padding-top="15px">
+      <input type="text"  id="totalbillamount" name="totalbillamount"  value="${totalnumberamount?string.currency}" style="width: 65px;"/>
+      </td>
+</tr>
+<tr>
+    <td width="55%" align="left" colspan="7" border-right="0.1px solid black" border-bottom="0.1px solid black"></td>
+    <td width="9%" align="center" border-right="0.1px solid black" border-bottom="0.1px solid black">
+          <input type="text"  id="totalGroupNetWeight" name="totalGroupNetWeight"  value='${totalweight?number}' style="width: 50px;"/>
+    </td>
+    <td width="10%" align="center" border-right="0.1px solid black" border-bottom="0.1px solid black">
+          <input type="text"  id="totalGroupQty" name="totalGroupQty"  value="${totalqty?number}" style="width: 50px;"/>
+     </td>
+</tr>
+
+    <tr>
+      <td width="55%" align="left" colspan="7" border-right="0.1px solid black" border-bottom="0.1px solid black">Mode of Transportation from point of exit:</td>
+      <td width="19%" align="center" colspan="2" border-right="0.1px solid black">Export Permit Number</td>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Packaging</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black">&nbsp;</td>
+    </tr>
+    <tr>
+      <#assign road = "" />
+      <#assign rail = "" />
+      <#assign ocean = "" />
+      <#assign air = "" />
+      <#assign other = "" />
+      <#if record.custbody_tc_road == true><#assign road = "true" /><#else><#assign road = "false" /></#if>
+      <#if record.custbody_tc_rail == true><#assign rail = "true" /><#else><#assign rail = "false" /></#if>
+      <#if record.custbody_tc_ocean == true><#assign ocean = "true" /><#else><#assign ocean = "false" /></#if>
+      <#if record.custbody_tc_air == true><#assign air = "true" /><#else><#assign air = "false" /></#if>
+      <#if record.custbody_tc_other == true><#assign other = "true" /><#else><#assign other = "false" /></#if>
+      <td width="55%" align="left" colspan="7" border-right="0.1px solid black" border-bottom="0.1px solid black" margin-top="20px;"><label for="road"><input display="inline" type="checkbox" id="road" name="road" value="Road"  checked="${road}" />&nbsp;&nbsp;Road&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="rail"><input display="inline" type="checkbox" id="rail" name="rail" value="Rail" checked="${rail}" />&nbsp;&nbsp;Rail&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="ocean"><input display="inline" type="checkbox" id="ocean" name="ocean" value="Ocean" checked="${ocean}" />&nbsp;&nbsp;Ocean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="air"><input display="inline" type="checkbox" id="air" name="air" value="Air" checked="${air}" />&nbsp;&nbsp;Air&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="other"><input display="inline" type="checkbox" id="other" name="other" value="Other" checked="${other}" />&nbsp;&nbsp;Other</label></td>
+      <td width="19%" align="center" colspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black"></td>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black" style="font-size: 8px;"><b>Ocean/Int'l<br/>Freight<br/><span padding-left="5px">Transportation</span></b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+        <td width="74%" align="left" colspan="9" rowspan="2" border-right="0.1px solid black" border-bottom="0.1px solid black" padding-top="15px;">I HEREBY CERTIFY THAT THE INFORMATION GIVEN ABOVE AND ON THE CONTINUATION SHEET(S), IF ANY, IS TRUE AND COMPLETE IN EVERY RESPECT.</td>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b><span padding-left="15px">Domestic</span><br/>Freight Chg</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Insurance</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+      <td width="74%" align="left" colspan="9" rowspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black" padding-top="15px;">Name &amp; Address, if different from Exporter box above: <br/></td>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Misc.<br/>Transp.</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Commission</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Container</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+      <td width="47%" align="left" colspan="5" padding-top="15px">Shipper Signature: <div width="100px" display="inline" border-bottom="0.1px solid black"></div></td>
+      <td width="29%" align="left" colspan="4" padding-top="15px" border-right="0.1px solid black">Date: <div width="120px" display="inline" border-bottom="0.1px solid black"></div></td>
+      <td width="8%" align="right" padding-top="8px" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Assists</b></td>
+      <td width="13%" align="center" padding-top="8px" border-bottom="0.1px solid black"></td>
+    </tr>
+    <tr>
+      <td width="74%" align="left" colspan="9" border-right="0.1px solid black">Status:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="box6"><input display="inline" type="checkbox" id="box6" name="box6" value="1" />&nbsp;&nbsp;Owner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="box6"><input display="inline" type="checkbox" id="box6" name="box6" value="2" />&nbsp;&nbsp;Agent</label></td>
+      <td width="8%" align="right" border-right="0.1px solid black" border-bottom="0.1px solid black"><b><span padding-left="12px">TOTAL</span><br/>INVOICE</b></td>
+      <td width="13%" align="center" border-bottom="0.1px solid black">
+        <input type="text"  id="finalbillamount" name="finalbillamount"  value="${totaldiscamount?string.currency}" style="width: 65px;"/>
+        </td>
+    </tr>
+    </table>
+</body>
+</pdf>

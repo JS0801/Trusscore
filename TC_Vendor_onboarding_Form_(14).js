@@ -905,7 +905,7 @@ stateSearchObj.run().each(function(result){
   <label>First Name: *<input name="first_name" value="${esc(ex.first_name)}"></label>
   <label>Last Name: *<input name="last_name"  value="${esc(ex.last_name)}"></label>
 </div>
-      <label>Business Number/TIN: *<input name="business_number" value="${esc(ex.business_number)}" required></label>
+      <label>Business Number/TIN/GST/HST: <input name="business_number" value="${esc(ex.business_number)}"></label>
       <label>Website:<input name="website" value="${esc(ex.website)}"></label>
       <label>Country: *
       <select name="ven_country" required>${countryOptions(ex.country)}</select>

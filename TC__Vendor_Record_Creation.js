@@ -454,7 +454,7 @@ define(['N/record', 'N/file', 'N/search', 'N/log'], function(record, file, searc
       const isPerson = stagingRec.getValue({ fieldId: 'custrecord_vendor_type' }) == 2;
       const taxCode = mapSubsidiaryToTaxCode(subsidiary);
       const businessNum = stagingRec.getValue({ fieldId: 'custrecord_vendor_tin' });
-      const emailPayNotif = stagingRec.getValue({ fieldId: 'custrecord_vendor_acc_email' });
+      const emailPayNotif = stagingRec.getValue({ fieldId: 'custrecord_vendor_remit_email' });
 
       const vendorRec = record.create({ type: record.Type.VENDOR, isDynamic: true });
       vendorRec.setValue({ fieldId: 'subsidiary', value: subsidiary });

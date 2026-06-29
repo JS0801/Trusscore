@@ -167,7 +167,7 @@ stateSearchObj.run().each(function(result){
                 row('Legal Company Name', data.legal_company_name, true) +
                 row('DBA Name', data.dba_name, false) +
                 row('Type', vendorType, true) + indRows +
-                row('Business Number / TIN', data.business_number, false) +
+                row('Business Number / TIN /GST / HST', data.business_number, false) +
                 row('Website', data.website, true) +
                 row('Street', data.street_address, false) +
                 row('PO Box', data.po_box, true) +
@@ -1845,7 +1845,7 @@ toggleIndividualUI();
             ${(String(req.parameters.vendor_type) === '2'
                                     ? row('First Name', req.parameters.first_name) + row('Last Name', req.parameters.last_name)
                                     : '')}
-            ${row('Business Number / TIN', req.parameters.business_number)}
+            ${row('Business Number / TIN / GST / HST', req.parameters.business_number)}
             ${row('Website', req.parameters.website)}
             ${row('Street', req.parameters.street_address)}
             ${row('PO Box', req.parameters.po_box)}

@@ -139,6 +139,8 @@ function(error,log,record,search,format) {
               
               load_SO.setCurrentSublistValue({sublistId:'item',fieldId:'custcol_tc_related_shipping_record',value:recID})
               if(shipDate){
+                log.audit('shipDate', shipDate)
+                log.audit('shipDate New', new Date(shipDate))
                 load_SO.setCurrentSublistValue({sublistId:'item',fieldId:'custcol_tc_scheduled_ship_date',value:new Date(shipDate)});
               }
               

@@ -157,14 +157,6 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
     }
 
     function getWorkflowStateFilters(recordConfig, recordId) {
-        if (recordConfig.workflowInternalId) {
-            return [
-                ['workflow.internalid', 'anyof', recordConfig.workflowInternalId],
-                'AND',
-                ['internalid', 'anyof', recordId]
-            ];
-        }
-
         return [
             ['internalid', 'anyof', recordId]
         ];

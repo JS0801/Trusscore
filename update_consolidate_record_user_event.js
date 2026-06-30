@@ -946,6 +946,8 @@ function(error,log,record,search,format) {
       customerLookup.custentity_market_value_automation === 'T';
   }
 
+
+
   var exporter = false;
   var consignee = false;
   var buyer = false;
@@ -957,6 +959,9 @@ function(error,log,record,search,format) {
   } else {
     consignee = true;
   }
+
+
+    log.debug('Values', {exporter, consignee, buyer})
 
   consolidated_shippingrecord.setValue({
     fieldId: 'custbody_eb_exporter',

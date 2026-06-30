@@ -202,7 +202,7 @@
           </#if> -->
         
       <td width="46%" align="left" colspan="3" border-right="0.1px solid black" border-bottom="0.1px solid black"><b>Destination (Country/State): </b></td>
-      <td width="54%" align="left" colspan="5" border-bottom="0.1px solid black">Bill Customs charges to:&nbsp;&nbsp;&nbsp;&nbsp;<label for="exporter"><input display="inline" type="checkbox" id="exporter" name="exporter" value="Exporter" checked="true" />&nbsp;&nbsp;Exporter&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="consignee"><input display="inline" type="checkbox" id="consignee" name="consignee" value="Consignee" checked="false" />&nbsp;&nbsp;Consignee&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="buyer"><input display="inline" type="checkbox" id="buyer" name="buyer" value="Buyer" checked="false" />&nbsp;&nbsp;Buyer </label></td>
+      <td width="54%" align="left" colspan="5" border-bottom="0.1px solid black">Bill Customs charges to:&nbsp;&nbsp;&nbsp;&nbsp;<label for="exporter"><input display="inline" type="checkbox" id="exporter" name="exporter" value="Exporter" checked="${exporter}" />&nbsp;&nbsp;Exporter&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="consignee"><input display="inline" type="checkbox" id="consignee" name="consignee" value="Consignee" checked="${consignee}" />&nbsp;&nbsp;Consignee&nbsp;&nbsp;&nbsp;&nbsp;</label><label for="buyer"><input display="inline" type="checkbox" id="buyer" name="buyer" value="Buyer" checked="${buyer}" />&nbsp;&nbsp;Buyer </label></td>
 	</tr>
         
 	<#assign totalweight = 0>

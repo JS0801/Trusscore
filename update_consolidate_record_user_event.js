@@ -461,6 +461,7 @@ function(error,log,record,search,format) {
           consolidated_shippingrecord.setValue({ fieldId: 'custbody_ds_final_cal_weight', value: total_cal_weight_to });
           var fob_name_to = getFOB(recID);
           consolidated_shippingrecord.setValue({ fieldId: 'custbody_tc_fob_point', value: fob_name_to.point });
+          setPartyCheckboxes(consolidated_shippingrecord);
           consolidated_shippingrecord.save();
         } // end else if TrnfrOrd
         //SD - TO Chnage End
@@ -916,6 +917,62 @@ function(error,log,record,search,format) {
     function isScrapRecord(value) {
       return value === true || value === 'true' || value === 'T';
     }
+
+
+  function setPartyCheckboxes(consolidated_shippingrecord) {
+  var ship = String(consolidated_shippingrecord.getValue({
+    fieldId: 'custbody_tc_shipping_address'
+  }) || '').trim().toLowerCase();
+
+  var bill = String(consolidated_shippingrecord.getValue({
+    fieldId: 'custbody_tc_billing_address'
+  }) || '').trim().toLowerCase();
+
+  var customerId = consolidated_shippingrecord.getValue({
+    fieldId: 'custbody_tc_customer'
+  });
+
+  var marketValueAutomation = false;
+
+  if (customerId) {
+    var customerLookup = search.lookupFields({
+      type: search.Type.CUSTOMER,
+      id: customerId,
+      columns: ['custentity_market_value_automation']
+    });
+
+    marketValueAutomation =
+      customerLookup.custentity_market_value_automation === true ||
+      customerLookup.custentity_market_value_automation === 'T';
+  }
+
+  var exporter = false;
+  var consignee = false;
+  var buyer = false;
+
+  if (marketValueAutomation) {
+    exporter = true;
+  } else if (ship !== bill) {
+    buyer = true;
+  } else {
+    consignee = true;
+  }
+
+  consolidated_shippingrecord.setValue({
+    fieldId: 'custbody_eb_exporter',
+    value: exporter
+  });
+
+  consolidated_shippingrecord.setValue({
+    fieldId: 'custbody_ts_consignee',
+    value: consignee
+  });
+
+  consolidated_shippingrecord.setValue({
+    fieldId: 'custbody_ts_buyer',
+    value: buyer
+  });
+}
     
     function getTransactionRecordType(tranId) {
       var lookup = search.lookupFields({

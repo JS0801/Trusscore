@@ -965,21 +965,21 @@ function(error,log,record,search,format) {
 
     log.debug('Values', {exporter: exporter, consignee: consignee, buyer: buyer})
 
-  consolidated_shippingrecord.setValue({
-    fieldId: 'custbody_eb_exporter',
-    value: exporter
-  });
+//   consolidated_shippingrecord.setValue({
+//     fieldId: 'custbody_eb_exporter',
+//     value: exporter
+//   });
 
-  consolidated_shippingrecord.setValue({
-    fieldId: 'custbody_ts_consignee',
-    value: consignee
-  });
+//   consolidated_shippingrecord.setValue({
+//     fieldId: 'custbody_ts_consignee',
+//     value: consignee
+//   });
 
-  consolidated_shippingrecord.setValue({
-    fieldId: 'custbody_ts_buyer',
-    value: buyer
-  });
-}
+//   consolidated_shippingrecord.setValue({
+//     fieldId: 'custbody_ts_buyer',
+//     value: buyer
+//   });
+// }
     
     function getTransactionRecordType(tranId) {
       var lookup = search.lookupFields({

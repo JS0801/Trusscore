@@ -961,7 +961,7 @@ function(error,log,record,search,format) {
   }
 
 
-    log.debug('Values', {exporter, consignee, buyer})
+    log.debug('Values', {exporter: exporter, consignee: consignee, buyer: buyer})
 
   consolidated_shippingrecord.setValue({
     fieldId: 'custbody_eb_exporter',

@@ -144,7 +144,7 @@ function(error,log,record,search,format) {
                 load_SO.setCurrentSublistValue({sublistId:'item',fieldId:'custcol_tc_scheduled_ship_date',value:new Date(shipDate)});
               }
               
-             // load_SO.setCurrentSublistValue({sublistId:'item',fieldId:'inventorylocation',value:shipLocation});
+              load_SO.setCurrentSublistValue({sublistId:'item',fieldId:'inventorylocation',value:shipLocation});
               load_SO.commitLine({sublistId:'item'})
               
               

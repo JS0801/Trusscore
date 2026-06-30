@@ -979,7 +979,7 @@ function(error,log,record,search,format) {
 //     fieldId: 'custbody_ts_buyer',
 //     value: buyer
 //   });
-// }
+}
     
     function getTransactionRecordType(tranId) {
       var lookup = search.lookupFields({

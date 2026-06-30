@@ -316,6 +316,7 @@ function(error,log,record,search,format) {
               return false;
             });
           }
+          setPartyCheckboxes(consolidated_shippingrecord);
           
           
           consolidated_shippingrecord.save()

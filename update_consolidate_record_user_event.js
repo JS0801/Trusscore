@@ -91,7 +91,8 @@ function(error,log,record,search,format) {
           consolidated_shippingrecord.setValue({ fieldId: 'custbody_tc_related_so', value: '' });
           consolidated_shippingrecord.setValue({ fieldId: 'custbody_tc_other_deliver_information', value: '' });
           consolidated_shippingrecord.setValue({ fieldId: 'custbody_tc_fob_point', value: '' });
-          
+          setPartyCheckboxes(consolidated_shippingrecord);
+
           consolidated_shippingrecord.save({ ignoreMandatoryFields: true });
           return;
         }

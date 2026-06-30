@@ -1,376 +1,104 @@
-<?xml version="1.0"?><!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd"><#-- Translation Collection --><#assign tc = nstranslation.load({
-	"collections":[{
-	"alias": "default",
-	"collection": "custcollection_bol_tc_translations",
-	"keys": ["OJ_BOL_NOT_NEGOTIABLE_HEADING","OJ_PAGE_HEADING","OJ_OF_HEADING","OJ_BOL_SHIP_FROM","OJ_BOL_SHIP_TO","OJ_BOL_BILL_OF_LADING_NUMBER","OJ_BOL_CUSTOMER_PO_NUMBER","OJ_BOL_CARRIER_NAME","OJ_BOL_THIRD_PARTY_FREIGHT_CHARGES_BILL_TO","OJ_BOL_PRO_NUMBER","OJ_BOL_ACCOUNT","OJ_BOL_DELIVERY_INSTRUCTIONS","OJ_BOL_FREIGHT_CHARGE_TERMS","OJ_BOL_NOTES_TITLE","OJ_BOL_ACCESSORIALS_TITLE","OJ_BOL_CARRIER_INFORMATION","OJ_BOL_HANDLING_UNIT","OJ_BOL_PIECES","OJ_BOL_LTL_ONLY","OJ_BOL_QTY","OJ_BOL_TYPE","OJ_BOL_WEIGHT","OJ_BOL_COMMODITY_DESC_TITLE","OJ_BOL_COMMODITY_DESCRIPTION","OJ_BOL_NMFC_NO","OJ_BOL_CLASS","OJ_BOL_SHIPPER_NOTES","OJ_BOL_COLLECT","OJ_BOL_PREPAID","OJ_BOL_CUSTOMER_CHECK_ACCEPTABLE","OJ_BOL_LIABILITY_NOTES","OJ_BOL_RECEIVED_NOTES","OJ_BOL_CARRIER_SHIPMENT_NOTES","OJ_BOL_SHIPPER_SIGNATURE","OJ_BOL_SHIPPER_SIGNATURE_DATE","OJ_BOL_TRAILER_LOADED","OJ_BOL_FREIGHT_COUNTED","OJ_BOL_CARRIER_SIGNATURE","OJ_BOL_NOTES_OF_APPLICABLE_REGULATIONS","OJ_BOL_BY_SHIPPER","OJ_BOL_BY_DRIVER","OJ_BOL_BY_DRIVER_PALLETS_NOTES","OJ_BOL_BY_DRIVER_PIECES_CHECK","OJ_BOL_CARRIER_ACK_RECEIPT_NOTES","OJ_BOL_COD_AMT","OJ_BOL_FEE_TERMS"],
-	"locale": .locale
-	}]
-})><#assign localizedTC = nstranslation.selectLocale({
-"handle": tc,
-"locale": .locale
-})><#function translate x><#return localizedTC.default[x]></#function>
-<pdf>
+<!doctype html>
+
+<html>
 <head>
-	<link name="NotoSans" type="font" subtype="truetype" src="${nsfont.NotoSans_Regular}" src-bold="${nsfont.NotoSans_Bold}" src-italic="${nsfont.NotoSans_Italic}" src-bolditalic="${nsfont.NotoSans_BoldItalic}" bytes="2" />
-	<#if .locale == "zh_CN">
-		<link name="NotoSansCJKsc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKsc_Regular}" src-bold="${nsfont.NotoSansCJKsc_Bold}" bytes="2" />
-	<#elseif .locale == "zh_TW">
-		<link name="NotoSansCJKtc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKtc_Regular}" src-bold="${nsfont.NotoSansCJKtc_Bold}" bytes="2" />
-	<#elseif .locale == "ja_JP">
-		<link name="NotoSansCJKjp" type="font" subtype="opentype" src="${nsfont.NotoSansCJKjp_Regular}" src-bold="${nsfont.NotoSansCJKjp_Bold}" bytes="2" />
-	<#elseif .locale == "ko_KR">
-		<link name="NotoSansCJKkr" type="font" subtype="opentype" src="${nsfont.NotoSansCJKkr_Regular}" src-bold="${nsfont.NotoSansCJKkr_Bold}" bytes="2" />
-	<#elseif .locale == "th_TH">
-		<link name="NotoSansThai" type="font" subtype="opentype" src="${nsfont.NotoSansThai_Regular}" src-bold="${nsfont.NotoSansThai_Bold}" bytes="2" />
-	</#if>
-    <macrolist>
-        <macro id="nlheader">
-            <table class="header" style="width: 100%; font-size: 10pt;">
-	<tr>
-    <#if record.custbody_tc_csr_non_branded_cust != true>
-	<td align="left" width="30%"><img height="45px" src="https://6518122.app.netsuite.com/core/media/media.nl?id=6122&amp;c=6518122&amp;h=m6_0Vrb_g_AphBfET8BOfpOVIeIbop4Sotx3jZo2T1ewbnzh" style="float: left; margin: 7px" width="140px" /></td>
-    <#else><td align="left" width="30%">&nbsp;</td>
-    </#if>
-	<td width="40%" align="center" padding-top="19px"><b><#assign bolnotnego = "OJ_BOL_NOT_NEGOTIABLE_HEADING">BILL OF LADING - SHORT FORM</b></td>
-	<td width="30%" align="right" padding-top="19px" style="font-size: 8pt;"><#assign page = "OJ_PAGE_HEADING">${translate(page)} <pagenumber/> <#assign of = "OJ_OF_HEADING">${translate(of)} <totalpages/></td>
-	</tr></table>
-        </macro>
-    </macrolist>
-    <style type="text/css">table {
-        <#if .locale == "zh_CN">
-            font-family: stsong, sans-serif;
-        <#elseif .locale == "zh_TW">
-            font-family: msung, sans-serif;
-        <#elseif .locale == "ja_JP">
-            font-family: heiseimin, sans-serif;
-        <#elseif .locale == "ko_KR">
-            font-family: hygothic, sans-serif;
-        <#elseif .locale == "ru_RU">
-            font-family: verdana;
-        <#else>
-            font-family: sans-serif;
-        </#if>
-            font-size: 9pt;
-            table-layout: fixed;
-        }
-        th {
-            font-weight: bold;
-            font-size: 8pt;
-            vertical-align: middle;
-            padding: 5px 6px 3px;
-            background-color: #e3e3e3;
-            color: #333333;
-        }
-        td {
-            padding: 4px 6px;
-          	font-size: 8pt;
-        }
-        b {
-            font-weight: bold;
-            color: #333333;
-        }
-        table.header td {
-            padding: 0;
-            font-size: 10pt;
-        }
-      	table.inTable{
-           padding: 0;
-           font-size: 8pt;
-           padding-bottom: 0px;
-            padding-top: 0px;
-        }
-        table.footer td {
-            padding: 0;
-            font-size: 8pt;
-        }
-        table.itemtable th {
-            padding-bottom: 10px;
-            padding-top: 10px;
-        }
-        table.body td {
-            padding-top: 2px;
-        }
-        td.addressheader {
-            font-size: 9pt;
-            font-weight: bold;
-            padding-top: 4px;
-            padding-bottom: 2px;
-            background-color: #E0E0E0;
-            align: center;
-        }
-        td.address {
-            padding-top: 2px;
-        }
-      	p.myp{
-           width: 100%;
-           font-size: 10pt;
-           font-weight: bold;
-           align: center;
-        }
-      	p.check{
-          font-size: 7pt;
-          align: left;
-          valign: middle;
-        }
-        span.title {
-            font-size: 28pt;
-        }
-        span.number {
-            font-size: 16pt;
-        }
-        span.itemname {
-            font-weight: bold;
-            line-height: 150%;
-        }
-        hr {
-            border-top: 1px dashed #d3d3d3;
-            width: 100%;
-            color: #ffffff;
-            background-color: #ffffff;
-            height: 1px;
-        }
-      table.mytable {
-          font-size: 9pt;
-          border-collapse: collapse;
-         }
-      .mytable td, .mytable th
-		{
-    	border: 0.1px solid #000000;
-		}
-      table.topdown{
-         font-size: 8pt;
-         border-collapse: collapse;
-      }
-      input[type=text] {
-        width: 100%;
-        margin-left: -.2rem;
-      }
-</style>
+	<title>NetSuite Login</title>
+
+<link rel="icon" type="image/png" href="/authentication/ui/loginpage/assets/icon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/authentication/ui/loginpage/assets/icon/favicon.svg" />
+<link rel="shortcut icon" href="/authentication/ui/loginpage/assets/icon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/authentication/ui/loginpage/assets/icon/apple-touch-icon.png" />
+<link rel="manifest" href="/authentication/ui/loginpage/assets/icon/site.webmanifest" />	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<meta name="robots" content="noindex, nofollow"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="/assets/@uif-js/fonts/1.0.9/css/fonts.css?NS_VER=2026.1&amp;minver=15" />
+    <link rel="stylesheet" type="text/css" href="/assets/redwood_tokens/3366255335.css?NS_VER=2026.1&amp;minver=15" />
+    <link rel="stylesheet" type="text/css" href="/assets/loginpage_redwoodcommon/3247350347.css?NS_VER=2026.1&amp;minver=15" />
+    <link rel="stylesheet" type="text/css" href="/assets/loginpage_redwood/3726434582.css?NS_VER=2026.1&amp;minver=15" />
+    	<script type="text/javascript" nonce="/toG3EHj/GEjD2SHB6Llc9PJ65Z6FZf2JPCAwE8PO2c=" src="/javascript/NLPortal.jsp?JSP_VER=1&amp;NS_VER=2026.1&amp;minver=15&amp;buildver=30084"></script>
+    	<script type="text/javascript" nonce="/toG3EHj/GEjD2SHB6Llc9PJ65Z6FZf2JPCAwE8PO2c=" src="/assets/loginpage_redwoodcommon/1850496838.js?NS_VER=2026.1&amp;minver=15" integrity="sha512-SuSCUiNXWCMUY/5xUGP6eFE6lC0fbXJuf/xlTSk87NqQe49queCPdsc5l/gd/4BbWjTWCp0jz7UX1+7hj8FPIw=="></script>
+
+
 </head>
-<body header="nlheader" header-height="5%" padding="0.5in 0.5in 0.5in 0.5in" size="Letter">
-    <#-- Table 1 -->
-        <#assign shipAddressLines = record.custbody_tc_shipping_address?split('<br />') />
-      <#if shipAddressLines?size == 4>
-        <#assign cityStateZip = shipAddressLines[2]?split(' ') />
-        <#assign consignee = shipAddressLines[0]/>
-        <#assign address1 = shipAddressLines[1]/>
-        <#assign country = shipAddressLines[3]/>
-      <#else>
-        <#assign cityStateZip = shipAddressLines[3]?split(' ') />
-        <#assign consignee = shipAddressLines[0]/>
-        <#assign address1 = shipAddressLines[1]/>
-        <#assign  address2 = shipAddressLines[2]/>
-        <#assign country = shipAddressLines[4]/>
-      </#if>
-        <#assign arrayLength = cityStateZip?size - 3 />
+<body>
+
+<div id="page-wrapper">
+	<div id='div__alert' class="text-align: center"></div>
+<div class="login-page-body" data-page-type="login">
+	<div class="login-page-main">
+		<div class="login-page-box">
+			<div class="login-page-box-logos">
+				<a class="login-page-box-logo-link" href="http://www.netsuite.com/portal/home.shtml?noredirect=T" tabindex="-1">
+					<img class="login-page-box-logo login-page-box-logo--ns"
+						src="/authentication/ui/loginpage/assets/logo/NetSuite-logo-mobius.svg" alt="Oracle NetSuite" />
+				</a>
+			</div>
+			<h2 class="login-page-box-title">Log In</h2>
 
 
-<table class="mytable" style="width: 100%; margin-top: 0px; border: 1px solid black;">
-  	<tr>
-    <td width="13%" colspan="2" rowspan="2" align="left" style="border-right: 0.1px solid black; padding-top: 15px;">Carrier Name</td>
-	<td width="37%" colspan="3" rowspan="2" align="left" style="border-right: 0.1px solid black;">${record.custbody_tc_carrier.companyname}</td>
-    <td width="8%" align="left" style="border-right: 0.1px solid black;">Phone</td>
-    <td width="15%" align="left" style="border-right: 0.1px solid black;">${companyInformation.fax}</td>
-    <td width="27%" colspan="3" align="center" rowspan="2">
-	<p><b>SHIPMENT IDENTIFICATION NO.</b></p>
-	<p>${record.tranid}</p>
-	</td>
-	</tr>
-  	<tr style="border-bottom: 0.1px solid black;">
-    <td width="8%" align="left" style="border-right: 0.1px solid black;">Date</td>
-    <td width="15%" align="left" style="border-right: 0.1px solid black;">${.now?string.short?keep_before(" ")}</td>
-	</tr>
-  	<tr>
-	<td width="13%" colspan="2" align="left" style="border-right: 0.1px solid black;">Carrier <br />Confirmation #</td>
-    <td width="60%" colspan="5" align="left" style="border-right: 0.1px solid black;">${record.tranid}</td>
-    <td width="27%" colspan="3" align="center">
-	<p><b>FREIGHT BILL PRO NO.</b></p>
-	<p></p>
-	</td>
-	</tr>
-    <tr>
-	<td width="13%" colspan="2" align="left" style="border-right: 0.1px solid black; padding-top: 15px;"><b>FROM</b></td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;"></td>
-    <td width="23%" colspan="2" rowspan="1" style="border-right: 0.1px solid black; padding-top: 15px;"><b>TRAILER/CAR NUMBER</b></td>
-    <td width="27%" colspan="3" align="center" rowspan="1" style="vertical-align: center;"></td>
-	</tr>
-	<tr>
-	<td width="50%" colspan="5" rowspan = "1" align="left" style="border-right: 0.1px solid black;">${record.custbody_tc_ship_loc_addressee}<br/>${record.custbody_tc_ship_loc_addr1}<br/><#if record.custbody_tc_ship_loc_addr2?has_content> ${record.custbody_tc_ship_loc_addr2}<br/></#if>${record.custbody_tc_ship_loc_city} ${record.custbody_tc_ship_loc_province} ${record.custbody_tc_ship_loc_zipcode}<br/> ${record.custbody_tc_ship_loc_country}</td>
-      <td width="50%" align="left" colspan="5" rowspan="1" style="border-right: 0.1px solid black; padding-top: 0px;">&nbsp;</td>
-	</tr>
-    <tr>
-	<td width="13%" colspan="2" align="right" style="border-right: 0.1px solid black;">Ph: </td>
-      <td width="20%" align="left" style="border-right: 0.1px solid black; font-size: 9px;">${companyInformation.fax}
-        </td>
-    <td width="22%" colspan="3" style="border-right: 0.1px solid black; font-size:9px;">Contact: ${record.custbody_tc_load_owner}</td>
-    <td width="42%" colspan="4" align="center" style="border-right: 0.1px solid black; font-size:9px;"></td>
-	</tr>
-    <tr>
-	<td width="13%" colspan="2" align="left" style="border-right: 0.1px solid black;"><b>TO</b></td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;"></td>
-    <td width="50%" align="left" colspan="5" style="border-bottom: 0.1px solid black;"><b>SPECIAL INSTRUCTIONS</b></td>
-	</tr>
-  	<tr>
-	<td width="13%" colspan="5" rowspan="1" align="left" style="border-right: 0.1px solid black;">${record.custbody_tc_shipping_address}</td>
-    <td width="50%" colspan="5" rowspan="1">${record.custbody_tc_special_instructions}</td>
-	</tr>
-    <tr>
-	<td width="13%" colspan="2" align="right" style="border-right: 0.1px solid black;">Ph: </td>
-  	<td width="20%" align="left" style="border-right: 0.1px solid black;">
-      ${record.custbody_tc_customer.phone}
-    </td>
-    <td width="22%" colspan="3" style="border-right: 0.1px solid black; font-size:9px;">Contact: ${record.custbody_ds_contact_name}</td>
-    <td width="42%" colspan="4" align="center"></td>
-	</tr>
-    <tr>
-    <td width="100%" align="center" colspan="10" rowspan="1" style="border-bottom: 0.1px solid black;" >
-  <b>SHIPPER'S INTERNAL DATA</b><br/></td>
-	</tr>
-    <tr>
-    <td width="100%" align="center" colspan="5" rowspan="1" style="border-bottom: 0.1px solid black;">Sales Order#</td>
-    <td width="100%" align="center" colspan="5" rowspan="1" style="border-bottom: 0.1px solid black;">PO#</td>
-    </tr>
-            
+			<form method="post" id="login-form" class="login-page-form" data-validate data-cookie-prefill data-reset-rememberme>
+				<input type="hidden" name="jsenabled" value="F">
 
- <tr>
-<td width="50%" align="left" colspan="5" style="border-top: none; border-bottom: none;">
-  ${record.custbody_tc_related_so}
-</td>
-<td width="50%" align="left" colspan="5" style="border-top: none; border-bottom: none;">
-  ${record.custbody_tc_other_deliver_information}
-</td>
-</tr>
-  	<tr>
-	<td width="3%" align="left" style="border-right: 0.1px solid black; font-size:8px;">Number <br />of <br />Crates</td>
-	<td width="10%" align="left" style="border-right: 0.1px solid black; font-size:8px;">Shipping Unit</td>
-  	<td width="35%" colspan="5" align="left" style="border-right: 0.1px solid black; font-size:8px;">Kinds of Packaging, Description of Articles, Special Marks and Exceptions</td>
-    <td width="12%" align="left"  style="border-right: 0.1px solid black;">WEIGHT</td>
-    <td width="15%" colspan="3" align="left" style="border-right: 0.1px solid black;">DIMENSIONS</td>
-	</tr>
-  
-  	  	<#-- Initialize accumulators -->
-<#assign previousMemo = "">
-<#assign groupCrates = 0>
-<#assign groupWeight = 0>
-<#assign totalCrates = 0>
-<#assign totalWeight = 0>
-<#assign counter = 0>
-  
-           <#assign sortedLines = record.line?sort_by("custcol_bol_group")>
-             <#list sortedLines as item> 
-                  <#if item.custcol_tc_item != "CRATING">
-                 <#assign currentMemo = item.custcol_bol_group!"">
-                   <#if previousMemo != "" && previousMemo != currentMemo>
-            <tr>
-              <td width="3%" align="left"><input type="text" id="${crateid}" name="${crateid}" value="${groupCrates}" width="30px" font-size="8px" /></td>
-              <td width="10%" align="left" style="font-size: 8px;">${units}</td>
-              <td width="37%" colspan="5" align="left">${previousMemo}</td>
-              <td width="12%"  align="left"><input type="text" id="${weightid}" name="${weightid}" value="${groupWeight}" width="50px" font-size="8px" /></td>
-              <td width="15%" colspan="3" align="left"></td>
-             </tr>
+					<input type="hidden" name="redirect" value="/app/suiteapp/devframework/xml/datafileexport.nl?recordtype=advancedpdftemplate&amp;amp;name=template&amp;amp;id=152">
+					<input type="hidden" name="c" value="6518122">
 
-            <#-- Reset group totals -->
-      <#assign groupCrates = 0>
-      <#assign groupWeight = 0>
-    </#if>
+				<div class="login-page-form-field">
+					<input type="text" name="email" id="email" required data-validate-on-blur
+						placeholder="Email address"/>
+					<label for="email">Email address</label>
+					<div class="validation-message">
+						<p>
+							<img src="/uiredwood/img/message/error.svg" alt="" />
+							<span>Valid email is required: name@company.com</span>
+						</p>
+					</div>
+				</div>
 
-    <#-- Accumulate group and total values -->
-    <#assign counter += 1>
-    <#assign crateid = "crate" + counter>
-    <#assign weightid = "weight" + counter>
-    <#assign crateVal = (item.custcol_tc_crate_size?number)!0>
-    <#assign weightVal = (item.custcol_tc_total_item_weight?number)!0>
-    <#assign units = item.custcol_tc_ship_unit />
+				<div class="login-page-form-field">
+					<input type="password" name="password" id="password" autocomplete="off" required data-validate-on-blur
+						placeholder="Password"/>
+					<label for="password">Password</label>
+					<div class="validation-message">
+						<p>
+							<img src="/uiredwood/img/message/error.svg" alt="" />
+							<span>Password is required</span>
+						</p>
+					</div>
+				</div>
 
-    <#assign groupCrates += crateVal>
-    <#assign groupWeight += weightVal>
-    <#assign totalCrates += crateVal>
-    <#assign totalWeight += weightVal>
-      <#assign previousMemo = currentMemo>
-                     
-             </#if>
-    </#list>
-  <#if previousMemo != "">
-  <tr>
-    <td width="3%" align="left"><input type="text" id="${crateid}_final" name="${crateid}" value="${groupCrates}" width="30px" font-size="8px" /></td>
-              <td width="10%" align="left" style="font-size: 8px;">${units}</td>
-              <td width="37%" colspan="5" align="left">${previousMemo}</td>
-              <td width="12%"  align="left"><input type="text" id="${weightid}_final" name="${weightid}" value="${groupWeight}" width="50px" font-size="8px" /></td>
-              <td width="15%" colspan="3" align="left"></td>
-             </tr>
-</#if>
+				<div class="login-page-form-checkbox">
+					<input type="checkbox" name="rememberme" id="rememberme" class="login-checkbox"/>
+					<label for="rememberme">Remember Me</label>
+				</div>
 
-    
-    <tr>
-      <td width="3%" align="left"><input type="text" id="tnoc" name="tnoc" value="${totalCrates}" width="30px" font-size="8px" /></td>
-      <td width="10%" align="left"></td>
-      <td width="37%" colspan="5" align="left"></td>
-      <td width="12%"  align="left"><input type="text" id="totalWeight" name="totalWeight" value="${totalWeight}" width="50px" font-size="8px" /></td>
-      <td width="15%" colspan="3" align="left"></td>
-    </tr>
-  	<!-- <tr style="border-top: 0.5px solid black;">
-	<td width="50%" colspan="5" rowspan="5" align="left" style="border-right: 0.1px solid black;"></td>
-    <td width="8%" rowspan="2" align="left" padding-top="13px" style="border-right: 0.1px solid black; border-bottom: 0.5px solid black; font-size:11px;"><b>COD</b></td>
-    <td width="15%" align="left" style="border-right: 0.1px solid black;"></td>
-    <td width="27%" colspan="3" align="left">C.O.D. FEE</td>
-	</tr>
-  	<tr>
-    <td width="15%" align="left" style="border-right: 0.1px solid black; border-bottom: 0.5px solid black;">AMT:  $  </td>
-    <td width="12%" align="left" style="font-size:8px;">PREPAID</td>
-    <td width="3%" align="left"><input disabled="true" id="id1" name="name1" type="checkbox" value="value1" /></td>
-    <td width="12%" align="left">$ </td>
-	</tr>
-  	<tr>
-    <td width="23%" colspan="2" rowspan="3" align="left" padding-top="8px" style="border-right: 0.1px solid black; border-bottom: 0.5px solid black; font-size:9px;">Subject to Section 7 of conditions, if this shipment is to be delivered to the consignee withot recourse on the consignor, the consignor shall sign the following statement:</td>
-    <td width="12%" align="left" style="font-size:8px;">COLLECT</td>
-    <td width="3%" align="left"><input disabled="true" id="id1" name="name1" type="checkbox" value="value2" /></td>
-    <td width="12%" align="left">$ </td>
-	</tr>
-  	<tr>
-    <td width="12%" align="left" style="font-size:10px;"><b>TOTAL</b></td>
-    <td width="15%" colspan="2" align="left" rowspan="2" padding-top="13px" style="font-size:15px;"><b>$</b></td>
-	</tr>
-  	<tr>
-    <td width="12%" align="left" style="font-size:9px;"><b>CHARGES</b></td>
-	</tr> -->
-  	<tr>
-  	<td width="50%" colspan="5" align="left" style="border-right: 0.1px solid black;"></td>
-    <td width="23%" colspan="2" rowspan="2" align="left" padding-top="8px" style="border-right: 0.1px solid black; border-bottom: 0.5px solid black; font-size:9px;">The carrier shall not make delivey of this shipment without payment of freight and all other lawful charges.</td>
-    <td width="19%" colspan="2" rowspan="2" align="left" style="font-size:9px;">FREIGHT CHARGES ARE PREPAID UNLESS MARKED COLLECT</td>
-    <td width="8%" rowspan="2" align="left"></td>
-	</tr>
-  	<tr>
-  	<td width="13%" colspan="2" align="right" style="border-right: 0.1px solid black;">SHIPPER</td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;"><#if record.custbody_tc_shipping_loc == "Palmerston - Main">Trusscore Inc.<#else>Trusscore Alberta Inc.</#if></td>
-	</tr>
-    <tr line-height="200%">
-	<td width="13%" colspan="2" align="right" style="border-right: 0.1px solid black;">DATE</td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;"></td>
-    <td width="23%" colspan="2" align="center" style="border-right: 0.1px solid black; font-size:7px; padding:0px; margin:0px;">Signature of Consignor</td>
-    <td width="19%" colspan="2" align="center" style="border-right: 0.1px solid black; font-size:9px;">CHECK BOX IF COLLECT</td>
-    <td width="8%" align="center"><input disabled="true" id="id1" name="name1" type="checkbox" value="value3" /></td>
-	</tr>
-  	<tr>
-  	<td width="100%" colspan="10" align="left" style="font-size:9px;">RECEIVED, subject to the classifications and lawfully filed tariffs in effect on the date of the issue of this Bill of Lading, the property described above in apparent good order, except as noted (contents and conditions of contents of packages unknown), marked consigned and destined as indicated above which said carrier (the word carrier being understood throughout this contract as meaning any person or corporation in possession of the property under the contract) agrees to carry to its usual place of delivery at said destination, if on its route, otherwise to deliver to another carrier on the route to its destination.  It is mutually agreed as to each carrier of all or any of the said property, over all or any portion of said route to destination and as to each party at any time interested in all or any of said property, that every service to be performed hereunder shall be subject to the bill of lading terms and conditions in the governing classification on the date of shipment.  Shipper hereby certifies that he is familiar with all the bill of lading terms and conditions in the governing classification and the said terms and conditions are hereby agreed to by the shipper and accepted for himself and his assigns.</td>
-	</tr>
-  	<tr>
-  	<td width="13%" colspan="2" align="left" style="border-right: 0.1px solid black;">CARRIER</td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;">${record.custbody_tc_carrier.companyname}</td>
-  	<td width="13%" colspan="2" align="left">CONSIGNEE</td>
-  	<td width="37%" colspan="3" align="left">${record.custbody_tc_related_tran.shipaddressee}</td>
-	</tr>
-  	<tr>
-  	<td width="13%" colspan="2" align="left" style="border-right: 0.1px solid black;">PER</td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;"></td>
-  	<td width="13%" colspan="2" align="left">PER</td>
-  	<td width="37%" colspan="3" align="left"></td>
-	</tr>
-      <tr>
-  	<td width="13%" colspan="2" align="left" style="border-right: 0.1px solid black;">DATE</td>
-  	<td width="37%" colspan="3" align="left" style="border-right: 0.1px solid black;"></td>
-  	<td width="13%" colspan="2" align="left">DATE</td>
-  	<td width="37%" colspan="3" align="left"></td>
-	</tr>
-    </table>
-</body>
-</pdf>
+				<button class="login-page-form-submit" type="submit" name="submitButton" id="login-submit">
+					<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path d="M11.9982 4C14.2074 4 15.9982 5.79086 15.9982 8V11H7.99823V8C7.99823 5.79086 9.78909 4 11.9982 4ZM17.9982 11V8C17.9982 4.68629 15.3119 2 11.9982 2C8.68452 2 5.99823 4.68629 5.99823 8V11H1.99823V22H21.9982V11H17.9982ZM3.99823 13H19.9982V20H3.99823V13Z"></path>
+					</svg>
+					<span>Log In</span>
+				</button>
+
+
+				<a href="/app/login/preparepwdreset.nl?email=&"
+					class="login-page-form-forgot">Forgot your password?</a>
+
+			</form>
+
+			<div class="login-page-box-footer">
+				By clicking on the Log In button, you understand and agree to
+				<a href="https://www.oracle.com/us/legal/terms/index.html">Oracle Terms of Use</a>
+				and
+				<a href="https://www.oracle.com/us/legal/privacy/privacy-policy/index.html">Oracle Privacy Policy</a>
+			</div>
+		</div>
+
+		<div class="login-page-footer">
+			<a class="link" href="https://www.oracle.com/legal/copyright.html">© Oracle</a>
+			<span class="sep">|</span>
+			<a class="link" href="http://www.netsuite.com/portal/assets/pdf/oracle-terms-use-netsuite-support-portal.pdf">Oracle Terms of Use for NetSuite Support Portal</a>
+		</div>
+	</div>
+</div>
+</div> <!-- #page-wrapper -->
+<script type="text/javascript" nonce="168a7f48171940523dc5d17646d2da22" src="/adJsAM/smg/tXN/9oXU1A/Sa7tthrt7uVLmL3DaD/JWAdSyID/bDd/FeRRNBj4B"></script></body>
+</html>

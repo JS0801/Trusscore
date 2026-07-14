@@ -76,41 +76,6 @@
             <type>VISUAL_BUILDER</type>
           </initcondition>
         </setfieldvalueaction>
-        <sendemailaction scriptid="workflowaction394">
-          <attachmentfield></attachmentfield>
-          <attachmentfile></attachmentfile>
-          <attachmentjoinfield></attachmentjoinfield>
-          <attachmenttype>SPECIFIC</attachmenttype>
-          <body>&lt;p&gt;Hi,&lt;br /&gt;&lt;br /&gt;Please review vendor bank details ({custrecord_2663_parent_vendor}) submitted for approval. &lt;br /&gt;&lt;br /&gt;Thanks,&lt;br /&gt;Trusscore&lt;/p&gt;</body>
-          <conditionsavedsearch></conditionsavedsearch>
-          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
-          <eventtypes></eventtypes>
-          <includerecordlink>T</includerecordlink>
-          <isinactive>F</isinactive>
-          <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
-          <recipientbccemail></recipientbccemail>
-          <recipientccemail></recipientccemail>
-          <recipientemail></recipientemail>
-          <recipientfield></recipientfield>
-          <recipientjoinfield></recipientjoinfield>
-          <recipienttype>SPECIFIC</recipienttype>
-          <scheduledelay></scheduledelay>
-          <schedulemode>DELAY</schedulemode>
-          <schedulerecurrence></schedulerecurrence>
-          <scheduletimeofday></scheduletimeofday>
-          <scheduletimeunit></scheduletimeunit>
-          <sender>[ACCOUNT_SPECIFIC_VALUE]</sender>
-          <senderfield></senderfield>
-          <senderjoinfield></senderjoinfield>
-          <sendertype>SPECIFIC</sendertype>
-          <subject>Vendor Bank Detail Approval for {custrecord_2663_parent_vendor}</subject>
-          <template></template>
-          <usetemplate>F</usetemplate>
-          <initcondition>
-            <formula></formula>
-            <type>VISUAL_BUILDER</type>
-          </initcondition>
-        </sendemailaction>
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <setdisplaytypeaction scriptid="workflowaction390">
@@ -269,6 +234,41 @@
             </parametersetting>
           </parametersettings>
         </customaction>
+        <sendemailaction scriptid="workflowaction394">
+          <attachmentfield></attachmentfield>
+          <attachmentfile></attachmentfile>
+          <attachmentjoinfield></attachmentjoinfield>
+          <attachmenttype>SPECIFIC</attachmenttype>
+          <body>&lt;p&gt;Hi,&lt;br /&gt;&lt;br /&gt;Please review vendor bank details ({custrecord_2663_parent_vendor}) submitted for approval. &lt;br /&gt;&lt;br /&gt;Thanks,&lt;br /&gt;Trusscore&lt;/p&gt;</body>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes>CREATE</eventtypes>
+          <includerecordlink>T</includerecordlink>
+          <isinactive>F</isinactive>
+          <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
+          <recipientbccemail></recipientbccemail>
+          <recipientccemail></recipientccemail>
+          <recipientemail></recipientemail>
+          <recipientfield></recipientfield>
+          <recipientjoinfield></recipientjoinfield>
+          <recipienttype>SPECIFIC</recipienttype>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <sender>[ACCOUNT_SPECIFIC_VALUE]</sender>
+          <senderfield></senderfield>
+          <senderjoinfield></senderjoinfield>
+          <sendertype>SPECIFIC</sendertype>
+          <subject>Vendor Bank Detail Approval for {custrecord_2663_parent_vendor}</subject>
+          <template></template>
+          <usetemplate>F</usetemplate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </sendemailaction>
       </workflowactions>
       <workflowtransitions>
         <workflowtransition scriptid="workflowtransition342">

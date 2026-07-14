@@ -115,13 +115,9 @@
           <label>Submit For Approval</label>
           <saverecordfirst>T</saverecordfirst>
           <initcondition>
-            <formula><![CDATA[isChecked("Inactive") = 'F' AND ( "User" IN ("Employee1","Employee2","Employee3","Employee4") OR "User Role" IN ("Role1") )]]></formula>
+            <formula><![CDATA[( "User" IN ("Employee1","Employee2","Employee3","Employee4") OR "User Role" IN ("Role1") )]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
-              <parameter>
-                <name>Inactive</name>
-                <value>STDRECORDISINACTIVE</value>
-              </parameter>
               <parameter>
                 <name>User</name>
                 <value>STDUSERUSER</value>
@@ -188,12 +184,21 @@
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula><![CDATA[isChecked("Inactive") = 'T']]></formula>
+            <formula><![CDATA[isChecked("Inactive") = 'T' AND "User" NOT IN ("Employee1")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
                 <name>Inactive</name>
                 <value>STDRECORDISINACTIVE</value>
+              </parameter>
+              <parameter>
+                <name>User</name>
+                <value>STDUSERUSER</value>
+              </parameter>
+              <parameter>
+                <name>Employee1</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
               </parameter>
             </parameters>
           </initcondition>
@@ -315,6 +320,22 @@
           <scheduledelay></scheduledelay>
           <scheduletimeunit></scheduletimeunit>
           <tostate>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate175]</tostate>
+          <triggertype></triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </workflowtransition>
+        <workflowtransition scriptid="workflowtransition374">
+          <buttonaction></buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate171]</tostate>
           <triggertype></triggertype>
           <waitforworkflow></waitforworkflow>
           <waitforworkflowstate></waitforworkflowstate>
@@ -1242,16 +1263,49 @@
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula><![CDATA[isChecked("Inactive") = 'T']]></formula>
+            <formula><![CDATA[isChecked("Inactive") = 'T' AND "User" NOT IN ("Employee1")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
                 <name>Inactive</name>
                 <value>STDRECORDISINACTIVE</value>
               </parameter>
+              <parameter>
+                <name>User</name>
+                <value>STDUSERUSER</value>
+              </parameter>
+              <parameter>
+                <name>Employee1</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
             </parameters>
           </initcondition>
         </lockrecordaction>
+        <addbuttonaction scriptid="workflowaction468">
+          <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <label>Send to Beci</label>
+          <saverecordfirst>T</saverecordfirst>
+          <initcondition>
+            <formula><![CDATA["User" IN ("Employee1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>User</name>
+                <value>STDUSERUSER</value>
+              </parameter>
+              <parameter>
+                <name>Employee1</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </addbuttonaction>
       </workflowactions>
       <workflowtransitions>
         <workflowtransition scriptid="workflowtransition349">
@@ -1344,6 +1398,22 @@
           <scheduledelay></scheduledelay>
           <scheduletimeunit></scheduletimeunit>
           <tostate>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate177]</tostate>
+          <triggertype></triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </workflowtransition>
+        <workflowtransition scriptid="workflowtransition372">
+          <buttonaction>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate175.workflowaction468]</buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate171]</tostate>
           <triggertype></triggertype>
           <waitforworkflow></waitforworkflow>
           <waitforworkflowstate></waitforworkflowstate>
@@ -1486,6 +1556,22 @@
           <scheduledelay></scheduledelay>
           <scheduletimeunit></scheduletimeunit>
           <tostate>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate175]</tostate>
+          <triggertype></triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </workflowtransition>
+        <workflowtransition scriptid="workflowtransition373">
+          <buttonaction></buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow_bank_detail_approval_flow.workflowstate171]</tostate>
           <triggertype></triggertype>
           <waitforworkflow></waitforworkflow>
           <waitforworkflowstate></waitforworkflowstate>

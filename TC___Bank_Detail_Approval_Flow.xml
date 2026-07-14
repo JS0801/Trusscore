@@ -115,9 +115,13 @@
           <label>Submit For Approval</label>
           <saverecordfirst>T</saverecordfirst>
           <initcondition>
-            <formula><![CDATA[( "User" IN ("Employee1","Employee2","Employee3","Employee4") OR "User Role" IN ("Role1") )]]></formula>
+            <formula><![CDATA[isChecked("Inactive") = 'F' AND ( "User" IN ("Employee1","Employee2","Employee3","Employee4") OR "User Role" IN ("Role1") )]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
+              <parameter>
+                <name>Inactive</name>
+                <value>STDRECORDISINACTIVE</value>
+              </parameter>
               <parameter>
                 <name>User</name>
                 <value>STDUSERUSER</value>
@@ -178,6 +182,22 @@
             </parameters>
           </initcondition>
         </addbuttonaction>
+        <lockrecordaction scriptid="workflowaction466">
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <initcondition>
+            <formula><![CDATA[isChecked("Inactive") = 'T']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Inactive</name>
+                <value>STDRECORDISINACTIVE</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </lockrecordaction>
       </workflowactions>
       <workflowactions triggertype="AFTERSUBMIT">
         <setfieldvalueaction scriptid="workflowaction393">
@@ -1212,6 +1232,22 @@
                 <name>Role3</name>
                 <selectrecordtype>-118</selectrecordtype>
                 <value>[scriptid=customrole1930]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </lockrecordaction>
+        <lockrecordaction scriptid="workflowaction467">
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <initcondition>
+            <formula><![CDATA[isChecked("Inactive") = 'T']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Inactive</name>
+                <value>STDRECORDISINACTIVE</value>
               </parameter>
             </parameters>
           </initcondition>

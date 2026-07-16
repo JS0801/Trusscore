@@ -9,10 +9,10 @@
   <inittriggertype></inittriggertype>
   <isinactive>F</isinactive>
   <islogenabled>T</islogenabled>
-  <keephistory>ONLYWHENTESTING</keephistory>
+  <keephistory>ALWAYS</keephistory>
   <name>TC | On Hold Vendor PO</name>
   <recordtypes>PURCHASEORDER</recordtypes>
-  <releasestatus>TESTING</releasestatus>
+  <releasestatus>RELEASED</releasestatus>
   <runasadmin>T</runasadmin>
   <initcondition>
     <formula></formula>
@@ -23,8 +23,72 @@
       <description></description>
       <donotexitworkflow>F</donotexitworkflow>
       <name>State 1</name>
-      <positionx>243</positionx>
-      <positiony>133</positiony>
+      <positionx>723</positionx>
+      <positiony>203</positiony>
+      <workflowactions triggertype="BEFORELOAD">
+        <returnusererroraction scriptid="workflowaction460">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <errortext>The vendor is not yet approved, so a PO cannot be created for this vendor at this time.&#xd;
+</errortext>
+          <eventtypes>CREATE</eventtypes>
+          <isinactive>F</isinactive>
+          <initcondition>
+            <formula><![CDATA[isChecked("Vendor:On Hold - All Transactions") = 'T']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Vendor:On Hold - All Transactions</name>
+                <value>STDBODYVENDOR:[scriptid=custentity_tc_onhold_trans]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </returnusererroraction>
+      </workflowactions>
+      <workflowactions triggertype="AFTERFIELDEDIT">
+        <returnusererroraction scriptid="workflowaction461">
+          <clienttriggerfields>STDBODYVENDOR</clienttriggerfields>
+          <clienttriggerfieldsissublistfield>F</clienttriggerfieldsissublistfield>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <errortext>The vendor is not yet approved, so a PO cannot be created for this vendor at this time.&#xd;
+</errortext>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <initcondition>
+            <formula><![CDATA[isChecked("Vendor:On Hold - All Transactions") = 'T']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Vendor:On Hold - All Transactions</name>
+                <value>STDBODYVENDOR:[scriptid=custentity_tc_onhold_trans]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </returnusererroraction>
+      </workflowactions>
+      <workflowactions triggertype="BEFORESUBMIT">
+        <returnusererroraction scriptid="workflowaction462">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <errortext>The vendor is not yet approved, so a PO cannot be created for this vendor at this time.&#xd;
+</errortext>
+          <eventtypes>CREATE</eventtypes>
+          <isinactive>F</isinactive>
+          <initcondition>
+            <formula><![CDATA[isChecked("Vendor:On Hold - All Transactions") = 'T']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Vendor:On Hold - All Transactions</name>
+                <value>STDBODYVENDOR:[scriptid=custentity_tc_onhold_trans]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </returnusererroraction>
+      </workflowactions>
     </workflowstate>
   </workflowstates>
 </workflow>

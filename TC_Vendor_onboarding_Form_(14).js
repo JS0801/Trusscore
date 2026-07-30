@@ -907,16 +907,16 @@ stateSearchObj.run().each(function(result){
 </div>
       <label>Business Number/TIN/GST/HST: <input name="business_number" value="${esc(ex.business_number)}"></label>
       <label>Website:<input name="website" value="${esc(ex.website)}"></label>
-      <label>Country:
-      <select name="ven_country">${countryOptions(ex.country)}</select>
+      <label>Country: *
+      <select name="ven_country" required>${countryOptions(ex.country)}</select>
       </label>
-      <label>Street Address:<input name="street_address" value="${esc(ex.street_address)}"></label>
+      <label>Street Address: *<input name="street_address" value="${esc(ex.street_address)}" required></label>
       <label>PO Box:<input name="po_box" value="${esc(ex.po_box)}"></label>
-      <label>City:<input name="city" value="${esc(ex.city)}"></label>
-      <label>Province/State:
-  <select id="state" name="state"></select>
+      <label>City: * <input name="city" value="${esc(ex.city)}" required></label>
+      <label>Province/State: *
+  <select id="state" name="state" required></select>
 </label>
-      <label>Postal Code/ZIP Code:<input name="zip" value="${esc(ex.zip)}"></label>
+      <label>Postal Code/ZIP Code: *<input name="zip" value="${esc(ex.zip)}" required></label>
       
       <label style="display: inline-flex; align-items: center; gap: 8px;">Is your mailing address different from your physical address?
         <input id="mailing_toggle" type="checkbox" ${hasMailing ? 'checked' : ''} onchange="toggleMailingAddress(this, 'mailing-address')">
@@ -956,13 +956,13 @@ stateSearchObj.run().each(function(result){
     <div class="tile">
       <h2>Payment & Banking Details</h2>
       <label>Bank Name: *<input name="bank_name" value="${esc(ex.bank_name)}" required></label>
-      <label>Country: *
+      <label>Country:
       <select name="bank_country" required>${countryOptions(ex.bank_country)}</select></label>
-      <label>Bank Address: *<input name="bank_address" value="${esc(ex.bank_address)}" required></label>
+      <label>Bank Address:<input name="bank_address" value="${esc(ex.bank_address)}"></label>
       <label>PO Box:<input name="bank_po_box" value="${esc(ex.bank_po_box)}"></label>
-      <label>City: *<input name="bank_city" value="${esc(ex.bank_city)}" required></label>
-      <label>Province/State: *<select id="bank_state" name="bank_state" value="${esc(ex.bank_state)}" required></select></label>
-      <label>Postal Code/ZIP Code: *<input name="bank_zip" value="${esc(ex.bank_zip)}" required></label>
+      <label>City:<input name="bank_city" value="${esc(ex.bank_city)}"></label>
+      <label>Province/State:<select id="bank_state" name="bank_state" value="${esc(ex.bank_state)}"></select></label>
+      <label>Postal Code/ZIP Code:<input name="bank_zip" value="${esc(ex.bank_zip)}"></label>
       
       <label>Branch Telephone:<input name="branch_telephone" value="${esc(ex.branch_telephone)}"></label>
       <label>Bank Contact:<input name="bank_contact" value="${esc(ex.bank_contact)}"></label>

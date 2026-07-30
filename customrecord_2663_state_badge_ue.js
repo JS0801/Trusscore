@@ -45,15 +45,15 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'], (log, search, serverWidget) =
 
     const VENDOR_STATE_BADGE_MAP = {
         'finance approval': {
-          label: 'Pending Approval (Finance)',
+          label: 'Pending Approval (Procurement)',
           theme: 'warning'
          },
          'ap approval and review': {
-             label: 'Pending Approval (AP)',
+             label: 'Pending Approval (Finance)',
              theme: 'warning'
          },
         'finance approval': {
-            label: 'Pending Approval (Finance)',
+            label: 'Pending Approval (Procurement)',
             theme: 'warning'
         },
         'rejected': {

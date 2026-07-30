@@ -280,7 +280,7 @@
           <senderfield></senderfield>
           <senderjoinfield></senderjoinfield>
           <sendertype>SPECIFIC</sendertype>
-          <subject>Approval Needed – Vendor Onboarding: {name}</subject>
+          <subject>New Vendor Onboarding – Staging Approval Request</subject>
           <template></template>
           <usetemplate>F</usetemplate>
           <initcondition>
@@ -321,7 +321,7 @@
           <senderfield></senderfield>
           <senderjoinfield></senderjoinfield>
           <sendertype>SPECIFIC</sendertype>
-          <subject>Approval Needed – Vendor Onboarding: {name}</subject>
+          <subject>New Vendor Onboarding – Staging Approval Request</subject>
           <template></template>
           <usetemplate>F</usetemplate>
           <initcondition>
@@ -488,7 +488,7 @@
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
           <includerecordlink>F</includerecordlink>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
           <recipientbccemail></recipientbccemail>
           <recipientccemail></recipientccemail>
@@ -529,7 +529,7 @@
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
           <includerecordlink>F</includerecordlink>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
           <recipientbccemail></recipientbccemail>
           <recipientccemail></recipientccemail>

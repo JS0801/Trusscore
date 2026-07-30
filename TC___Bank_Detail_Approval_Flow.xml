@@ -631,7 +631,7 @@
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula><![CDATA[( "User" NOT IN ("Employee1","Employee2","Employee3","Employee4") AND "User Role" NOT IN ("Role1","Role2") )]]></formula>
+            <formula><![CDATA["User" NOT IN ("Employee1","Employee2","Employee3","Employee4") AND "User Role" NOT IN ("Role1","Role2","Role3")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -671,6 +671,11 @@
                 <name>Role2</name>
                 <selectrecordtype>-118</selectrecordtype>
                 <value>[scriptid=customrole1925]</value>
+              </parameter>
+              <parameter>
+                <name>Role3</name>
+                <selectrecordtype>-118</selectrecordtype>
+                <value>ADMINISTRATOR</value>
               </parameter>
             </parameters>
           </initcondition>
@@ -1046,7 +1051,7 @@
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula><![CDATA[( "User" NOT IN ("Employee1","Employee2","Employee3","Employee4") OR "User Role" IN ("Role1","Role2") )]]></formula>
+            <formula><![CDATA["User" NOT IN ("Employee1","Employee2","Employee3","Employee4") AND "User Role" NOT IN ("Role1","Role2","Role3")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -1086,6 +1091,11 @@
                 <name>Role2</name>
                 <selectrecordtype>-118</selectrecordtype>
                 <value>[scriptid=customrole1041]</value>
+              </parameter>
+              <parameter>
+                <name>Role3</name>
+                <selectrecordtype>-118</selectrecordtype>
+                <value>ADMINISTRATOR</value>
               </parameter>
             </parameters>
           </initcondition>

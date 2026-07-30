@@ -907,16 +907,16 @@ stateSearchObj.run().each(function(result){
 </div>
       <label>Business Number/TIN/GST/HST: <input name="business_number" value="${esc(ex.business_number)}"></label>
       <label>Website:<input name="website" value="${esc(ex.website)}"></label>
-      <label>Country: *
-      <select name="ven_country" required>${countryOptions(ex.country)}</select>
+      <label>Country:
+      <select name="ven_country">${countryOptions(ex.country)}</select>
       </label>
-      <label>Street Address: *<input name="street_address" value="${esc(ex.street_address)}" required></label>
+      <label>Street Address:<input name="street_address" value="${esc(ex.street_address)}"></label>
       <label>PO Box:<input name="po_box" value="${esc(ex.po_box)}"></label>
-      <label>City: *<input name="city" value="${esc(ex.city)}" required></label>
-      <label>Province/State: *
-  <select id="state" name="state" required></select>
+      <label>City:<input name="city" value="${esc(ex.city)}"></label>
+      <label>Province/State:
+  <select id="state" name="state"></select>
 </label>
-      <label>Postal Code/ZIP Code: *<input name="zip" value="${esc(ex.zip)}" required></label>
+      <label>Postal Code/ZIP Code:<input name="zip" value="${esc(ex.zip)}"></label>
       
       <label style="display: inline-flex; align-items: center; gap: 8px;">Is your mailing address different from your physical address?
         <input id="mailing_toggle" type="checkbox" ${hasMailing ? 'checked' : ''} onchange="toggleMailingAddress(this, 'mailing-address')">
@@ -980,8 +980,8 @@ stateSearchObj.run().each(function(result){
 </div>
 
       <label>Remittance Email: *<input name="remit_email" type="email" value="${esc(ex.remit_email)}" required></label>
-      <label>Choose the appropriate payment method:
-        <select name="payment_method" onchange="togglePaymentSection(this)">
+      <label>Choose the appropriate payment method: *
+        <select name="payment_method" onchange="togglePaymentSection(this)" required>
           <option value="">Select</option>
           <option value="EFT"${selEFT}>EFT (CAD)</option>
           <option value="ACH"${selACH}>ACH (USD)</option>

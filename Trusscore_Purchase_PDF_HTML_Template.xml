@@ -156,12 +156,14 @@
 		</tr></table>
 	</td>
 	<td>
-	<table style="font-size:12px;"><tr>
+	<table style="font-size:12px;">
+      <tr>
 		<td colspan="3" font-weight="bold" margin-bottom="5pt">${record.shipaddress@label}:</td>
-		</tr>
-		<tr>
-		<td colspan="3" rowspan="2">${record.shipaddress}</td>
-		</tr></table>
+	  </tr>
+	  <tr>
+		<td colspan="3" rowspan="2">${record.subsidiary.mainaddress_text}</td>
+	  </tr>
+    </table>
 	</td>
 	</tr></table>
 

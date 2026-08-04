@@ -1,0 +1,288 @@
+<?xml version="1.0"?><!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd">
+<pdf>
+<head>
+	<link name="NotoSans" type="font" subtype="truetype" src="${nsfont.NotoSans_Regular}" src-bold="${nsfont.NotoSans_Bold}" src-italic="${nsfont.NotoSans_Italic}" src-bolditalic="${nsfont.NotoSans_BoldItalic}" bytes="2" />
+	<#if .locale == "zh_CN">
+		<link name="NotoSansCJKsc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKsc_Regular}" src-bold="${nsfont.NotoSansCJKsc_Bold}" bytes="2" />
+	<#elseif .locale == "zh_TW">
+		<link name="NotoSansCJKtc" type="font" subtype="opentype" src="${nsfont.NotoSansCJKtc_Regular}" src-bold="${nsfont.NotoSansCJKtc_Bold}" bytes="2" />
+	<#elseif .locale == "ja_JP">
+		<link name="NotoSansCJKjp" type="font" subtype="opentype" src="${nsfont.NotoSansCJKjp_Regular}" src-bold="${nsfont.NotoSansCJKjp_Bold}" bytes="2" />
+	<#elseif .locale == "ko_KR">
+		<link name="NotoSansCJKkr" type="font" subtype="opentype" src="${nsfont.NotoSansCJKkr_Regular}" src-bold="${nsfont.NotoSansCJKkr_Bold}" bytes="2" />
+	<#elseif .locale == "th_TH">
+		<link name="NotoSansThai" type="font" subtype="opentype" src="${nsfont.NotoSansThai_Regular}" src-bold="${nsfont.NotoSansThai_Bold}" bytes="2" />
+	</#if>
+    <macrolist>
+        <macro id="nlheader">
+            <table class="header" style="width: 100%;"><tr>
+	<td rowspan="4" width="40%"><img height="75px" src="https://6518122.app.netsuite.com/core/media/media.nl?id=6122&amp;c=6518122&amp;h=m6_0Vrb_g_AphBfET8BOfpOVIeIbop4Sotx3jZo2T1ewbnzh" style="float: left; margin: 7px" width="215px" /></td>
+	<td align="left" padding-top="10px" rowspan="4" style="font-size:10px;" width="25%"><b>${record.custbody_tc_subsidiary_address}</b><br /><b>Phone: ${companyInformation.phone}<br />Fax: ${companyInformation.fax}</b></td>
+	<td align="center" colspan="2" padding-top="10px" style="font-size:20px;" width="35%"><b>Purchase Order</b></td>
+	</tr>
+	<tr>
+	<td align="left" width="10%"><b>${record.trandate@label}</b></td>
+	<td align="left" style="font-size:11px;" width="25%">${record.trandate}</td>
+	</tr>
+	<tr>
+	<td align="left" width="10%"><b>Vendor ID</b></td>
+	<td align="left" style="font-size:11px;" width="25%">${record.entity.entityid}</td>
+	</tr>
+	<tr>
+	<td align="left" width="10%"><b>${record.tranid@label}</b></td>
+	<td align="left" style="font-size:11px;" width="25%">${record.tranid}</td>
+	</tr></table>
+        </macro>
+        <macro id="nlfooter">
+            <table class="footer" style="width: 100%;"><tr>
+	<td><barcode codetype="code128" showtext="true" value="${record.tranid}"/></td>
+	<td align="right"><pagenumber/> of <totalpages/></td>
+	</tr></table>
+        </macro>
+    </macrolist>
+    <style type="text/css">* {
+		<#if .locale == "zh_CN">
+			font-family: NotoSans, NotoSansCJKsc, sans-serif;
+		<#elseif .locale == "zh_TW">
+			font-family: NotoSans, NotoSansCJKtc, sans-serif;
+		<#elseif .locale == "ja_JP">
+			font-family: NotoSans, NotoSansCJKjp, sans-serif;
+		<#elseif .locale == "ko_KR">
+			font-family: NotoSans, NotoSansCJKkr, sans-serif;
+		<#elseif .locale == "th_TH">
+			font-family: NotoSans, NotoSansThai, sans-serif;
+		<#else>
+			font-family: NotoSans, sans-serif;
+		</#if>
+		}
+		table {
+			font-size: 9pt;
+			table-layout: fixed;
+		}
+        th {
+            font-weight: bold;
+            font-size: 8pt;
+            vertical-align: middle;
+            padding: 5px 6px 3px;
+            background-color: #e3e3e3;
+            color: #333333;
+        }
+        td {
+            padding: 4px 6px;
+        }
+		td p { align:left }
+        b {
+            font-weight: bold;
+            color: #333333;
+        }
+        table.header td {
+            padding: 0;
+            font-size: 10pt;
+        }
+        table.footer td {
+            padding: 0;
+            font-size: 8pt;
+        }
+        table.itemtable th {
+            padding-bottom: 10px;
+            padding-top: 10px;
+        }
+        table.body td {
+            padding-top: 2px;
+        }
+        table.total {
+            page-break-inside: avoid;
+        }
+        tr.totalrow {
+            background-color: #e3e3e3;
+            line-height: 200%;
+        }
+        td.totalboxtop {
+            font-size: 12pt;
+            background-color: #e3e3e3;
+        }
+        td.addressheader {
+            font-size: 8pt;
+            padding-top: 6px;
+            padding-bottom: 2px;
+        }
+        td.address {
+            padding-top: 0;
+        }
+        td.totalboxmid {
+            font-size: 28pt;
+            padding-top: 20px;
+            background-color: #e3e3e3;
+        }
+        td.totalboxbot {
+            background-color: #e3e3e3;
+            font-weight: bold;
+        }
+        span.title {
+            font-size: 28pt;
+        }
+        span.number {
+            font-size: 16pt;
+        }
+        span.itemname {
+            font-weight: bold;
+            line-height: 150%;
+        }
+        hr {
+            width: 100%;
+            color: #d3d3d3;
+            background-color: #d3d3d3;
+            height: 1px;
+        }
+</style>
+</head>
+<body header="nlheader" header-height="10%" footer="nlfooter" footer-height="20pt" padding="0.5in 0.5in 0.5in 0.5in" size="Letter">
+    <table style="width: 100%;"><tr>
+	<td>
+	<table style="font-size:12px;"><tr>
+		<td colspan="3" font-weight="bold" margin-bottom="5pt">Vendor:</td>
+		</tr>
+		<tr>
+		<td colspan="3" rowspan="2">${record.billaddress}</td>
+		</tr></table>
+	</td>
+	<td>
+	<table style="font-size:12px;"><tr>
+		<td colspan="3" font-weight="bold" margin-bottom="5pt">Bill To:</td>
+		</tr>
+		<tr>
+		<td colspan="3" rowspan="2">${record.custbody_tc_subsidiary_address}</td>
+		</tr></table>
+	</td>
+	<td>
+	<table style="font-size:12px;"><tr>
+		<td colspan="3" font-weight="bold" margin-bottom="5pt">${record.shipaddress@label}:</td>
+		</tr>
+		<tr>
+		<td colspan="3" rowspan="2">${record.shipaddress}</td>
+		</tr></table>
+	</td>
+	</tr></table>
+
+<table class="body" style="width: 100%;"><tr>
+	<th width="13%">Order Date</th>
+	<th width="22%">Requested Delivery Date</th>
+	<th width="15%">Payment Terms</th>
+	<th width="13%">Currency</th>
+	<th width="12%">Incoterms</th>
+	<th width="25%">Buyer Details</th>
+	</tr>
+	<tr>
+	<td width="13%">${record.trandate}</td>
+	<td width="22%">${record.duedate}</td>
+	<td width="15%">${record.terms}</td>
+	<td width="13%">${record.currencysymbol}</td>
+	<td width="12%">${record.incoterm}</td>
+	<td width="25%">${record.custbody_tc_created_by.firstname}&nbsp;${record.custbody_tc_created_by.lastname}<br /><a style="color: blue;">${record.custbody_tc_created_by.email}</a></td>
+	</tr></table>
+<br /><#if record.item?has_content>
+<table class="itemtable" style="width: 100%;"><!-- start items --><#list record.item as item><#if item_index==0>
+<thead>
+	<tr>
+	<th width="33%">${item.item@label}</th>
+    <th width="15%">Requested Date</th>
+	<th align="center" width="12%">${item.quantity@label}</th>
+	<th align="right" width="15%">${item.rate@label}</th>
+	<th align="right" width="25%">${item.amount@label}</th>
+	</tr>
+</thead>
+</#if><tr>
+	<td width="33%"><span class="itemname">${item.item}</span><br />${item.description}</td>
+    <td width="15%">${item.custcol_tc_requested_date}</td>
+	<td align="center" width="12%">${item.quantity}</td>
+	<td align="right" width="15%">${item.rate}</td>
+	<td align="right" width="25%">${item.amount}</td>
+	</tr>
+	</#list><!-- end items --></table>
+</#if><#if record.expense?has_content>
+
+<table class="itemtable" style="width: 100%;"><!-- start expenses --><#list record.expense as expense ><#if expense_index==0>
+<thead>
+	<tr>
+	<th width="45%">Item</th>
+	<th align="center" width="15%">Quantity</th>
+	<th align="right" width="15%">Rate</th>
+	<th align="right" width="25%">Amount</th>
+	</tr>
+</thead>
+</#if><tr>
+	<td width="45%">${expense.memo}</td>
+	<td align="center" width="15%">${expense.custcol_tc_item_qty}</td>
+	<td align="right" width="15%">${expense.custcol_tc_item_price}</td>
+	<td align="right" width="25%">${expense.amount}</td>
+	</tr>
+	</#list><!-- end expenses --></table>
+</#if>
+
+<hr />
+<table class="total" style="width: 100%;"><tr>
+	<td colspan="4">&nbsp;</td>
+	<td align="right"><b>${record.subtotal@label}</b></td>
+	<td align="right">${record.subtotal}</td>
+	</tr>
+	<#if record.discounttotal?has_content && record.discounttotal != 0>
+	<tr>
+	<td colspan="4">&nbsp;</td>
+	<td align="right"><b>Discounts</b></td>
+	<td align="right">${record.discounttotal}</td>
+	</tr>
+	</#if>
+  	<#if record.item?has_content>
+      <#if record.subsidiary == "TCC" || record.subsidiary == "TCA">
+        <tr>
+        <td colspan="4"></td>
+        <td align="right"><#if record.taxtotal?has_content><b>GST/HST(${record.item[0].taxrate1})</b><#else>&nbsp;</#if></td>
+        <td align="right"><#if record.taxtotal?has_content>${record.taxtotal}<#else>&nbsp;</#if></td>
+        </tr>
+        <tr>
+          <td colspan="4"></td>
+          <td align="right"><b>${record.tax2total@label}</b> <#if record.item[0].taxrate2!=0><b>(${record.item[0].taxrate2})</b><#else>&nbsp;</#if></td>
+          <td align="right"><#if record.taxtotal?has_content>${record.tax2total}<#else>&nbsp;</#if></td>
+        </tr>
+      <#elseif record.subsidiary == "TCU" || record.subsidiary == "TRE">
+        <tr>
+        <td colspan="4"></td>
+        <td align="right"><#if record.taxtotal?has_content><b>US Sales Tax</b><#else>&nbsp;</#if></td>
+        <td align="right"><#if record.taxtotal?has_content>${record.taxtotal}<#else>&nbsp;</#if></td>
+        </tr>
+      </#if>
+    </#if>
+    <#if record.expense?has_content>
+      <#if record.subsidiary == "TCC" || record.subsidiary == "TCA">
+        <tr>
+        <td colspan="4"></td>
+        <td align="right"><#if record.taxtotal?has_content><b>GST/HST(${record.expense[0].taxrate1})</b><#else>&nbsp;</#if></td>
+        <td align="right"><#if record.taxtotal?has_content>${record.taxtotal}<#else>&nbsp;</#if></td>
+        </tr>
+        <tr>
+          <td colspan="4"></td>
+          <td align="right"><b>${record.tax2total@label}</b> <#if record.expense[0].taxrate2!=0><b>(${record.expense[0].taxrate2})</b><#else>&nbsp;</#if></td>
+          <td align="right"><#if record.taxtotal?has_content>${record.tax2total}<#else>&nbsp;</#if></td>
+        </tr>
+      <#elseif record.subsidiary == "TCU" || record.subsidiary == "TRE">
+        <tr>
+        <td colspan="4"></td>
+        <td align="right"><#if record.taxtotal?has_content><b>US Sales Tax</b><#else>&nbsp;</#if></td>
+        <td align="right"><#if record.taxtotal?has_content>${record.taxtotal}<#else>&nbsp;</#if></td>
+        </tr>
+      </#if>
+    </#if>
+	<#if record.shippingcost?has_content>
+	<tr>
+	<td colspan="4">&nbsp;</td>
+	<td align="right">${record.shippingcost@label}</td>
+	<td align="right">${record.shippingcost}</td>
+	</tr>
+	</#if>
+	<tr class="totalrow">
+	<td background-color="#ffffff" colspan="4">&nbsp;</td>
+	<td align="right"><b>${record.total@label}</b></td>
+	<td align="right">${record.total}</td>
+	</tr></table>
+</body>
+</pdf>

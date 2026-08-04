@@ -152,6 +152,7 @@
 		</tr>
 		<tr>
 		<td colspan="3" rowspan="2">${record.custbody_tc_subsidiary_address}</td>
+          
 		</tr></table>
 	</td>
 	<td>

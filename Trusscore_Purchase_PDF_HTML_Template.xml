@@ -161,7 +161,7 @@
 		<td colspan="3" font-weight="bold" margin-bottom="5pt">${record.shipaddress@label}:</td>
 	  </tr>
 	  <tr>
-		<td colspan="3" rowspan="2">${record.subsidiary.mainaddress_text}</td>
+		<td colspan="3" rowspan="2">${record.subsidiary.mainaddress}</td>
 	  </tr>
     </table>
 	</td>

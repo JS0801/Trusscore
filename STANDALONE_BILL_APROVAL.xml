@@ -15,13 +15,9 @@
   <releasestatus>RELEASED</releasestatus>
   <runasadmin>T</runasadmin>
   <initcondition>
-    <formula><![CDATA[( isEmpty("Related Transaction") = 'T' AND "Type" IN ("Transaction Type1") ) OR ( "Type" IN ("Transaction Type2") )]]></formula>
+    <formula><![CDATA[( "Type" IN ("Transaction Type1") AND isChecked("Freight CSR PO") = 'F' ) OR ( "Type" IN ("Transaction Type2") )]]></formula>
     <type>VISUAL_BUILDER</type>
     <parameters>
-      <parameter>
-        <name>Related Transaction</name>
-        <value>[scriptid=custbody_tc_related_tran]</value>
-      </parameter>
       <parameter>
         <name>Type</name>
         <value>STDBODYTRANTYPE</value>
@@ -29,12 +25,16 @@
       <parameter>
         <name>Transaction Type1</name>
         <selectrecordtype>-100</selectrecordtype>
-        <value>VENDORBILL</value>
+        <value>PURCHASEORDER</value>
+      </parameter>
+      <parameter>
+        <name>Freight CSR PO</name>
+        <value>[scriptid=custbody_tc_freight_csr_po]</value>
       </parameter>
       <parameter>
         <name>Transaction Type2</name>
         <selectrecordtype>-100</selectrecordtype>
-        <value>PURCHASEORDER</value>
+        <value>VENDORBILL</value>
       </parameter>
     </parameters>
   </initcondition>

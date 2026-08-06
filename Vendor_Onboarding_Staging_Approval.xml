@@ -146,7 +146,7 @@
           <label>Approve </label>
           <saverecordfirst>T</saverecordfirst>
           <initcondition>
-            <formula><![CDATA[isEmpty("Vendor Type") = 'F' AND isEmpty("Primary Subsidiary") = 'F' AND isEmpty("Payment Terms") = 'F' AND ( "Next Approver" IN ("Current User") OR "User" IN ("Employee1","Employee2") )]]></formula>
+            <formula><![CDATA[isEmpty("Vendor Type") = 'F' AND isEmpty("Primary Subsidiary") = 'F' AND isEmpty("Payment Terms") = 'F' AND ( "Next Approver" IN ("Current User") OR "User" IN ("Employee1","Employee2","Employee3") )]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -181,6 +181,11 @@
               </parameter>
               <parameter>
                 <name>Employee2</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
+              <parameter>
+                <name>Employee3</name>
                 <selectrecordtype>-4</selectrecordtype>
                 <value>[ACCOUNT_SPECIFIC_VALUE]</value>
               </parameter>
@@ -196,7 +201,7 @@
           <label>Reject</label>
           <saverecordfirst>T</saverecordfirst>
           <initcondition>
-            <formula><![CDATA[isEmpty("Vendor Type") = 'F' AND isEmpty("Primary Subsidiary") = 'F' AND isEmpty("Payment Terms") = 'F' AND ( "Next Approver" IN ("Current User") OR "User" IN ("Employee1","Employee2") )]]></formula>
+            <formula><![CDATA[isEmpty("Vendor Type") = 'F' AND isEmpty("Primary Subsidiary") = 'F' AND isEmpty("Payment Terms") = 'F' AND ( "Next Approver" IN ("Current User") OR "User" IN ("Employee1","Employee2","Employee3") )]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -231,6 +236,11 @@
               </parameter>
               <parameter>
                 <name>Employee2</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
+              <parameter>
+                <name>Employee3</name>
                 <selectrecordtype>-4</selectrecordtype>
                 <value>[ACCOUNT_SPECIFIC_VALUE]</value>
               </parameter>

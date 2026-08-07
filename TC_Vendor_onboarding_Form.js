@@ -1089,7 +1089,8 @@ stateSearchObj.run().each(function(result){
 
       <!-- W9 -->
       <div class="upload-container">
-        <label>W9</label>
+        <label>W9<span id="w9_required_mark" style="display:none; color:#b00020;"> *</span></label>
+        <p id="w9_required_note" style="display:none; margin:6px 0 8px; color:#b00020; font-size:12px;">Required for vendors based in the United States.</p>
         <div class="file-drop-area" data-target="custpage_file_data_w9" data-preview="preview_w9" data-keep="custpage_keep_w9">
           <span class="fake-btn">Choose file</span>
           <span class="file-msg">or drag and drop file here</span>
@@ -1190,8 +1191,10 @@ stateSearchObj.run().each(function(result){
           this.previewArea.innerHTML = '';
           this.targetField.value = '';
           this.fileInput.value = '';
+          if (window.syncW9Requirement) window.syncW9Requirement();
         });
         this.previewArea.appendChild(previewItem);
+        if (window.syncW9Requirement) window.syncW9Requirement();
       };
       reader.readAsDataURL(file);
     }
@@ -1273,6 +1276,51 @@ function hookCountryState(countryNameAttr, stateSelectId, prefillState) {
 const termsSelect = document.getElementById('payment_terms');
 const altBox = document.getElementById('alt_terms_box');
 const altInput = document.getElementById('payment_other');
+const vendorCountrySelect = form.querySelector('[name="ven_country"]');
+const w9Target = document.getElementById('custpage_file_data_w9');
+const w9Keep = document.getElementById('custpage_keep_w9');
+const w9FileInput = document.querySelector('.file-drop-area[data-preview="preview_w9"] .file-input');
+const w9RequiredMark = document.getElementById('w9_required_mark');
+const w9RequiredNote = document.getElementById('w9_required_note');
+
+function isUSVendorCountry() {
+  if (!vendorCountrySelect) return false;
+  var selectedText = (vendorCountrySelect.options && vendorCountrySelect.selectedIndex >= 0)
+    ? vendorCountrySelect.options[vendorCountrySelect.selectedIndex].text
+    : '';
+  var selectedValue = vendorCountrySelect.value || '';
+  return selectedValue === 'United States' || selectedValue === 'US' || selectedText === 'United States';
+}
+
+function hasW9Attachment() {
+  return !!(w9Target && String(w9Target.value || '').trim()) || !!(w9Keep && w9Keep.value === '1');
+}
+
+function syncW9Requirement() {
+  var required = isUSVendorCountry();
+  var hasW9 = hasW9Attachment();
+  if (w9RequiredMark) w9RequiredMark.style.display = required ? 'inline' : 'none';
+  if (w9RequiredNote) w9RequiredNote.style.display = required && !hasW9 ? 'block' : 'none';
+  if (!required || hasW9) {
+    if (w9FileInput) w9FileInput.setCustomValidity('');
+  }
+}
+
+function validateW9ForUS() {
+  syncW9Requirement();
+  if (!isUSVendorCountry() || hasW9Attachment()) return true;
+  if (w9FileInput) {
+    w9FileInput.setCustomValidity('W9 is required for vendors based in the United States.');
+    w9FileInput.reportValidity();
+    w9FileInput.focus();
+  } else {
+    alert('W9 is required for vendors based in the United States.');
+  }
+  return false;
+}
+
+if (vendorCountrySelect) vendorCountrySelect.addEventListener('change', syncW9Requirement);
+window.syncW9Requirement = syncW9Requirement;
 
 //ADD: toggle logic for Individual fields
 function toggleIndividualUI(){
@@ -1312,6 +1360,7 @@ if (termsSelect) {
     // Final submit confirm
     form.addEventListener('submit', function (e) {
       if (actionField.value === 'draft') return; // skip confirm for drafts
+      if (!validateW9ForUS()) { e.preventDefault(); return false; }
       const doubleCheck = confirm("Are you sure you want to submit now? You will not be able to edit after this.");
       if (!doubleCheck) { e.preventDefault(); return false; }
     });
@@ -1383,6 +1432,7 @@ toggleIndividualUI();
           const targetField = document.getElementById(drop.dataset.target);
           if (targetField) targetField.value = '';
           if (input) input.value = '';
+          if (window.syncW9Requirement) window.syncW9Requirement();
         });
       }
     }
@@ -1395,6 +1445,7 @@ toggleIndividualUI();
     // Ensure mailing section visibility matches checkbox on load
     const mailingToggle = document.getElementById('mailing_toggle');
     if (mailingToggle) { toggleMailingAddress(mailingToggle, 'mailing-address'); }
+    syncW9Requirement();
   });
 </script>
 </body>
@@ -1460,6 +1511,45 @@ toggleIndividualUI();
                         rec = record.load({ type: 'customrecord_vendor_onboarding', id: existingId, isDynamic: true });
                     } else {
                         rec = record.create({ type: 'customrecord_vendor_onboarding', isDynamic: true });
+                    }
+
+                    function isUSCountryValue(country) {
+                        var value = String(country || '').trim().toLowerCase();
+                        return value === 'united states' || value === 'us';
+                    }
+
+                    function hasNewFilePayload(paramName) {
+                        var raw = req.parameters[paramName];
+                        if (!raw || !String(raw).trim()) return false;
+                        try {
+                            var payload = JSON.parse(raw);
+                            return !!(payload && payload.name && payload.base64);
+                        } catch (e) {
+                            return false;
+                        }
+                    }
+
+                    function writePostValidationError(message) {
+                        context.response.write(
+                            '<html><head><style>' +
+                            'body{font-family:Arial;padding:28px;background:#fff;}' +
+                            '.card{max-width:640px;margin:0 auto;border:1px solid #eee;border-radius:10px;padding:20px;}' +
+                            '.err{color:#b00020} button{margin-top:18px;padding:10px 16px;border:0;background:#444;color:#fff;border-radius:6px;cursor:pointer}' +
+                            '</style></head><body><div class="card">' +
+                            '<h2 class="err">Submission not saved</h2>' +
+                            '<p>' + esc(message) + '</p>' +
+                            '<button onclick="history.back()">Back to form</button>' +
+                            '</div></body></html>'
+                        );
+                    }
+
+                    if (!isDraft && isUSCountryValue(req.parameters.ven_country)) {
+                        var hasNewW9 = hasNewFilePayload('custpage_file_data_w9');
+                        var hasKeptExistingW9 = req.parameters.custpage_keep_w9 === '1' && existingId && !!rec.getValue('custrecord_w9_file');
+                        if (!hasNewW9 && !hasKeptExistingW9) {
+                            writePostValidationError('W9 is required for vendors based in the United States.');
+                            return;
+                        }
                     }
 
                     // Vendor Details

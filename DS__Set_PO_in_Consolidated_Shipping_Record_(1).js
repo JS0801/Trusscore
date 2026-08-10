@@ -333,6 +333,8 @@ define(['N/record', 'N/log', 'N/search', 'N/workflow'], function (record, log, s
         poRecord.setValue({ fieldId: 'employee', value: owner });
       }
 
+      poRecord.setValue({ fieldId: 'tobeemailed', value: false });
+
       // if (locID) {
       //   poRecord.setValue({ fieldId: 'location', value: locID });
       // }

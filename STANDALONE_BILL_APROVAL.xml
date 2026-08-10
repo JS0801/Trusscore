@@ -5,7 +5,7 @@
   <initlocalizationcontext></initlocalizationcontext>
   <initoncreate>T</initoncreate>
   <initonvieworupdate>T</initonvieworupdate>
-  <initsavedsearchcondition>[scriptid=customsearch_transaction_sds_test]</initsavedsearchcondition>
+  <initsavedsearchcondition></initsavedsearchcondition>
   <inittriggertype></inittriggertype>
   <isinactive>F</isinactive>
   <islogenabled>T</islogenabled>
@@ -15,8 +15,10 @@
   <releasestatus>RELEASED</releasestatus>
   <runasadmin>T</runasadmin>
   <initcondition>
-    <formula></formula>
-    <type>VISUAL_BUILDER</type>
+    <formula><![CDATA[({custbody_tc_related_tran} is null and UPPER({type})=UPPER('VendBill'))
+or
+(UPPER({type})=UPPER('PurchOrd') and NVL({custbody_tc_freight_csr_po},'F')<>'T')]]></formula>
+    <type>FORMULA</type>
   </initcondition>
   <workflowstates>
     <workflowstate scriptid="workflowstate47">

@@ -15,7 +15,9 @@ define(['N/record'], (record) => {
     });
 
     const existing = {};
-
+    const carrier = vendor.getValue({ fieldId: 'custentity_tc_carriers_csr' });
+    if(!carrier) return;
+    
     const primarySub = vendor.getValue({ fieldId: 'subsidiary' });
     if (primarySub) existing[String(primarySub)] = true;
 

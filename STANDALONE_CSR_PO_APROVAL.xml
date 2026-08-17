@@ -8,7 +8,7 @@
   <initsavedsearchcondition></initsavedsearchcondition>
   <inittriggertype></inittriggertype>
   <isinactive>F</isinactive>
-  <islogenabled>F</islogenabled>
+  <islogenabled>T</islogenabled>
   <keephistory>ALWAYS</keephistory>
   <name>STANDALONE CSR PO APROVAL</name>
   <recordtypes>PURCHASEORDER</recordtypes>
@@ -531,7 +531,7 @@
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula><![CDATA[( "Created By" NOT IN ("Current User") AND "User" NOT IN ("Employee1") )]]></formula>
+            <formula><![CDATA[( "Created By" NOT IN ("Current User") AND "User" NOT IN ("Employee1","Employee2") )]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -549,6 +549,11 @@
               </parameter>
               <parameter>
                 <name>Employee1</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
+              <parameter>
+                <name>Employee2</name>
                 <selectrecordtype>-4</selectrecordtype>
                 <value>[ACCOUNT_SPECIFIC_VALUE]</value>
               </parameter>
@@ -691,7 +696,7 @@
           <waitforworkflow></waitforworkflow>
           <waitforworkflowstate></waitforworkflowstate>
           <initcondition>
-            <formula><![CDATA["Total" >= "Next Approver:Purchase Approval Limit"]]></formula>
+            <formula><![CDATA["Total" >= "Next Approver:Purchase Approval Limit" AND "Type" IN ("Transaction Type1")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -701,6 +706,15 @@
               <parameter>
                 <name>Next Approver:Purchase Approval Limit</name>
                 <value>STDBODYNEXTAPPROVER:STDENTITYPURCHASEORDERAPPROVALLIMIT</value>
+              </parameter>
+              <parameter>
+                <name>Type</name>
+                <value>STDBODYTRANTYPE</value>
+              </parameter>
+              <parameter>
+                <name>Transaction Type1</name>
+                <selectrecordtype>-100</selectrecordtype>
+                <value>VENDORBILL</value>
               </parameter>
             </parameters>
           </initcondition>
@@ -791,6 +805,53 @@
               <parameter>
                 <name>Freight CSR PO</name>
                 <value>[scriptid=custbody_tc_freight_csr_po]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </workflowtransition>
+        <workflowtransition scriptid="workflowtransition386">
+          <buttonaction>[scriptid=customworkflow7_2.workflowstate48.workflowaction188]</buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow7_2.workflowstate195]</tostate>
+          <triggertype></triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula><![CDATA["Total" <= "Next Approver:Purchase Approval Limit" AND isChecked("Freight CSR PO") = 'T' AND "Type" IN ("Transaction Type1") AND ( isChecked("Is Vendor Freight Changed?") = 'F' OR isChecked("Is PO Item Changed?") = 'F' )]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Total</name>
+                <value>STDBODYTOTAL</value>
+              </parameter>
+              <parameter>
+                <name>Next Approver:Purchase Approval Limit</name>
+                <value>STDBODYNEXTAPPROVER:STDENTITYPURCHASEORDERAPPROVALLIMIT</value>
+              </parameter>
+              <parameter>
+                <name>Freight CSR PO</name>
+                <value>[scriptid=custbody_tc_freight_csr_po]</value>
+              </parameter>
+              <parameter>
+                <name>Type</name>
+                <value>STDBODYTRANTYPE</value>
+              </parameter>
+              <parameter>
+                <name>Transaction Type1</name>
+                <selectrecordtype>-100</selectrecordtype>
+                <value>PURCHASEORDER</value>
+              </parameter>
+              <parameter>
+                <name>Is Vendor Freight Changed?</name>
+                <value>[scriptid=custbody_is_ven_freight_changed]</value>
+              </parameter>
+              <parameter>
+                <name>Is PO Item Changed?</name>
+                <value>[scriptid=custbody_is_po_item_changed]</value>
               </parameter>
             </parameters>
           </initcondition>
@@ -1299,6 +1360,41 @@
             <type>VISUAL_BUILDER</type>
           </initcondition>
         </setfieldvalueaction>
+        <sendemailaction scriptid="workflowaction491">
+          <attachmentfield></attachmentfield>
+          <attachmentfile></attachmentfile>
+          <attachmentjoinfield></attachmentjoinfield>
+          <attachmenttype>SPECIFIC</attachmenttype>
+          <body>&lt;p&gt;Hello,&lt;/p&gt;&lt;p&gt;New Purchase Order for {entity} has been submitted for an approval.&lt;/p&gt;&lt;p&gt;Thanks&lt;/p&gt;</body>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <includeformat></includeformat>
+          <includerecordlink>T</includerecordlink>
+          <includetransaction>F</includetransaction>
+          <isinactive>F</isinactive>
+          <recipientbccemail></recipientbccemail>
+          <recipientccemail></recipientccemail>
+          <recipientemail></recipientemail>
+          <recipientfield>STDBODYNEXTAPPROVER</recipientfield>
+          <recipientjoinfield></recipientjoinfield>
+          <recipienttype>FIELD</recipienttype>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <senderfield>STDBODYEMPLOYEE</senderfield>
+          <senderjoinfield></senderjoinfield>
+          <sendertype>FIELD</sendertype>
+          <subject>Purchase Order For Approval - {tranid}</subject>
+          <template></template>
+          <usetemplate>F</usetemplate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </sendemailaction>
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction474">
@@ -1443,8 +1539,8 @@
       <description></description>
       <donotexitworkflow>F</donotexitworkflow>
       <name>Level 3 Approval</name>
-      <positionx>403</positionx>
-      <positiony>463</positiony>
+      <positionx>493</positionx>
+      <positiony>373</positiony>
       <workflowactions triggertype="ONENTRY">
         <setfieldvalueaction scriptid="workflowaction476">
           <clienttriggerfields></clienttriggerfields>
@@ -1471,6 +1567,41 @@
             <type>VISUAL_BUILDER</type>
           </initcondition>
         </setfieldvalueaction>
+        <sendemailaction scriptid="workflowaction492">
+          <attachmentfield></attachmentfield>
+          <attachmentfile></attachmentfile>
+          <attachmentjoinfield></attachmentjoinfield>
+          <attachmenttype>SPECIFIC</attachmenttype>
+          <body>&lt;p&gt;Hello,&lt;/p&gt;&lt;p&gt;New Purchase Order for {entity} has been submitted for an approval.&lt;/p&gt;&lt;p&gt;Thanks&lt;/p&gt;</body>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <includeformat></includeformat>
+          <includerecordlink>T</includerecordlink>
+          <includetransaction>F</includetransaction>
+          <isinactive>F</isinactive>
+          <recipientbccemail></recipientbccemail>
+          <recipientccemail></recipientccemail>
+          <recipientemail></recipientemail>
+          <recipientfield>STDBODYNEXTAPPROVER</recipientfield>
+          <recipientjoinfield></recipientjoinfield>
+          <recipienttype>FIELD</recipienttype>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <senderfield>STDBODYEMPLOYEE</senderfield>
+          <senderjoinfield></senderjoinfield>
+          <sendertype>FIELD</sendertype>
+          <subject>Purchase Order For Approval - {tranid}</subject>
+          <template></template>
+          <usetemplate>F</usetemplate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </sendemailaction>
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction477">
@@ -1607,6 +1738,42 @@
             <type>VISUAL_BUILDER</type>
           </initcondition>
         </setfieldvalueaction>
+        <sendemailaction scriptid="workflowaction493">
+          <attachmentfield></attachmentfield>
+          <attachmentfile></attachmentfile>
+          <attachmentjoinfield></attachmentjoinfield>
+          <attachmenttype>SPECIFIC</attachmenttype>
+          <body>&lt;p&gt;Hello,&lt;/p&gt;&lt;p&gt;New Purchase Order for {entity} has been submitted for an approval.&lt;/p&gt;&lt;p&gt;Thanks&lt;/p&gt;</body>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <includeformat></includeformat>
+          <includerecordlink>T</includerecordlink>
+          <includetransaction>F</includetransaction>
+          <isinactive>F</isinactive>
+          <recipient>[ACCOUNT_SPECIFIC_VALUE]</recipient>
+          <recipientbccemail></recipientbccemail>
+          <recipientccemail></recipientccemail>
+          <recipientemail></recipientemail>
+          <recipientfield></recipientfield>
+          <recipientjoinfield></recipientjoinfield>
+          <recipienttype>SPECIFIC</recipienttype>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <senderfield>STDBODYEMPLOYEE</senderfield>
+          <senderjoinfield></senderjoinfield>
+          <sendertype>FIELD</sendertype>
+          <subject>Purchase Order For Approval - {tranid}</subject>
+          <template></template>
+          <usetemplate>F</usetemplate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </sendemailaction>
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction480">

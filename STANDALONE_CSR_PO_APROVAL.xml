@@ -239,35 +239,6 @@
       <positionx>823</positionx>
       <positiony>213</positiony>
       <workflowactions triggertype="ONENTRY">
-        <customaction scriptid="workflowaction186">
-          <conditionsavedsearch></conditionsavedsearch>
-          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
-          <eventtypes></eventtypes>
-          <isinactive>F</isinactive>
-          <resultfield>STDBODYNEXTAPPROVER</resultfield>
-          <scheduledelay></scheduledelay>
-          <schedulemode>DELAY</schedulemode>
-          <schedulerecurrence></schedulerecurrence>
-          <scheduletimeofday></scheduletimeofday>
-          <scheduletimeunit></scheduletimeunit>
-          <scripttype>[scriptid=customscript2596]</scripttype>
-          <initcondition>
-            <formula></formula>
-            <type>VISUAL_BUILDER</type>
-          </initcondition>
-          <parametersettings>
-            <parametersetting>
-              <targetparameter>[scriptid=customscript2596.custscript1]</targetparameter>
-              <valuechecked></valuechecked>
-              <valuedate></valuedate>
-              <valuefield></valuefield>
-              <valueformula></valueformula>
-              <valuejoinfield></valuejoinfield>
-              <valueselect></valueselect>
-              <valuetext></valuetext>
-            </parametersetting>
-          </parametersettings>
-        </customaction>
         <sendemailaction scriptid="workflowaction187">
           <attachmentfield></attachmentfield>
           <attachmentfile></attachmentfile>
@@ -631,6 +602,37 @@
             </parameters>
           </initcondition>
         </addbuttonaction>
+      </workflowactions>
+      <workflowactions triggertype="BEFORESUBMIT">
+        <customaction scriptid="workflowaction186">
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <resultfield>STDBODYNEXTAPPROVER</resultfield>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <scripttype>[scriptid=customscript2596]</scripttype>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+          <parametersettings>
+            <parametersetting>
+              <targetparameter>[scriptid=customscript2596.custscript1]</targetparameter>
+              <valuechecked></valuechecked>
+              <valuedate></valuedate>
+              <valuefield></valuefield>
+              <valueformula></valueformula>
+              <valuejoinfield></valuejoinfield>
+              <valueselect></valueselect>
+              <valuetext></valuetext>
+            </parametersetting>
+          </parametersettings>
+        </customaction>
       </workflowactions>
       <workflowtransitions>
         <workflowtransition scriptid="workflowtransition253">

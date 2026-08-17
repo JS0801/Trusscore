@@ -1914,8 +1914,28 @@ or
           <eventtypes></eventtypes>
           <isinactive>F</isinactive>
           <initcondition>
-            <formula></formula>
+            <formula><![CDATA[( "Created By" NOT IN ("Current User") AND "User" NOT IN ("Employee1") )]]></formula>
             <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Created By</name>
+                <value>[scriptid=custbody_tc_created_by]</value>
+              </parameter>
+              <parameter>
+                <name>Current User</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>@CURRENTUSER@</value>
+              </parameter>
+              <parameter>
+                <name>User</name>
+                <value>STDUSERUSER</value>
+              </parameter>
+              <parameter>
+                <name>Employee1</name>
+                <selectrecordtype>-4</selectrecordtype>
+                <value>[ACCOUNT_SPECIFIC_VALUE]</value>
+              </parameter>
+            </parameters>
           </initcondition>
         </lockrecordaction>
       </workflowactions>

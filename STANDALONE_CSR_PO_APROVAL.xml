@@ -645,7 +645,7 @@
           <waitforworkflow></waitforworkflow>
           <waitforworkflowstate></waitforworkflowstate>
           <initcondition>
-            <formula><![CDATA["Total" <= "Next Approver:Purchase Approval Limit" AND "Type" IN ("Transaction Type1")]]></formula>
+            <formula><![CDATA["Total" <= "Next Approver:Purchase Approval Limit"]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -655,15 +655,6 @@
               <parameter>
                 <name>Next Approver:Purchase Approval Limit</name>
                 <value>STDBODYNEXTAPPROVER:STDENTITYPURCHASEORDERAPPROVALLIMIT</value>
-              </parameter>
-              <parameter>
-                <name>Type</name>
-                <value>STDBODYTRANTYPE</value>
-              </parameter>
-              <parameter>
-                <name>Transaction Type1</name>
-                <selectrecordtype>-100</selectrecordtype>
-                <value>VENDORBILL</value>
               </parameter>
             </parameters>
           </initcondition>

@@ -20,6 +20,7 @@ define([
 
     const DEPLOY_MR_SCRIPT_ID = 5803;
     const PALMERSTON_SAMPLE_LOCATION = '68';
+    const CAL_SAMPLE_LOCATION = '76';
 
     // ================= MAIN =================
     function onRequest(context) {
@@ -274,6 +275,7 @@ define([
         });
         locationField.addSelectOption({ value: '', text: '' });
         locationField.addSelectOption({ value: PALMERSTON_SAMPLE_LOCATION, text: 'Palmerston - Samples' });
+        locationField.addSelectOption({ value: CAL_SAMPLE_LOCATION, text: 'Calgary - Samples' });
 
         var rescheduleField = formObj.addField({
             id: 'custpage_reschedule',

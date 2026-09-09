@@ -189,7 +189,7 @@ or
           <displaytype>DISABLED</displaytype>
           <eventtypes></eventtypes>
           <field>STDBODYNEXTAPPROVER</field>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <issublistfield>F</issublistfield>
           <initcondition>
             <formula></formula>
@@ -686,7 +686,7 @@ or
           <displaytype>DISABLED</displaytype>
           <eventtypes></eventtypes>
           <field>STDBODYNEXTAPPROVER</field>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <issublistfield>F</issublistfield>
           <initcondition>
             <formula><![CDATA[( "Created By" IN ("Current User") OR "User" IN ("Employee1","Employee2","Employee3") )]]></formula>
@@ -1060,7 +1060,7 @@ or
           <displaytype>DISABLED</displaytype>
           <eventtypes></eventtypes>
           <field>STDBODYNEXTAPPROVER</field>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <issublistfield>F</issublistfield>
           <initcondition>
             <formula></formula>
@@ -1313,7 +1313,7 @@ or
           <displaytype>DISABLED</displaytype>
           <eventtypes></eventtypes>
           <field>STDBODYNEXTAPPROVER</field>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <issublistfield>F</issublistfield>
           <initcondition>
             <formula><![CDATA[( "Created By" IN ("Current User") OR "User" IN ("Employee1","Employee2","Employee3") )]]></formula>
@@ -2069,7 +2069,7 @@ or
           <displaytype>DISABLED</displaytype>
           <eventtypes></eventtypes>
           <field>STDBODYNEXTAPPROVER</field>
-          <isinactive>F</isinactive>
+          <isinactive>T</isinactive>
           <issublistfield>F</issublistfield>
           <initcondition>
             <formula></formula>

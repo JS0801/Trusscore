@@ -13,7 +13,7 @@
   <name>TC | PO / Standalone Bill Approval</name>
   <recordtypes>PURCHASEORDER|VENDORBILL</recordtypes>
   <releasestatus>RELEASED</releasestatus>
-  <runasadmin>T</runasadmin>
+  <runasadmin>F</runasadmin>
   <initcondition>
     <formula><![CDATA[({custbody_tc_related_tran} is null and UPPER({type})=UPPER('VendBill'))
 or

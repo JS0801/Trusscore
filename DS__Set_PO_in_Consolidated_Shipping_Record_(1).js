@@ -52,6 +52,29 @@ define(['N/record', 'N/log', 'N/search', 'N/workflow'], function (record, log, s
         isPO_freight_amount_original: isPO_freight_amount_original
       }));
 
+      var departmentID = '';
+
+
+
+
+const itemSearchObj = search.create({
+   type: "item",
+   filters:
+   [
+      ["internalid","anyof",poItem]
+   ],
+   columns:
+   [
+      search.createColumn({name: "departmentnohierarchy", label: "Department (no hierarchy)"})
+   ]
+});
+const searchResultCount = itemSearchObj.runPaged().count;
+log.debug("itemSearchObj result count",searchResultCount);
+itemSearchObj.run().each(function(result){
+   departmentID = result.getValue('departmentnohierarchy')
+   return true;
+});
+
       // --------------------------------------------------
       // SCRAP LOGIC
       // If scrap record is true and PO already exists, close that PO
@@ -313,7 +336,7 @@ define(['N/record', 'N/log', 'N/search', 'N/workflow'], function (record, log, s
         poRecord.setValue({ fieldId: 'subsidiary', value: subID });
         poRecord.setValue({ fieldId: 'custbody_tc_freight_csr_po', value: true });
         poRecord.setValue({ fieldId: 'memo', value: tranId });
-        poRecord.setValue({ fieldId: 'department', value: 9 });
+        poRecord.setValue({ fieldId: 'department', value: departmentID });
         poRecord.setValue({ fieldId: 'nextapprover', value: 2004 }); //commeted to test approval process
 
         var pickupState = getLocationState(shippingLocation);
@@ -384,7 +407,7 @@ define(['N/record', 'N/log', 'N/search', 'N/workflow'], function (record, log, s
         poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: 1 });
         poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: lineAmount });
         poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: lineAmount });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'department', value: 9 });
+        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'department', value: departmentID });
         poRecord.commitLine({ sublistId: 'item' });
       });
       /*

@@ -332,6 +332,8 @@ itemSearchObj.run().each(function(result){
           isDynamic: true
         });
 
+        if (!departmentID) departmentID = 9;
+
         poRecord.setValue({ fieldId: 'entity', value: carrier });
         poRecord.setValue({ fieldId: 'subsidiary', value: subID });
         poRecord.setValue({ fieldId: 'custbody_tc_freight_csr_po', value: true });

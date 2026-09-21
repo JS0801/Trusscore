@@ -401,6 +401,8 @@ itemSearchObj.run().each(function(result){
           freightAmount: freightAmount
         }));
 
+        if (!departmentID) departmentID = 9;
+
         poRecord.selectNewLine({ sublistId: 'item' });
         poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: group.poItemId });
         poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_po_customer', value: customer });

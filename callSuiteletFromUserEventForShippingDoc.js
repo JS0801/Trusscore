@@ -24,64 +24,64 @@ define(['N/ui/serverWidget', 'N/url', 'N/record', 'N/runtime', 'N/search'], func
       var salesorder = (context.newRecord).getText({ fieldId: 'custbody_tc_related_tran' }).split("#")[1];
       var owner = (context.newRecord).getText({ fieldId: 'custbody_tc_load_owner' })
 
-      //       if(customerid){
-      //         var customerSearchObj = search.create({
-      //    type: "customer",
-      //    filters:
-      //    [
-      //       ["internalid","anyof",customerid]
-      //    ],
-      //    columns:
-      //    [
-      //      search.createColumn({
-      //          name: "custentity_market_value_automation",
-      //          label: "custentity_market_value_automation"
-      //       }),
-      //       search.createColumn({
-      //          name: "email",
-      //          join: "CUSTENTITY_TC_SALES_OPS",
-      //          label: "Email"
-      //       }),
-      //       search.createColumn({
-      //          name: "formulatext",
-      //          formula: "case when {contact.role} = 'Shipping' then {contact.email} end",
-      //          label: "Shipping Role"
-      //       }),
-      //       search.createColumn({
-      //          name: "formulatext1",
-      //          formula: "case when {contact.role} = 'Order Confirmation' then {contact.email} end",
-      //          label: "Order Role"
-      //       })
-      //    ]
-      // });
-      // var searchResultCount = customerSearchObj.runPaged().count;
-      // var rep_mail = '';
-      // var customermail = '';
-      // var market = false;
-      // customerSearchObj.run().each(function(result){
-      //    var opsEmail = result.getValue({name: "email",join: "CUSTENTITY_TC_SALES_OPS"})
-      //    var shippingEmail = result.getValue({name: "formulatext"});
-      //    var orderEmail = result.getValue({name: "formulatext1"});
-      //    var marketCheck = result.getValue({name: "custentity_market_value_automation"});
-      //    if (marketCheck) market = true;
-      //    if (opsEmail) rep_mail = opsEmail;
-      //    if (shippingEmail || orderEmail) customermail = shippingEmail || orderEmail;
-      //    return true;
-      // });
-      //       }
-      var customermail, market, sales_rep;
-      if (customerid) {
-        var customerRec = record.load({ type: 'customer', id: customerid })
-        customermail = customerRec.getValue({ fieldId: 'email' })
-        market = customerRec.getValue({ fieldId: 'custentity_market_value_automation' })
-        sales_rep = customerRec.getValue({ fieldId: 'salesrep' })
-      }
-
+            if(customerid){
+              var customerSearchObj = search.create({
+         type: "customer",
+         filters:
+         [
+            ["internalid","anyof",customerid]
+         ],
+         columns:
+         [
+           search.createColumn({
+               name: "custentity_market_value_automation",
+               label: "custentity_market_value_automation"
+            }),
+            search.createColumn({
+               name: "email",
+               join: "CUSTENTITY_TC_SALES_OPS",
+               label: "Email"
+            }),
+            search.createColumn({
+               name: "formulatext",
+               formula: "case when {contact.role} = 'Shipping' then {contact.email} end",
+               label: "Shipping Role"
+            }),
+            search.createColumn({
+               name: "formulatext1",
+               formula: "case when {contact.role} = 'Order Confirmation' then {contact.email} end",
+               label: "Order Role"
+            })
+         ]
+      });
+      var searchResultCount = customerSearchObj.runPaged().count;
       var rep_mail = '';
-      if (sales_rep) {
-        var empRec = record.load({ type: 'employee', id: sales_rep })
-        rep_mail = empRec.getValue({ fieldId: 'email' })
-      }
+      var customermail = '';
+      var market = false;
+      customerSearchObj.run().each(function(result){
+         var opsEmail = result.getValue({name: "email",join: "CUSTENTITY_TC_SALES_OPS"})
+         var shippingEmail = result.getValue({name: "formulatext"});
+         var orderEmail = result.getValue({name: "formulatext1"});
+         var marketCheck = result.getValue({name: "custentity_market_value_automation"});
+         if (marketCheck) market = true;
+         if (opsEmail) rep_mail = opsEmail;
+         if (shippingEmail || orderEmail) customermail = shippingEmail || orderEmail;
+         return true;
+      });
+            }
+      // var customermail, market, sales_rep;
+      // if (customerid) {
+      //   var customerRec = record.load({ type: 'customer', id: customerid })
+      //   customermail = customerRec.getValue({ fieldId: 'email' })
+      //   market = customerRec.getValue({ fieldId: 'custentity_market_value_automation' })
+      //   sales_rep = customerRec.getValue({ fieldId: 'salesrep' })
+      // }
+
+      // var rep_mail = '';
+      // if (sales_rep) {
+      //   var empRec = record.load({ type: 'employee', id: sales_rep })
+      //   rep_mail = empRec.getValue({ fieldId: 'email' })
+      // }
 
       var uniqueSales = [];
       var uniquePO = [];

@@ -412,7 +412,9 @@ define(['N/error', 'N/log', 'N/record', 'N/search', 'N/format'],
               var data = groupedBySalesOrder[keySO];
               var load_SO = record.load({ type: record.Type.TRANSFER_ORDER, id: keySO, isDynamic: true });
               var currency = load_SO.getValue({ fieldId: 'currency' });
+              var custIDTo = load_SO.getValue({ fieldId: 'custbody_tc_to_customer' });
               consolidated_shippingrecord.setValue({ fieldId: 'custbody_tc_con_ship_currency', value: currency });
+              consolidated_shippingrecord.setValue({ fieldId: 'custbody_tc_customer', value: custIDTo });
 
               for (var i = 0; i < data.length; i++) {
                 var item = data[i].item;

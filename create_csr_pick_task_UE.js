@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType UserEventScript
  */
-define(['N/record', 'N/log'], (record, log) => {
+define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
 
     const ITEM_SUBLIST = 'line';
 
@@ -17,6 +17,34 @@ define(['N/record', 'N/log'], (record, log) => {
     const CSR_PICK_TASK_SO = 'custrecord_sales_order';
 
     const STATUS_UNRELEASED = 1;
+
+    // Attach the companion client script only on the saved CSR View page.
+    function beforeLoad(context) {
+        if (context.type !== context.UserEventType.VIEW || !context.newRecord.id) return;
+        try {
+            const csrId = String(context.newRecord.id);
+            if (!/^\d+$/.test(csrId)) return;
+            const unreleased = search.create({
+                type: PICK_TASK_RECORD,
+                filters: [
+                    [FLD_PICK_CSR, 'anyof', csrId], 'AND',
+                    [FLD_PICK_STATUS, 'anyof', STATUS_UNRELEASED], 'AND',
+                    ['isinactive', 'is', 'F']
+                ],
+                columns: ['internalid']
+            }).run().getRange({ start: 0, end: 1 });
+            if (!unreleased.length) return;
+
+            context.form.clientScriptModulePath = './tc_csr_release_pick_tasks_cs.js';
+            context.form.addButton({
+                id: 'custpage_tc_release_pick_tasks',
+                label: 'Release Pick Tasks',
+                functionName: 'releasePickTasks(' + csrId + ')'
+            });
+        } catch (e) {
+            log.error({ title: 'Release Pick Tasks button error', details: e });
+        }
+    }
 
     function afterSubmit(context) {
         try {
@@ -257,6 +285,7 @@ define(['N/record', 'N/log'], (record, log) => {
     }
 
     return {
+        beforeLoad: beforeLoad,
         afterSubmit: afterSubmit
     };
 });

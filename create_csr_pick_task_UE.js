@@ -17,11 +17,6 @@ define(['N/record', 'N/log'], (record, log) => {
     const CSR_PICK_TASK_SO = 'custrecord_sales_order';
 
     const STATUS_UNRELEASED = 1;
-    const STATUS_RELEASED = 2; // Pick task status list - Released
-
-    // CSR header picking status field + backend id for "Released"
-    const FLD_CSR_PICKING_STATUS = 'custbody_picking_status';
-    const PICKING_STATUS_RELEASED = 1;
 
     function afterSubmit(context) {
         try {
@@ -41,43 +36,6 @@ define(['N/record', 'N/log'], (record, log) => {
             const csrId = newRec.id;
             const csrType = newRec.type;
             const tranId = newRec.getValue({ fieldId: 'tranid' });
-
-            // Only proceed if CSR picking status is Released
-            const pickingStatus = newRec.getValue({ fieldId: FLD_CSR_PICKING_STATUS });
-            const pickingStatusText = newRec.getText
-                ? newRec.getText({ fieldId: FLD_CSR_PICKING_STATUS })
-                : null;
-
-            log.debug({
-                title: 'Picking Status Check',
-                details: {
-                    csrId: csrId,
-                    rawValue: pickingStatus,
-                    rawValueType: typeof pickingStatus,
-                    textValue: pickingStatusText,
-                    coercedNumber: Number(pickingStatus),
-                    expectedReleasedId: PICKING_STATUS_RELEASED
-                }
-            });
-
-            if (Number(pickingStatus) !== PICKING_STATUS_RELEASED) {
-                log.audit({
-                    title: 'Skipped - Not Released',
-                    details: `CSR ${csrId} status is ${pickingStatus}, not Released (${PICKING_STATUS_RELEASED}). No pick tasks created.`
-                });
-                return;
-            }
-
-            log.audit({
-                title: 'Script Start',
-                details: {
-                    eventType: context.type,
-                    csrId: csrId,
-                    csrType: csrType,
-                    tranId: tranId,
-                    pickingStatus: pickingStatus
-                }
-            });
 
             const lineCount = newRec.getLineCount({ sublistId: ITEM_SUBLIST });
 
@@ -152,11 +110,10 @@ define(['N/record', 'N/log'], (record, log) => {
                 details: `Prepared ${lineDataArr.length} line object(s) for CSR ${csrId}`
             });
 
-            // Any line with an item is actionable - either update its existing
-            // pick task, or (if new/unlinked) create one.
+            // Only item lines without a linked pick task need processing.
             let needsProcessing = false;
             for (let k = 0; k < lineDataArr.length; k++) {
-                if (lineDataArr[k].itemId) {
+                if (lineDataArr[k].itemId && !lineDataArr[k].existingPickTask) {
                     needsProcessing = true;
                     break;
                 }
@@ -165,7 +122,7 @@ define(['N/record', 'N/log'], (record, log) => {
             if (!needsProcessing) {
                 log.audit({
                     title: 'No Action Required',
-                    details: `No item lines on CSR ${csrId} to process.`
+                    details: `No missing pick tasks on CSR ${csrId}.`
                 });
                 return;
             }
@@ -177,7 +134,9 @@ define(['N/record', 'N/log'], (record, log) => {
                 isDynamic: false
             });
 
-            // Process each line: update existing pick task, or create a new one
+            let createdCount = 0;
+
+            // Preserve all existing tasks, including their picks and statuses.
             for (let j = 0; j < lineDataArr.length; j++) {
                 const lineObj = lineDataArr[j];
 
@@ -190,68 +149,12 @@ define(['N/record', 'N/log'], (record, log) => {
                     continue;
                 }
 
-                if (lineObj.existingPickTask) {
-                    // Line already has a pick task attached - sync item/qty/SO
-                    // in case they changed on this edit.
-                    try {
-                        const existingPickRec = record.load({
-                            type: PICK_TASK_RECORD,
-                            id: lineObj.existingPickTask,
-                            isDynamic: true
-                        });
-
-                        existingPickRec.setValue({
-                            fieldId: FLD_PICK_ITEM,
-                            value: lineObj.itemId
-                        });
-
-                        existingPickRec.setValue({
-                            fieldId: FLD_PICK_QTY,
-                            value: lineObj.qty || 0
-                        });
-
-                        existingPickRec.setValue({
-                            fieldId: FLD_PICK_STATUS,
-                            value: STATUS_RELEASED
-                        });
-
-                        if (lineObj.salesOrder) {
-                            existingPickRec.setValue({
-                                fieldId: CSR_PICK_TASK_SO,
-                                value: lineObj.salesOrder
-                            });
-                        }
-
-                        const updatedPickTaskId = existingPickRec.save({
-                            enableSourcing: true,
-                            ignoreMandatoryFields: false
-                        });
-
-                        log.audit({
-                            title: `Pick Task Updated for Line ${j}`,
-                            details: {
-                                csrId: csrId,
-                                lineIndex: lineObj.lineIndex,
-                                lineNumber: lineObj.lineNumber,
-                                itemId: lineObj.itemId,
-                                qty: lineObj.qty,
-                                pickTaskId: updatedPickTaskId
-                            }
-                        });
-                    } catch (updateErr) {
-                        log.error({
-                            title: `Pick Task Update Error - Line ${j}`,
-                            details: {
-                                csrId: csrId,
-                                pickTaskId: lineObj.existingPickTask,
-                                error: updateErr
-                            }
-                        });
-                    }
-
-                    // Already linked, no need to touch CSR_LINE_PICK_LINK
-                    continue;
-                }
+                const latestPickTask = csrRec.getSublistValue({
+                    sublistId: ITEM_SUBLIST,
+                    fieldId: CSR_LINE_PICK_LINK,
+                    line: lineObj.lineIndex
+                });
+                if (lineObj.existingPickTask || latestPickTask) continue;
 
                 // No pick task linked yet on this line - create a new one
                 const pickTaskRec = record.create({
@@ -265,10 +168,10 @@ define(['N/record', 'N/log'], (record, log) => {
                     value: csrId
                 });
 
-                // Set status = Released (CSR is Released when this path runs)
+                // New tasks require an explicit release action.
                 pickTaskRec.setValue({
                     fieldId: FLD_PICK_STATUS,
-                    value: STATUS_RELEASED
+                    value: STATUS_UNRELEASED
                 });
 
                 // Set item
@@ -290,10 +193,22 @@ define(['N/record', 'N/log'], (record, log) => {
                     });
                 }
 
+                // Preserve the manually entered source Sales Order line reference.
+                const sourceSoLineId = csrRec.getSublistValue({
+                    sublistId: ITEM_SUBLIST,
+                    fieldId: 'custcol_tc_line_id',
+                    line: lineObj.lineIndex
+                });
+                if (sourceSoLineId !== '' && sourceSoLineId != null) {
+                    pickTaskRec.setValue({ fieldId: 'custrecord_line_id', value: String(sourceSoLineId) });
+                }
+
                 const pickTaskId = pickTaskRec.save({
                     enableSourcing: true,
                     ignoreMandatoryFields: false
                 });
+
+                createdCount++;
 
                 log.audit({
                     title: `Pick Task Created for Line ${j}`,
@@ -320,6 +235,8 @@ define(['N/record', 'N/log'], (record, log) => {
                     details: `Set ${CSR_LINE_PICK_LINK} = ${pickTaskId} on line index ${lineObj.lineIndex}`
                 });
             }
+
+            if (!createdCount) return;
 
             const savedCsrId = csrRec.save({
                 enableSourcing: true,

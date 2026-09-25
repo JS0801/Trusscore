@@ -10,8 +10,8 @@ define(['N/search', 'N/record', 'N/ui/dialog', 'N/ui/message'], (search, record,
     const RELEASED = '2';
     let releasing = false;
 
-    // Header 1 requires at least one task and every task to have status 2 (Released).
-    // Cancelled, Picked, Staged, blank statuses, and no tasks produce header 2.
+    // Header 1 requires at least one non-cancelled task and all such tasks Released.
+    // Cancelled tasks are excluded; no tasks or all Cancelled produce header 2.
     function syncCsrPickingStatus(csrId, csrType) {
         let taskCount = 0;
         let allReleased = true;
@@ -25,6 +25,7 @@ define(['N/search', 'N/record', 'N/ui/dialog', 'N/ui/message'], (search, record,
         }).run().each(result => {
             const count = Number(result.getValue({ name: 'internalid', summary: search.Summary.COUNT })) || 0;
             const status = result.getValue({ name: 'custrecord_tc_csr_pt_status', summary: search.Summary.GROUP });
+            if (String(status) === '4') return true; // Ignore Cancelled tasks.
             taskCount += count;
             if (count && String(status) !== '2') allReleased = false;
             return true;

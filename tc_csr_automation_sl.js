@@ -641,13 +641,16 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 // Multi-level joins like join1.join2.field are not supported in filters.
                 // We'll find all Pick Tasks for this location first.
                 const pickTaskIds = [];
-                search.create({
+                const locationPickTaskSearch = search.create({
                     type: 'customrecord_tc_csr_pick',
                     filters: [['custrecord_tc_csr_pt_csr.custbody_tc_shipping_loc', 'anyof', locId]],
-                    columns: ['internalid']
-                }).run().each(r => {
-                    pickTaskIds.push(r.id);
-                    return true;
+                    columns: [search.createColumn({ name: 'internalid', sort: search.Sort.ASC })]
+                });
+                // ResultSet.each stops at 4,000 results. Read every page with a unique sort.
+                const locationPickTaskPages = locationPickTaskSearch.runPaged({ pageSize: 1000 });
+                locationPickTaskPages.pageRanges.forEach(pageRange => {
+                    const page = locationPickTaskPages.fetch({ index: pageRange.index });
+                    page.data.forEach(result => pickTaskIds.push(result.id));
                 });
 
                 if (pickTaskIds.length > 0) {

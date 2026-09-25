@@ -1163,7 +1163,7 @@
                     <label>Quantity to Fulfill</label>
                     <input type="number" id="qtyToFulfill" class="scan-input" placeholder="Enter quantity...">
                 </div>
-                <div class="input-group" style="margin-bottom:0;">
+                <div id="lotEntryGroup" class="input-group" style="margin-bottom:0;">
                     <label>Lot Number</label>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <input type="text" id="lotInput" class="scan-input" placeholder="Scan or type lot..."
@@ -1177,7 +1177,7 @@
                     </div>
                 </div>
                 <!-- Lot Availability Table -->
-                <div class="lot-table-container">
+                <div id="lotAvailabilityGroup" class="lot-table-container">
                     <table class="lot-selection-table">
                         <thead>
                             <tr>
@@ -2163,9 +2163,9 @@
                     totalCommitted += lCommitted;
  
                     if (lQty !== lPicked) isFullyPicked = false;
-                    if (lQty !== lStaged) isFullyStaged = false;
+                    if (requiresLot(l) && lQty !== lStaged) isFullyStaged = false;
                     if (lQty > lPicked) linesToPick++;
-                    if (lStaged > 0 && lPicked !== lStaged) {
+                    if (requiresLot(l) && lStaged > 0 && lPicked !== lStaged) {
                         pickedDivergence = true;
                     }
                 });
@@ -2293,7 +2293,7 @@
                         </div>
                         <div style="flex:1; text-align:center; font-size:12px;">${qty}</div>
                         <div style="flex:1; text-align:center; font-size:12px; color:#f39c12; font-weight:700; cursor:pointer; text-decoration:underline;" onclick="openChildInventoryModal('${line.id}')">${picked}</div>
-                        <div style="flex:1; text-align:center; font-size:12px; color:#27ae60; font-weight:700;">${staged}</div>
+                        <div style="flex:1; text-align:center; font-size:12px; color:#27ae60; font-weight:700;">${requiresLot(line) ? staged : 'N/A'}</div>
                         <div style="flex:1; text-align:center; font-size:12px; color:#2980b9;">${remaining}</div>
                     `;
                 } else {
@@ -2421,9 +2421,24 @@
         }
 
         /* --- Fulfill Modal --- */
+        function requiresLot(line) {
+            // Older API responses fail closed and retain lot entry until the Suitelet is updated.
+            return line.isLotNumbered !== false;
+        }
+
         async function openModal(lineIdx) {
             const line = allCsrLines[lineIdx];
+            if (line.isSerialNumbered) {
+                showToast('Serialized items require serial-number picking, which this app does not support.', 'error');
+                return;
+            }
             currentlySelectedLine = line;
+            currentLotOptions = [];
+            const needsLot = requiresLot(line);
+            document.getElementById('lotModalTitle').innerText = needsLot ? 'Enter Lot Number' : 'Enter Pick Quantity';
+            document.getElementById('lotEntryGroup').style.display = needsLot ? '' : 'none';
+            document.getElementById('lotAvailabilityGroup').style.display = needsLot ? '' : 'none';
+            document.getElementById('confirmLotBtn').innerText = 'Save Pick';
 
             const reqQty = parseFloat(line.quantity || 0);
             const invQty = parseFloat(line.pickedQty || 0);
@@ -2473,8 +2488,10 @@
 
             document.getElementById('lotModal').classList.add('active');
             if (!isFullyPicked) {
-                setTimeout(() => { document.getElementById('lotInput').focus(); }, 100);
+                setTimeout(() => { document.getElementById(needsLot ? 'lotInput' : 'qtyToFulfill').focus(); }, 100);
             }
+
+            if (!needsLot) return;
 
             // Fetch Lot info
             const tbody = document.getElementById('lotTableBody');
@@ -2522,6 +2539,7 @@
 
         async function openInventoryModal(csrId, soId, lineId, itemName, itemQty, units, lineUniqueKey, lineIdx) {
             currentlySelectedLine = allCsrLines[lineIdx];
+            if (!requiresLot(currentlySelectedLine)) return openModal(lineIdx);
             showLoading('Fetching Inventory Details...');
             try {
                 const response = await fetch(suiteletUrl, {
@@ -2602,7 +2620,7 @@
 
                             tr.innerHTML = `
                                 <td>${row.name || '-'}</td>
-                                <td><span style="color:#3b82f6; font-weight:600;">${row.lotText || '-'}</span></td>
+                                <td><span style="color:#3b82f6; font-weight:600;">${row.lotText || 'Quantity only'}</span></td>
                                 <td>${row.quantity || 0}</td>
                                 <td>${row.dateCreated || '-'}</td>
                                 <td>${actionsHtml}</td>
@@ -2624,7 +2642,7 @@
 
         async function editPickedLot(detailId, lotText, currentQty, pickTaskId) {
             const activeScreen = navigationStack[navigationStack.length - 1];
-            const newQtyStr = prompt(`Enter new quantity for Lot ${lotText}:`, currentQty);
+            const newQtyStr = prompt(lotText ? `Enter new quantity for Lot ${lotText}:` : 'Enter new picked quantity:', currentQty);
             if (newQtyStr === null) return;
 
             const newQty = parseFloat(newQtyStr);
@@ -2722,7 +2740,9 @@
 
             const qtyInput = parseFloat(document.getElementById('qtyToFulfill').value);
  
-            if (!lotInput) { showToast('Please enter a Lot Number', 'error'); return; }
+            if (!currentlySelectedLine) return;
+            const needsLot = requiresLot(currentlySelectedLine);
+            if (needsLot && !lotInput) { showToast('Please enter a Lot Number', 'error'); return; }
             if (isNaN(qtyInput) || qtyInput <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
             if (!currentlySelectedLine) return;
  
@@ -2737,6 +2757,7 @@
  
             let finalQty = qtyInput;
             let alreadyConfirmed = false;
+            if (needsLot) {
             const selectedLotData = currentLotOptions.find(l => l.lotNumber === lotInput);
             if (selectedLotData) {
                 const availQty = parseFloat(selectedLotData.quantityAvailable || 0);
@@ -2752,8 +2773,10 @@
                 return;
             }
 
+            }
+
             if (requireConfirm && !alreadyConfirmed) {
-                const proceed = confirm(`Do you want to proceed with fulfilling ${finalQty} units for Lot ${lotInput}?`);
+                const proceed = confirm(needsLot ? `Record ${finalQty} units for Lot ${lotInput}?` : `Record ${finalQty} units?`);
                 if (!proceed) return;
             }
  
@@ -2761,7 +2784,7 @@
                 csrId: currentlySelectedLine.id,
                 lineId: currentlySelectedLine.lineId,
                 lineUniqueKey: currentlySelectedLine.lineUniqueKey,
-                lotNumber: lotInput,
+                lotNumber: needsLot ? lotInput : '',
                 salesOrderId: currentlySelectedLine.salesOrderId,
                 itemId: currentlySelectedLine.itemId,
                 quantity: finalQty,
@@ -2769,7 +2792,7 @@
             };
  
             closeModal('lotModal');
-            showLoading('Fulfilling Line...');
+            showLoading('Saving Pick...');
 
             try {
                 const response = await fetch(suiteletUrl, {

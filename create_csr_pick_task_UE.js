@@ -100,6 +100,40 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
         }
     }
 
+    // Header 1 requires at least one task and every task to have status 2 (Released).
+    // Cancelled, Picked, Staged, blank statuses, and no tasks produce header 2.
+    function syncCsrPickingStatus(csrId, csrType) {
+        let taskCount = 0;
+        let allReleased = true;
+        search.create({
+            type: 'customrecord_tc_csr_pick',
+            filters: [['custrecord_tc_csr_pt_csr', 'anyof', csrId]],
+            columns: [
+                search.createColumn({ name: 'custrecord_tc_csr_pt_status', summary: search.Summary.GROUP }),
+                search.createColumn({ name: 'internalid', summary: search.Summary.COUNT })
+            ]
+        }).run().each(result => {
+            const count = Number(result.getValue({ name: 'internalid', summary: search.Summary.COUNT })) || 0;
+            const status = result.getValue({ name: 'custrecord_tc_csr_pt_status', summary: search.Summary.GROUP });
+            taskCount += count;
+            if (count && String(status) !== '2') allReleased = false;
+            return true;
+        });
+        const target = taskCount > 0 && allReleased ? 1 : 2;
+        const current = search.lookupFields({ type: csrType, id: csrId, columns: ['custbody_picking_status'] });
+        const raw = current.custbody_picking_status;
+        const currentValue = Array.isArray(raw) ? (raw[0] && raw[0].value) : raw;
+        if (String(currentValue) !== String(target)) {
+            record.submitFields({
+                type: csrType,
+                id: csrId,
+                values: { custbody_picking_status: target },
+                options: { enableSourcing: false, ignoreMandatoryFields: true }
+            });
+        }
+        return target;
+    }
+
     function afterSubmit(context) {
         try {
             // Run only on create and edit
@@ -366,6 +400,16 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
                 title: 'afterSubmit Error',
                 details: e
             });
+        } finally {
+            // Runs on all Create/Edit paths, including no new lines and cancellation.
+            // XEDIT from this header-only submitFields is intentionally not processed.
+            if (context.type === context.UserEventType.CREATE || context.type === context.UserEventType.EDIT) {
+                try {
+                    syncCsrPickingStatus(context.newRecord.id, context.newRecord.type);
+                } catch (error) {
+                    log.error({ title: 'CSR picking header synchronization failed', details: error });
+                }
+            }
         }
     }
 

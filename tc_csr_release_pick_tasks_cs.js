@@ -10,6 +10,40 @@ define(['N/search', 'N/record', 'N/ui/dialog', 'N/ui/message'], (search, record,
     const RELEASED = '2';
     let releasing = false;
 
+    // Header 1 requires at least one task and every task to have status 2 (Released).
+    // Cancelled, Picked, Staged, blank statuses, and no tasks produce header 2.
+    function syncCsrPickingStatus(csrId, csrType) {
+        let taskCount = 0;
+        let allReleased = true;
+        search.create({
+            type: 'customrecord_tc_csr_pick',
+            filters: [['custrecord_tc_csr_pt_csr', 'anyof', csrId]],
+            columns: [
+                search.createColumn({ name: 'custrecord_tc_csr_pt_status', summary: search.Summary.GROUP }),
+                search.createColumn({ name: 'internalid', summary: search.Summary.COUNT })
+            ]
+        }).run().each(result => {
+            const count = Number(result.getValue({ name: 'internalid', summary: search.Summary.COUNT })) || 0;
+            const status = result.getValue({ name: 'custrecord_tc_csr_pt_status', summary: search.Summary.GROUP });
+            taskCount += count;
+            if (count && String(status) !== '2') allReleased = false;
+            return true;
+        });
+        const target = taskCount > 0 && allReleased ? 1 : 2;
+        const current = search.lookupFields({ type: csrType, id: csrId, columns: ['custbody_picking_status'] });
+        const raw = current.custbody_picking_status;
+        const currentValue = Array.isArray(raw) ? (raw[0] && raw[0].value) : raw;
+        if (String(currentValue) !== String(target)) {
+            record.submitFields({
+                type: csrType,
+                id: csrId,
+                values: { custbody_picking_status: target },
+                options: { enableSourcing: false, ignoreMandatoryFields: true }
+            });
+        }
+        return target;
+    }
+
     function pageInit() {}
 
     async function releasePickTasks(csrId) {
@@ -62,6 +96,7 @@ define(['N/search', 'N/record', 'N/ui/dialog', 'N/ui/message'], (search, record,
                     failed.push({ id: taskId, message: error.message || String(error) });
                 }
             }
+            syncCsrPickingStatus(csrId, 'customtransaction118');
             progress.hide();
             const failureText = failed.length
                 ? '\nFailed tasks: ' + failed.slice(0, 10).map(f => f.id + ': ' + f.message).join('; ') +
@@ -75,7 +110,7 @@ define(['N/search', 'N/record', 'N/ui/dialog', 'N/ui/message'], (search, record,
             window.location.reload();
         } catch (error) {
             if (progress) progress.hide();
-            await dialog.alert({ title: 'Unable to release pick tasks', message: error.message || String(error) });
+            await dialog.alert({ title: 'Release or header update failed', message: released + ' task(s) were released before this error. ' + (error.message || String(error)) });
         } finally {
             releasing = false;
         }

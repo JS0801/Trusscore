@@ -19,6 +19,7 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
     const STATUS_UNRELEASED = 1;
     const STATUS_CANCELLED = 4;
     const FLD_CSR_SCRAP = 'custbody_ds_scrap_record';
+    const FLD_LINE_REMOVE = 'custcol_ds_remove';
 
     function isScrap(csrRecord) {
         const value = csrRecord.getValue({ fieldId: FLD_CSR_SCRAP });
@@ -139,6 +140,7 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
             }
 
             const lineDataArr = [];
+            const removedTaskIds = new Set();
 
             // Read all lines first and store required details
             for (let i = 0; i < lineCount; i++) {
@@ -172,7 +174,16 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
                     line: i
                 });
 
+                const removeValue = newRec.getSublistValue({
+                    sublistId: ITEM_SUBLIST,
+                    fieldId: FLD_LINE_REMOVE,
+                    line: i
+                });
+                const isRemoved = removeValue === true || removeValue === 'T';
+                if (isRemoved && existingPickTask) removedTaskIds.add(String(existingPickTask));
+
                 const lineObj = {
+                    isRemoved: isRemoved,
                     lineIndex: i,
                     csrId: csrId,
                     soNumber: tranId,
@@ -196,10 +207,25 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
                 details: `Prepared ${lineDataArr.length} line object(s) for CSR ${csrId}`
             });
 
-            // Only item lines without a linked pick task need processing.
+            // Cancel removed lines before the creation early-return, even if the item is blank.
+            removedTaskIds.forEach(taskId => {
+                try {
+                    record.submitFields({
+                        type: PICK_TASK_RECORD,
+                        id: taskId,
+                        values: { [FLD_PICK_STATUS]: STATUS_CANCELLED },
+                        options: { enableSourcing: false, ignoreMandatoryFields: true }
+                    });
+                    log.audit({ title: 'Removed CSR line task cancelled', details: { csrId: csrId, taskId: taskId } });
+                } catch (error) {
+                    log.error({ title: 'Removed CSR line task cancellation failed: ' + taskId, details: error });
+                }
+            });
+
+            // Only non-removed item lines without a linked pick task need processing.
             let needsProcessing = false;
             for (let k = 0; k < lineDataArr.length; k++) {
-                if (lineDataArr[k].itemId && !lineDataArr[k].existingPickTask) {
+                if (!lineDataArr[k].isRemoved && lineDataArr[k].itemId && !lineDataArr[k].existingPickTask) {
                     needsProcessing = true;
                     break;
                 }
@@ -225,6 +251,7 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
             // Preserve all existing tasks, including their picks and statuses.
             for (let j = 0; j < lineDataArr.length; j++) {
                 const lineObj = lineDataArr[j];
+                if (lineObj.isRemoved) continue;
 
                 // Skip line if no item
                 if (!lineObj.itemId) {

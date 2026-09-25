@@ -986,8 +986,16 @@
             <div class="filter-section">
                 <div class="input-group">
                     <label>CSR #</label>
-                    <input type="text" id="filter-csr" class="filter-input" placeholder="Scan or type..."
-                        oninput="debounce(applyInstantFilters, 400)()">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="text" id="filter-csr" class="filter-input" placeholder="Scan or type..."
+                            oninput="debounce(applyInstantFilters, 400)()" style="flex:1; min-width:0;">
+                        <button type="button" class="scan-btn-sm" onclick="openScanner('filter-csr')"
+                            title="Scan CSR barcode" aria-label="Scan CSR barcode">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                                <path d="M4 4h3V2H2v5h2V4zm14-2v2h3v3h2V2h-5zM2 22h5v-2H4v-3H2v5zm20-5v3h-3v2h5v-5h-2zM7 9V7h10v2H7zm0 4v-2h10v2H7zm0 4v-2h10v2H7z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label>Start Date</label>
@@ -1325,6 +1333,7 @@
         let soGroups = [];
         let allPickTasks = [];
         let currentCsrTab = 'open';
+        let expandedCsrId = null;
         let allLocations = [];
         let allCustomers = [];
 
@@ -1643,32 +1652,31 @@
             }
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            if (currentScanTargetId) {
-                const input = document.getElementById(currentScanTargetId);
-                if (input) {
-                    const extractedValue = parseBarcode(decodedText);
-                    input.value = extractedValue;
+        async function onScanSuccess(decodedText, decodedResult) {
+            const targetId = currentScanTargetId;
+            if (!targetId) return;
+            // Accept only one camera result per scan session.
+            currentScanTargetId = null;
+            const input = document.getElementById(targetId);
+            if (!input) { await closeScanner(); return; }
 
-                    console.log('extractedValue', extractedValue);
-                    console.log('decodedText', decodedText);
+            // CSR numbers are document identifiers, not GS1 lot payloads.
+            const extractedValue = targetId === 'filter-csr'
+                ? String(decodedText).trim().replace(/^\][a-z0-9]{2}/i, '')
+                : parseBarcode(decodedText);
+            input.value = extractedValue;
+            await closeScanner();
 
-                    if (extractedValue !== decodedText) {
-                        showToast("Scanned Lot Number: " + extractedValue);
-                    } else {
-                        showToast("Scanned: " + decodedText);
-                    }
-
-                    if (currentScanTargetId === 'lotInput') {
-                        closeScanner();
-                        setTimeout(() => {
-                            submitLot(true);
-                        }, 200);
-                        return;
-                    }
-                }
+            if (targetId === 'filter-csr') {
+                clearTimeout(debounceTimer);
+                showToast('Scanned CSR: ' + extractedValue);
+                applyInstantFilters();
+            } else if (targetId === 'lotInput') {
+                showToast('Scanned Lot Number: ' + extractedValue);
+                setTimeout(() => { submitLot(true); }, 200);
+            } else {
+                showToast('Scanned: ' + extractedValue);
             }
-            closeScanner();
         }
 
         async function closeScanner() {
@@ -1802,7 +1810,8 @@
         }
 
         /* --- Fetching Data --- */
-        async function fetchData(type, reset = true) {
+        async function fetchData(type, reset = true, preserveLoadedPages = false) {
+            const lastLoadedCsrPage = type === 'csr' && reset && preserveLoadedPages ? csrPagination.currentIndex : 0;
             if (reset) {
                 if (type === 'csr') {
                     csrPagination.currentIndex = 0;
@@ -1860,7 +1869,23 @@
                         allPickTasks = result.data;
                         renderPickTasks(allPickTasks);
                     } else if (type === 'csr' || type === 'so') {
-                        const pageData = result.data.results;
+                        const pageData = [...result.data.results];
+                        // Refresh all previously loaded CSR pages after a mutation so an open
+                        // CSR on a later page remains available for expansion.
+                        if (type === 'csr' && reset && preserveLoadedPages) {
+                            const lastPage = Math.min(lastLoadedCsrPage, Math.max(0, result.data.totalPages - 1));
+                            for (let pageIndex = 1; pageIndex <= lastPage; pageIndex++) {
+                                const pageResponse = await fetch(suiteletUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: postAction, payload: { ...payload, pageIndex } })
+                                });
+                                const nextPage = await pageResponse.json();
+                                if (!nextPage.success) throw new Error(nextPage.error || 'Unable to refresh CSR page.');
+                                pageData.push(...nextPage.data.results);
+                            }
+                            csrPagination.currentIndex = lastPage;
+                        }
                         const pagination = type === 'csr' ? csrPagination : soPagination;
                         pagination.totalPages = result.data.totalPages;
                         pagination.totalCount = result.data.totalCount;
@@ -2100,6 +2125,11 @@
                 itemDiv.appendChild(mainDiv);
                 itemDiv.appendChild(nestedDiv);
                 list.appendChild(itemDiv);
+                if (expandedCsrId !== null && String(g.id) === expandedCsrId) {
+                    nestedDiv.classList.add('active');
+                    mainDiv.classList.add('expanded');
+                    renderLinesInPlace(g.id, 'csr');
+                }
             });
 
             if (renderedCount === 0) {
@@ -2117,6 +2147,7 @@
         function toggleDrillDown(element, id, type) {
             const nested = document.getElementById(`nested-${type}-${id}`);
             const isExpanding = !nested.classList.contains('active');
+            if (type === 'csr') expandedCsrId = isExpanding ? String(id) : null;
 
             // Collapse others if desired - opting for single expand flow matching reference
             document.querySelectorAll('.nested-list').forEach(nl => nl.classList.remove('active'));
@@ -2668,7 +2699,7 @@
                 if (result.success) {
                     showToast('Quantity updated successfully.', 'success');
                     openChildInventoryModal(pickTaskId);
-                    fetchData(activeScreen === 'pick-csr' ? 'csr' : 'so');
+                    await fetchData(activeScreen === 'pick-csr' ? 'csr' : 'so', true, true);
                 } else {
                     showToast('Error: ' + result.error, 'error');
                 }
@@ -2699,7 +2730,7 @@
                 if (result.success) {
                     showToast('Lot detail removed successfully.', 'success');
                     openChildInventoryModal(pickTaskId);
-                    fetchData(activeScreen === 'pick-csr' ? 'csr' : 'so');
+                    await fetchData(activeScreen === 'pick-csr' ? 'csr' : 'so', true, true);
                 } else {
                     showToast('Error: ' + result.error, 'error');
                 }
@@ -2804,7 +2835,7 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast(result.data.message || 'Line fulfilled successfully!', 'success');
-                    fetchData('csr');
+                    await fetchData('csr', true, true);
                 } else {
                     showToast('Action Failed: ' + result.error, 'error');
                 }
@@ -2828,7 +2859,7 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast(result.message || 'Picks pushed successfully!', 'success');
-                    fetchData('csr');
+                    await fetchData('csr', true, true);
                 } else {
                     showToast('Action Failed: ' + result.error, 'error');
                 }
@@ -2865,7 +2896,7 @@
                 const result = await response.json();
                 if (result.success) {
                     showToast(result.data.message || 'Item Fulfillment(s) created successfully!', 'success');
-                    fetchData('csr');
+                    await fetchData('csr', true, true);
                 } else {
                     showToast('Action Failed: ' + result.error, 'error');
                 }

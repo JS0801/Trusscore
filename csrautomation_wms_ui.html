@@ -986,12 +986,13 @@
             <div class="filter-section">
                 <div class="input-group">
                     <label>CSR #</label>
-                    <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="position:relative; width:100%;">
                         <input type="text" id="filter-csr" class="filter-input" placeholder="Scan or type..."
-                            oninput="debounce(applyInstantFilters, 400)()" style="flex:1; min-width:0;">
+                            oninput="debounce(applyInstantFilters, 400)()" style="width:100%; padding-right:42px;">
                         <button type="button" class="scan-btn-sm" onclick="openScanner('filter-csr')"
+                            style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; min-width:0; padding:5px; border:0; background:transparent; color:#333 !important;"
                             title="Scan CSR barcode" aria-label="Scan CSR barcode">
-                            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
                                 <path d="M4 4h3V2H2v5h2V4zm14-2v2h3v3h2V2h-5zM2 22h5v-2H4v-3H2v5zm20-5v3h-3v2h5v-5h-2zM7 9V7h10v2H7zm0 4v-2h10v2H7zm0 4v-2h10v2H7z" />
                             </svg>
                         </button>

@@ -17,11 +17,64 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
     const CSR_PICK_TASK_SO = 'custrecord_sales_order';
 
     const STATUS_UNRELEASED = 1;
+    const STATUS_CANCELLED = 4;
+    const FLD_CSR_SCRAP = 'custbody_ds_scrap_record';
+
+    function isScrap(csrRecord) {
+        const value = csrRecord.getValue({ fieldId: FLD_CSR_SCRAP });
+        return value === true || value === 'T';
+    }
+
+    function cancelPickTasks(csrId) {
+        // Search by parent CSR, including tasks no longer linked on a current line.
+        // Do not filter by status or inactive flag: all associated tasks must cancel.
+        const tasks = search.create({
+            type: PICK_TASK_RECORD,
+            filters: [[FLD_PICK_CSR, 'anyof', csrId]],
+            columns: [
+                search.createColumn({ name: 'internalid', sort: search.Sort.ASC }),
+                FLD_PICK_STATUS
+            ]
+        }).runPaged({ pageSize: 1000 });
+        const pending = [];
+        tasks.pageRanges.forEach(range => {
+            tasks.fetch({ index: range.index }).data.forEach(result => {
+                if (String(result.getValue({ name: FLD_PICK_STATUS })) !== String(STATUS_CANCELLED)) {
+                    pending.push(result.id);
+                }
+            });
+        });
+
+        let cancelled = 0;
+        const failed = [];
+        pending.forEach(taskId => {
+            try {
+                record.submitFields({
+                    type: PICK_TASK_RECORD,
+                    id: taskId,
+                    values: { [FLD_PICK_STATUS]: STATUS_CANCELLED },
+                    options: { enableSourcing: false, ignoreMandatoryFields: true }
+                });
+                cancelled++;
+            } catch (error) {
+                failed.push(taskId);
+                log.error({ title: 'Scrap CSR task cancellation failed: ' + taskId, details: error });
+            }
+        });
+        log.audit({
+            title: 'Scrap CSR pick task cancellation',
+            details: { csrId: csrId, cancelled: cancelled, failedTaskIds: failed }
+        });
+        if (failed.length) {
+            throw new Error('CSR ' + csrId + ': could not cancel pick tasks ' + failed.join(', ') + '. Review script logs and save the CSR again to retry.');
+        }
+    }
 
     // Attach the companion client script only on the saved CSR View page.
     function beforeLoad(context) {
         if (context.type !== context.UserEventType.VIEW || !context.newRecord.id) return;
         try {
+            if (isScrap(context.newRecord)) return;
             const csrId = String(context.newRecord.id);
             if (!/^\d+$/.test(csrId)) return;
             const unreleased = search.create({
@@ -63,6 +116,11 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
             const newRec = context.newRecord;
             const csrId = newRec.id;
             const csrType = newRec.type;
+            // Scrap takes precedence over task creation, even when there are no CSR lines.
+            if (isScrap(newRec)) {
+                cancelPickTasks(csrId);
+                return;
+            }
             const tranId = newRec.getValue({ fieldId: 'tranid' });
 
             const lineCount = newRec.getLineCount({ sublistId: ITEM_SUBLIST });

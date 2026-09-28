@@ -2,7 +2,44 @@
  * @NApiVersion 2.1
  * @NScriptType UserEventScript
  */
-define(['N/record', 'N/log', 'N/search', 'N/workflow'], function (record, log, search, workflow) {
+define(['N/record', 'N/log', 'N/search', 'N/url', 'N/https'], function (record, log, search, url, https) {
+
+  var CSR_RECORD_TYPE = 'customtransaction118';
+  var PO_SUBLIST = 'item';
+
+  var DEPARTMENT_ID = 9;
+  var NEXT_APPROVER_ID = 2004;
+
+  var PO_STATUS_PENDING_APPROVAL = 'A';
+  var PO_STATUS_PENDING_RECEIPT = 'F';
+
+  var FIELD_LINKED_PO = 'custbody_ds_freight_purchase_order';
+  var FIELD_VENDOR_FREIGHT_CHANGED = 'custbody_is_ven_freight_changed';
+
+  var PO_SUITELET_SCRIPT_ID = 'customscript3587';
+  var PO_SUITELET_DEPLOYMENT_ID = 'customdeploy1';
+  var PO_SUITELET_PO_PARAM = 'poid';
+
+  var CSR_BODY_FIELDS_TO_WATCH = [
+    'custbody_tc_carrier',
+    'custbody_tc_customer',
+    'memo',
+    'custbody_tc_shipping_loc',
+    'custbody_tc_shipping_address',
+    'custbody_tc_load_owner',
+    'custbodycustbody_vendor_fr_currency',
+    'custbody_ts_vendor_freight',
+    'custbody_ds_scrap_record',
+    'custbody_tc_po_item',
+    'custbody_csr_po_item_changed',
+    'custbody_csr_freight_changed'
+  ];
+
+  var CSR_LINE_FIELDS_TO_WATCH = [
+    'custcol_tc_sales_order',
+    'custcol_csr_po_item',
+    'custcol_trusscore_po_amount'
+  ];
 
   function afterSubmit(context) {
     try {
@@ -14,601 +51,503 @@ define(['N/record', 'N/log', 'N/search', 'N/workflow'], function (record, log, s
         return;
       }
 
-      var trxRec = context.newRecord;
-      var trxId = trxRec.id;
+      var csrRecord = context.newRecord;
+      var values = getCsrHeaderValues(csrRecord);
+      var relevantCsrChanged = hasRelevantCsrChange(context);
 
-      var carrier = trxRec.getValue({ fieldId: 'custbody_tc_carrier' });
-      var customer = trxRec.getValue({ fieldId: 'custbody_tc_customer' }); // added by sim  
-      var memoText = trxRec.getValue({ fieldId: 'memo' }); // added by sim 
-      var shippingLocation = trxRec.getValue({ fieldId: 'custbody_tc_shipping_loc' }); // added by sim - value for Pickups state
-      var deliveryAddress = trxRec.getValue({ fieldId: 'custbody_tc_shipping_address' }); // added by sim - value for Delivery state
-      var oldPO = trxRec.getValue({ fieldId: 'custbody_ds_freight_purchase_order' });
-      var poItem = trxRec.getValue({ fieldId: 'custbody_tc_po_item' });
-      var owner = trxRec.getValue({ fieldId: 'custbody_tc_load_owner' });
-      var locID = trxRec.getValue({ fieldId: 'custbody_tc_shipping_loc' });
-      var subID = trxRec.getValue({ fieldId: 'custbody_po_subsidiary' });
-      var isScrap = trxRec.getValue({ fieldId: 'custbody_ds_scrap_record' });
-      var isPO_Item_Changed = trxRec.getValue({ fieldId: 'custbody_csr_po_item_changed' });
-      var isPO_item_original = trxRec.getValue({ fieldId: 'custbody_csr_original_po_item' });
-      var isPO_freight_amount_changed = trxRec.getValue({ fieldId: 'custbody_csr_freight_changed' });
-      var isPO_freight_amount_original = trxRec.getValue({ fieldId: 'custbody_csr_original_vendor_freight' });
+      log.debug('CSR HEADER VALUES', JSON.stringify(values));
 
-      log.debug('Header Values', JSON.stringify({
-        trxId: trxId,
-        carrier: carrier,
-        customer: customer, // added by sim
-        memoText: memoText, // added by sim
-        shippingLocation: shippingLocation, // added by sim
-        deliveryAddress: deliveryAddress, // added by sim
-        oldPO: oldPO,
-        poItem: poItem,
-        owner: owner,
-        locID: locID,
-        subID: subID,
-        isScrap: isScrap,
-        isPO_Item_Changed: isPO_Item_Changed,
-        isPO_item_original: isPO_item_original,
-        isPO_freight_amount_changed: isPO_freight_amount_changed,
-        isPO_freight_amount_original: isPO_freight_amount_original
-      }));
-
-      var departmentID = '';
-
-
-
-
-const itemSearchObj = search.create({
-   type: "item",
-   filters:
-   [
-      ["internalid","anyof",poItem]
-   ],
-   columns:
-   [
-      search.createColumn({name: "departmentnohierarchy", label: "Department (no hierarchy)"})
-   ]
-});
-const searchResultCount = itemSearchObj.runPaged().count;
-log.debug("itemSearchObj result count",searchResultCount);
-itemSearchObj.run().each(function(result){
-   departmentID = result.getValue('departmentnohierarchy')
-   return true;
-});
-
-      // --------------------------------------------------
-      // SCRAP LOGIC
-      // If scrap record is true and PO already exists, close that PO
-      // --------------------------------------------------
-      if (isScrap === true || isScrap === 'T') {
-        log.debug('SCRAP CHECK', 'Record marked as scrap');
-
-        if (oldPO) {
-          closePurchaseOrder(oldPO);
-          log.debug('SCRAP EXIT', 'Related PO closed. PO ID=' + oldPO);
+      if (isTrue(values.isScrap)) {
+        if (values.oldPO) {
+          closePurchaseOrderIfAllowed(values.oldPO, true, 'CSR marked as scrap');
         } else {
-          log.debug('SCRAP EXIT', 'Scrap is true but no related PO found');
+          log.debug('SCRAP EXIT', 'CSR is marked as scrap but there is no linked PO');
         }
-
         return;
       }
 
-      // Remove the oldPO condition
-      // If PO already exists, do not create again
-      if (!carrier || !poItem || !subID) { //|| oldPO
-        log.debug('EXIT', 'Missing carrier / PO Item / subsidiary or PO already created');
-        return;
-      }
-
-      var currency = trxRec.getValue({ fieldId: 'custbodycustbody_vendor_fr_currency' });
-      var freightAmount = parseFloat(trxRec.getValue({ fieldId: 'custbody_ts_vendor_freight' })) || 0;
-      var tranId = trxRec.getValue({ fieldId: 'tranid' });
-
-      log.debug('Freight Values', JSON.stringify({
-        currency: currency,
-        freightAmount: freightAmount,
-        tranId: tranId
-      }));
-
-      // Once PO created, after that Frieght Amount updated as 0 in CSR record then what we need to do. Do we need to delete or Close the existing PO.
-      if (freightAmount <= 0) {
-        log.debug('EXIT', 'Freight amount is zero or blank');
-        return;
-      }
-
-      // var soLines = [];
-      // var totalCommitted = 0;
-
-      // var transactionSearchObj = search.create({
-      //   type: 'transaction',
-      //   filters: [
-      //     ['type', 'anyof', 'Custom116'],
-      //     'AND',
-      //     ['internalid', 'anyof', trxId],
-      //     'AND',
-      //     ['mainline', 'is', 'F'],
-      //     'AND',
-      //     ['custcol_tc_sales_order.mainline', 'is', 'T']
-      //   ],
-      //   columns: [
-      //     search.createColumn({
-      //       name: 'internalid',
-      //       join: 'CUSTCOL_TC_SALES_ORDER',
-      //       summary: 'GROUP'
-      //     }),
-      //     search.createColumn({
-      //       name: 'custbody_tc_customer',
-      //       summary: 'GROUP'
-      //     }),
-      //     search.createColumn({
-      //       name: 'custcol_tc_commited',
-      //       summary: 'SUM'
-      //     }),
-      //     search.createColumn({
-      //       name: 'shipstate',
-      //       join: 'CUSTCOL_TC_SALES_ORDER',
-      //       summary: 'MAX'
-      //     }),
-      //     search.createColumn({
-      //       name: 'state',
-      //       join: 'CUSTBODY_TC_SHIPPING_LOC',
-      //       summary: 'MAX'
-      //     }),
-      //     search.createColumn({
-      //       name: 'state',
-      //       join: 'subsidiary',
-      //       summary: 'MAX'
-      //     })
-      //   ]
-      // });
-
-      // transactionSearchObj.run().each(function (result) {
-      //   var soId = result.getValue({
-      //     name: 'internalid',
-      //     join: 'CUSTCOL_TC_SALES_ORDER',
-      //     summary: 'GROUP'
-      //   });
-
-      //   var customerText = result.getText({
-      //     name: 'custbody_tc_customer',
-      //     summary: 'GROUP'
-      //   }) || '';
-
-      //   var committedQty = parseFloat(result.getValue({
-      //     name: 'custcol_tc_commited',
-      //     summary: 'SUM'
-      //   })) || 0;
-
-      //   var pickupState = result.getValue({
-      //     name: 'state',
-      //     join: 'CUSTBODY_TC_SHIPPING_LOC',
-      //     summary: 'MAX'
-      //   }) || result.getValue({
-      //     name: 'state',
-      //     join: 'subsidiary',
-      //     summary: 'MAX'
-      //   }) || '';
-
-      //   var delState = result.getValue({
-      //     name: 'shipstate',
-      //     join: 'CUSTCOL_TC_SALES_ORDER',
-      //     summary: 'MAX'
-      //   }) || '';
-
-      //   if (soId && committedQty > 0) {
-      //     soLines.push({
-      //       soId: soId,
-      //       customerText: customerText,
-      //       committedQty: committedQty,
-      //       pickupState: pickupState,
-      //       delState: delState
-      //     });
-      //     totalCommitted += committedQty;
-      //   }
-
-      //   return true;
-      // });
-
-      // log.debug('SO DATA', JSON.stringify({
-      //   soLineCount: soLines.length,
-      //   totalCommitted: totalCommitted
-      // }));
-
-      // commenting this as PO needs to be created even if the committed quantity is zero on the CSR
-      // if (!soLines.length || totalCommitted <= 0) {
-      //   log.debug('EXIT', 'No valid related SO lines found');
-      //   return;
-      // }
-
-      const uniqueObj = {};
-      const lineCount = trxRec.getLineCount({ sublistId: 'line' });
-      log.debug('lineCount', lineCount);
-
-      // Collect and build object from CSR record
-
-      for (let i = 0; i < lineCount; i++) {
-        const salesOrderId = trxRec.getSublistValue({ sublistId: 'line', fieldId: 'custcol_tc_sales_order', line: i });
-        const poItemId = trxRec.getSublistValue({ sublistId: 'line', fieldId: 'custcol_csr_po_item', line: i });
-        const poAmount = trxRec.getSublistValue({ sublistId: 'line', fieldId: 'custcol_trusscore_po_amount', line: i });
-        log.debug('lineCount : ' + i, "salesOrderId : " + salesOrderId + " -- poItemId : " + poItemId + " -- poAmount : " + poAmount);
-
-        if (!salesOrderId || !poItemId) continue;
-
-        const key = salesOrderId + '_' + poItemId;
-
-        if (!uniqueObj[key]) {
-          uniqueObj[key] = {
-            salesOrderId: salesOrderId,
-            poItemId: poItemId,
-            totalAmount: 0,
-            lines: []
-          };
-        }
-
-        uniqueObj[key].totalAmount += Number(poAmount || 0);
-        uniqueObj[key].lines.push({
-          line: i,
-          salesOrderId: salesOrderId,
-          poItemId: poItemId,
-          poAmount: poAmount
-        });
-      }
-
-      log.debug('Unique SO + PO Item Object', uniqueObj);
-
-      var poRecord = null;
-      if (oldPO)//then load hte PO
-      {
-
-        poRecord = record.load({
-          type: record.Type.PURCHASE_ORDER,
-          id: oldPO,
-          isDynamic: true
-        });
-        var is_Freight_CSR_PO = poRecord.getValue({ fieldId: 'custbody_tc_freight_csr_po' });
-        log.debug('oldPO', oldPO + ' oldPO found so will load and update' + '  || is_Freight_CSR_PO : ' + is_Freight_CSR_PO);
-
-        poRecord.setValue({ fieldId: 'memo', value: tranId });
-        var pickupState = getLocationState(shippingLocation);
-        var deliveryState = getStateFromAddress(deliveryAddress);
-        log.emergency('asdf', 'pickupState : ' + pickupState + ' -- deliveryState : ' + deliveryState)
-        poRecord.setValue({ fieldId: 'custbody_tc_frt_pickup_state', value: pickupState });
-        poRecord.setValue({ fieldId: 'custbody_tc_frt_delivery_state', value: deliveryState });
-        poRecord.setValue({ fieldId: 'custbody_memo_notes_from_csr', value: memoText });// added by sim
-
-        // set freight changed and item changed fields in PO (should happen only in EDIT)
-        poRecord.setValue({ fieldId: 'custbody_is_ven_freight_changed', value: isPO_freight_amount_changed });
-        poRecord.setValue({ fieldId: 'custbody_is_po_item_changed', value: isPO_Item_Changed });
-
-        const lineCount = poRecord.getLineCount({ sublistId: 'item' });
-
-        for (let i = lineCount - 1; i >= 0; i--) {
-          log.debug('oldPO', oldPO + ' removing line  ' + i);
-          poRecord.removeLine({ sublistId: 'item', line: i });
-        }
-
-        // 
-        // a. Item Code Edit   PO reapproval should triggered
-        // b.	$$$ Value Edit   PO reapproval should triggered
-        if (is_Freight_CSR_PO == true && (isPO_freight_amount_changed == true || isPO_Item_Changed == true)) {
-          try {
-            // const WORKFLOW_ID = 'customworkflow7';
-            // const WORKFLOW_SUBMIT_FOR_APPROVAL_STATE_ID = 'workflowstate48';
-            // Trigger the workflow specific action
-            // var workflowInstanceId = workflow.trigger({
-            //   recordType: 'purchaseorder', // The record type (e.g., 'salesorder', 'customer')
-            //   recordId: oldPO, // The ID of the record
-            //   workflowId: WORKFLOW_ID, // STANDALONE BILL APROVAL
-            //   actionId: 'workflowaction186'  // Script ID of the specific action/button
-            // });
-            // log.debug('Workflow Triggered', 'Instance ID: ' + workflowInstanceId);
-
-            // var workflowInstanceId = workflow.initiate({
-            //   recordType: 'purchaseorder', // The record type (e.g., 'salesorder', 'customer')
-            //   recordId: oldPO, // The ID of the record
-            //   workflowId: WORKFLOW_ID, // STANDALONE BILL APROVAL
-            // });
-            // log.debug('Workflow initiate', 'Instance ID: ' + workflowInstanceId);
-
-            poRecord.setValue({ fieldId: 'nextapprover', value: 2004 }); //commeted to test approval process
-            // resetting the status to avoid Submit for approval extra step and make it to auto
-            poRecord.setValue({
-              fieldId: 'approvalstatus',
-              value: 1
-            });
-            // Define your NetSuite Workflow Script ID
-            // log.debug('approvalstatus', ' approvalstatus udpated to ');
-          } catch (e) {
-            log.error('Workflow Trigger Error', e.message);
-          }
-        }
-
-      }
-      // Else create a new PO
-      else {
-        log.debug('oldPO', 'oldPO NOT found so will create new one');
-
-        poRecord = record.create({
-          type: record.Type.PURCHASE_ORDER,
-          isDynamic: true
-        });
-
-        if (!departmentID) departmentID = 9;
-
-        poRecord.setValue({ fieldId: 'entity', value: carrier });
-        poRecord.setValue({ fieldId: 'subsidiary', value: subID });
-        poRecord.setValue({ fieldId: 'custbody_tc_freight_csr_po', value: true });
-        poRecord.setValue({ fieldId: 'memo', value: tranId });
-        poRecord.setValue({ fieldId: 'department', value: departmentID });
-        poRecord.setValue({ fieldId: 'nextapprover', value: 2004 }); //commeted to test approval process
-
-        var pickupState = getLocationState(shippingLocation);
-        var deliveryState = getStateFromAddress(deliveryAddress);
-        log.emergency('asdf', 'pickupState : ' + pickupState + ' -- deliveryState : ' + deliveryState)
-        poRecord.setValue({ fieldId: 'custbody_tc_frt_pickup_state', value: pickupState });
-        poRecord.setValue({ fieldId: 'custbody_tc_frt_delivery_state', value: deliveryState });
-        poRecord.setValue({ fieldId: 'custbody_memo_notes_from_csr', value: memoText });// added by sim
-
-      }
-
-      if (currency) {
-        poRecord.setValue({ fieldId: 'currency', value: currency });
-      }
-
-      if (owner) {
-        poRecord.setValue({ fieldId: 'employee', value: owner });
-      }
-
-      poRecord.setValue({ fieldId: 'tobeemailed', value: false });
-
-      // if (locID) {
-      //   poRecord.setValue({ fieldId: 'location', value: locID });
-      // }
-
-      // Get the line count of existing PO and get the Item and rate values as well as Header values of Subsidiary and Carrier
-      // If any changes happen then delete all existing line items and create new lines based on solInes array
-
-      // var allocatedTotal = 0;
-      var i, line, amount, pickupStateId, delStateId;
-      var arrayLength = Object.keys(uniqueObj).length;
-      // amount = roundToTwo(freightAmount / arrayLength);
-      log.debug('Unique combinations count arrayLength', arrayLength);
-      // log.debug('amount', amount);
-      var poGroups = Object.keys(uniqueObj).map(function (key) {
-        return uniqueObj[key];
-      });
-
-      var allocatedTotal = 0;
-
-      // added for amount rounding fix
-      poGroups.forEach(function (group, index) {
-        var lineAmount;
-
-        if (index === poGroups.length - 1) {
-          // Allocate any rounding difference to the last PO line
-          lineAmount = roundToTwo(freightAmount - allocatedTotal);
+      if (values.freightAmount <= 0) {
+        if (values.oldPO) {
+          closePurchaseOrderIfAllowed(values.oldPO, true, 'CSR vendor freight is zero or blank');
         } else {
-          lineAmount = roundToTwo(group.totalAmount);
-          allocatedTotal = roundToTwo(allocatedTotal + lineAmount);
+          log.debug('ZERO FREIGHT EXIT', 'Freight is zero or blank and there is no linked PO');
         }
+        return;
+      }
 
-        log.debug('PO LINE AMOUNT', JSON.stringify({
-          index: index,
-          salesOrderId: group.salesOrderId,
-          poItemId: group.poItemId,
-          originalGroupAmount: group.totalAmount,
-          finalLineAmount: lineAmount,
-          allocatedTotalBeforeLast: allocatedTotal,
-          freightAmount: freightAmount
-        }));
+      var poGroups = buildCsrPoGroups(csrRecord);
+      if (!poGroups.length) {
+        log.debug('EXIT', 'No valid CSR line groups found. PO was not created or updated.');
+        return;
+      }
 
-        if (!departmentID) departmentID = 9;
+      if (values.oldPO) {
+        updateLinkedPurchaseOrder(values, poGroups, relevantCsrChanged);
+      } else {
+        createPurchaseOrderFromCsr(values, poGroups);
+      }
 
-        poRecord.selectNewLine({ sublistId: 'item' });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: group.poItemId });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_po_customer', value: customer });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_tc_trx_line', value: group.salesOrderId });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_tc_trx_line_ship', value: trxId });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: 1 });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: lineAmount });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: lineAmount });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'department', value: departmentID });
-        poRecord.commitLine({ sublistId: 'item' });
-      });
-      /*
-      // commneted on 4-jul Sim to fix Amount not rounding issue
-      Object.keys(uniqueObj).forEach((key) => {
-        const group = uniqueObj[key];
-
-        poRecord.selectNewLine({ sublistId: 'item' });
-
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'item', value: group.poItemId });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_po_customer', value: customer });
-
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_tc_trx_line', value: group.salesOrderId });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'custcol_tc_trx_line_ship', value: trxId });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: 1 });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'rate', value: group.totalAmount });
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'amount', value: group.totalAmount });  //amount
-        poRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'department', value: 9 });
-
-        poRecord.commitLine({ sublistId: 'item' });
-      });
-      */
-      // END COMMENT
-      // for (i = 0; i < soLines.length; i++) {
-      //   line = soLines[i];
-
-      //   if (i === soLines.length - 1) {
-      //     amount = roundToTwo(freightAmount - allocatedTotal);
-      //   } else {
-      //     amount = roundToTwo((freightAmount * line.committedQty) / totalCommitted);
-      //     allocatedTotal += amount;
-      //   }
-
-      //   pickupStateId = getStateId(line.pickupState);
-      //   delStateId = getStateId(line.delState);
-
-      //   log.debug('LINE BUILD', JSON.stringify({
-      //     index: i,
-      //     soId: line.soId,
-      //     amount: amount,
-      //     pickupState: line.pickupState,
-      //     pickupStateId: pickupStateId,
-      //     delState: line.delState,
-      //     delStateId: delStateId
-      //   }));
-
-      //   poRecord.selectNewLine({ sublistId: 'item' });
-
-      //   poRecord.setCurrentSublistValue({
-      //     sublistId: 'item',
-      //     fieldId: 'item', // new field custcol_csr_po_items
-      //     value: poaccount
-      //   });
-
-      //   poRecord.setCurrentSublistValue({
-      //     sublistId: 'item',
-      //     fieldId: 'amount',
-      //     value: amount
-      //   });
-
-      //   poRecord.setCurrentSublistValue({
-      //     sublistId: 'item',
-      //     fieldId: 'department',
-      //     value: 9
-      //   });
-
-      //   if (pickupStateId) {
-      //     poRecord.setCurrentSublistValue({
-      //       sublistId: 'item',
-      //       fieldId: 'custcol_tc_frt_pickup_state',
-      //       value: pickupStateId
-      //     });
-      //   }
-
-      //   if (delStateId) {
-      //     poRecord.setCurrentSublistValue({
-      //       sublistId: 'item',
-      //       fieldId: 'custcol_tc_frt_delivery_state',
-      //       value: delStateId
-      //     });
-      //   }
-
-      //   if (line.customerText) {
-      //     poRecord.setCurrentSublistValue({
-      //       sublistId: 'item',
-      //       fieldId: 'description',
-      //       value: line.customerText
-      //     });
-      //   }
-
-      //   poRecord.setCurrentSublistValue({
-      //     sublistId: 'item',
-      //     fieldId: 'custcol_tc_trx_line',
-      //     value: line.soId
-      //   });
-
-      //   poRecord.setCurrentSublistValue({
-      //     sublistId: 'item',
-      //     fieldId: 'custcol_tc_trx_line_ship',
-      //     value: trxId
-      //   });
-
-      //   poRecord.commitLine({ sublistId: 'item' });
-      // }
-
-      var poId = poRecord.save({
-        enableSourcing: true,
-        ignoreMandatoryFields: true
-      });
-
-      log.debug('PO CREATED', 'PO ID=' + poId);
-
-      record.submitFields({
-        type: 'customtransaction118',
-        id: trxId,
-        values: {
-          custbody_ds_freight_purchase_order: poId
-        }
-      });
-
-      log.debug('END', 'PO linked back to transaction. trxId=' + trxId + ', poId=' + poId);
+      log.debug('END', 'CSR PO sync complete. CSR ID=' + values.trxId);
 
     } catch (e) {
       log.error('ERROR', e.name + ': ' + e.message + ' | Stack: ' + e.stack);
     }
   }
 
-  // added by sim
-  /**
-   * Get state/province from Location main address
-   *
-   * @param {number|string} locationId
-   * @returns {string}a
-   */
-  function getLocationState(locationId) {
-    if (!locationId) return '';
+  function updateLinkedPurchaseOrder(values, poGroups, relevantCsrChanged) {
+    if (!relevantCsrChanged) {
+      log.debug('OLD PO EXIT', 'No watched CSR fields or CSR line fields changed. PO ID=' + values.oldPO);
+      return;
+    }
 
-    var locRec = record.load({
-      type: record.Type.LOCATION,
-      id: locationId,
+    var poRecord = record.load({
+      type: record.Type.PURCHASE_ORDER,
+      id: values.oldPO,
+      isDynamic: true
+    });
+
+    if (!canUpdatePurchaseOrder(poRecord)) {
+      log.debug('OLD PO EXIT', 'Linked PO is not Pending Approval or Pending Receipt. PO ID=' + values.oldPO);
+      return;
+    }
+
+    var poWasUpdated = false;
+    var desiredLines = buildDesiredPoLines(values, poGroups);
+
+    poWasUpdated = syncPurchaseOrderHeader(poRecord, values, false) || poWasUpdated;
+
+    if (poLinesAreDifferent(poRecord, desiredLines)) {
+      rebuildPurchaseOrderLines(poRecord, desiredLines);
+      poWasUpdated = true;
+    } else {
+      log.debug('PO LINES', 'Current PO lines already match the CSR calculation. PO ID=' + values.oldPO);
+    }
+
+    poWasUpdated = setBodyValueIfChanged(poRecord, FIELD_VENDOR_FREIGHT_CHANGED, true) || poWasUpdated;
+
+    if (!poWasUpdated) {
+      log.debug('OLD PO EXIT', 'CSR changed, but no PO field or line value needed to be saved. PO ID=' + values.oldPO);
+      return;
+    }
+
+    var poId = poRecord.save({
+      enableSourcing: true,
+      ignoreMandatoryFields: true
+    });
+
+    log.debug('PO UPDATED', 'PO ID=' + poId);
+    callPurchaseOrderSuitelet(poId);
+  }
+
+  function createPurchaseOrderFromCsr(values, poGroups) {
+    if (!values.carrier || !values.subID) {
+      log.debug('CREATE EXIT', 'Missing carrier or subsidiary. PO was not created.');
+      return;
+    }
+
+    var poRecord = record.create({
+      type: record.Type.PURCHASE_ORDER,
+      isDynamic: true
+    });
+
+    syncPurchaseOrderHeader(poRecord, values, true);
+    rebuildPurchaseOrderLines(poRecord, buildDesiredPoLines(values, poGroups));
+
+    var poId = poRecord.save({
+      enableSourcing: true,
+      ignoreMandatoryFields: true
+    });
+
+    log.debug('PO CREATED', 'PO ID=' + poId);
+
+    record.submitFields({
+      type: CSR_RECORD_TYPE,
+      id: values.trxId,
+      values: {
+        custbody_ds_freight_purchase_order: poId
+      }
+    });
+
+    log.debug('PO LINKED', 'CSR ID=' + values.trxId + ', PO ID=' + poId);
+  }
+
+  function syncPurchaseOrderHeader(poRecord, values, isNewPo) {
+    var poWasUpdated = false;
+
+    if (values.carrier) {
+      poWasUpdated = setBodyValueIfChanged(poRecord, 'entity', values.carrier) || poWasUpdated;
+    }
+
+    if (isNewPo) {
+      poWasUpdated = setBodyValueIfChanged(poRecord, 'subsidiary', values.subID) || poWasUpdated;
+      poWasUpdated = setBodyValueIfChanged(poRecord, 'custbody_tc_freight_csr_po', true) || poWasUpdated;
+      poWasUpdated = setBodyValueIfChanged(poRecord, 'nextapprover', NEXT_APPROVER_ID) || poWasUpdated;
+    }
+
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'memo', values.tranId) || poWasUpdated;
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'department', DEPARTMENT_ID) || poWasUpdated;
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'tobeemailed', false) || poWasUpdated;
+
+    if (values.currency) {
+      poWasUpdated = setBodyValueIfChanged(poRecord, 'currency', values.currency) || poWasUpdated;
+    }
+
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'employee', values.owner || '') || poWasUpdated;
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'custbody_memo_notes_from_csr', values.memoText || '') || poWasUpdated;
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'custbody_tc_frt_pickup_state', getLocationState(values.shippingLocation)) || poWasUpdated;
+    poWasUpdated = setBodyValueIfChanged(poRecord, 'custbody_tc_frt_delivery_state', getStateFromAddress(values.deliveryAddress)) || poWasUpdated;
+
+    return poWasUpdated;
+  }
+
+  function buildCsrPoGroups(csrRecord) {
+    var uniqueGroups = {};
+    var orderedKeys = [];
+    var lineCount = csrRecord.getLineCount({ sublistId: 'line' });
+
+    log.debug('CSR LINE COUNT', lineCount);
+
+    for (var i = 0; i < lineCount; i++) {
+      var salesOrderId = csrRecord.getSublistValue({
+        sublistId: 'line',
+        fieldId: 'custcol_tc_sales_order',
+        line: i
+      });
+
+      var poItemId = csrRecord.getSublistValue({
+        sublistId: 'line',
+        fieldId: 'custcol_csr_po_item',
+        line: i
+      });
+
+      var poAmount = parseFloat(csrRecord.getSublistValue({
+        sublistId: 'line',
+        fieldId: 'custcol_trusscore_po_amount',
+        line: i
+      })) || 0;
+
+      log.debug('CSR LINE', 'line=' + i + ', salesOrderId=' + salesOrderId +
+        ', poItemId=' + poItemId + ', poAmount=' + poAmount);
+
+      if (!salesOrderId || !poItemId) {
+        continue;
+      }
+
+      var key = salesOrderId + '_' + poItemId;
+      if (!uniqueGroups[key]) {
+        uniqueGroups[key] = {
+          salesOrderId: salesOrderId,
+          poItemId: poItemId,
+          totalAmount: 0
+        };
+        orderedKeys.push(key);
+      }
+
+      uniqueGroups[key].totalAmount = roundToTwo(uniqueGroups[key].totalAmount + poAmount);
+    }
+
+    var groups = orderedKeys.map(function (key) {
+      return uniqueGroups[key];
+    });
+
+    log.debug('CSR PO GROUPS', JSON.stringify(groups));
+    return groups;
+  }
+
+  function buildDesiredPoLines(values, poGroups) {
+    var desiredLines = [];
+    var allocatedTotal = 0;
+
+    poGroups.forEach(function (group, index) {
+      var lineAmount;
+
+      if (index === poGroups.length - 1) {
+        lineAmount = roundToTwo(values.freightAmount - allocatedTotal);
+      } else {
+        lineAmount = roundToTwo(group.totalAmount);
+        allocatedTotal = roundToTwo(allocatedTotal + lineAmount);
+      }
+
+      desiredLines.push({
+        item: group.poItemId,
+        customer: values.customer || '',
+        salesOrderId: group.salesOrderId,
+        csrId: values.trxId,
+        quantity: 1,
+        rate: lineAmount,
+        amount: lineAmount,
+        department: DEPARTMENT_ID
+      });
+    });
+
+    log.debug('DESIRED PO LINES', JSON.stringify(desiredLines));
+    return desiredLines;
+  }
+
+  function rebuildPurchaseOrderLines(poRecord, desiredLines) {
+    var lineCount = poRecord.getLineCount({ sublistId: PO_SUBLIST });
+
+    for (var i = lineCount - 1; i >= 0; i--) {
+      poRecord.removeLine({
+        sublistId: PO_SUBLIST,
+        line: i
+      });
+    }
+
+    desiredLines.forEach(function (line) {
+      poRecord.selectNewLine({ sublistId: PO_SUBLIST });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'item', value: line.item });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'custcol_po_customer', value: line.customer });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'custcol_tc_trx_line', value: line.salesOrderId });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'custcol_tc_trx_line_ship', value: line.csrId });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'quantity', value: line.quantity });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'rate', value: line.rate });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'amount', value: line.amount });
+      poRecord.setCurrentSublistValue({ sublistId: PO_SUBLIST, fieldId: 'department', value: line.department });
+      poRecord.commitLine({ sublistId: PO_SUBLIST });
+    });
+
+    log.debug('PO LINES REBUILT', 'lineCount=' + desiredLines.length);
+  }
+
+  function poLinesAreDifferent(poRecord, desiredLines) {
+    var lineCount = poRecord.getLineCount({ sublistId: PO_SUBLIST });
+
+    if (lineCount !== desiredLines.length) {
+      log.debug('PO LINE DIFF', 'Line count differs. current=' + lineCount + ', desired=' + desiredLines.length);
+      return true;
+    }
+
+    for (var i = 0; i < desiredLines.length; i++) {
+      var desired = desiredLines[i];
+
+      if (valuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'item', line: i }), desired.item) ||
+        valuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'custcol_po_customer', line: i }), desired.customer) ||
+        valuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'custcol_tc_trx_line', line: i }), desired.salesOrderId) ||
+        valuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'custcol_tc_trx_line_ship', line: i }), desired.csrId) ||
+        numericValuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'quantity', line: i }), desired.quantity) ||
+        numericValuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'rate', line: i }), desired.rate) ||
+        numericValuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'amount', line: i }), desired.amount) ||
+        valuesAreDifferent(poRecord.getSublistValue({ sublistId: PO_SUBLIST, fieldId: 'department', line: i }), desired.department)) {
+        log.debug('PO LINE DIFF', 'Line differs at index=' + i);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function closePurchaseOrderIfAllowed(poId, markVendorFreightChanged, reason) {
+    var poRecord = record.load({
+      type: record.Type.PURCHASE_ORDER,
+      id: poId,
       isDynamic: false
     });
 
-    var addrSubrec = locRec.getSubrecord({
-      fieldId: 'mainaddress'
-    });
-
-    if (!addrSubrec) return '';
-
-    var stateCode = addrSubrec.getValue({
-      fieldId: 'state'
-    });
-
-    log.debug('getLocationState 1', stateCode)
-    if (stateCode) {
-      var stateId = getStateIdByCode(stateCode);
-      log.debug('getLocationState 2', stateId)
-      return stateId;
+    if (!canUpdatePurchaseOrder(poRecord)) {
+      log.debug('CLOSE PO EXIT', 'PO is not Pending Approval or Pending Receipt. PO ID=' + poId + ', reason=' + reason);
+      return false;
     }
-    else {
+
+    var poWasUpdated = false;
+    var lineCount = poRecord.getLineCount({ sublistId: PO_SUBLIST });
+
+    if (markVendorFreightChanged) {
+      poWasUpdated = setBodyValueIfChanged(poRecord, FIELD_VENDOR_FREIGHT_CHANGED, true) || poWasUpdated;
+    }
+
+    for (var i = 0; i < lineCount; i++) {
+      var isClosed = poRecord.getSublistValue({
+        sublistId: PO_SUBLIST,
+        fieldId: 'isclosed',
+        line: i
+      });
+
+      if (!isTrue(isClosed)) {
+        poRecord.setSublistValue({
+          sublistId: PO_SUBLIST,
+          fieldId: 'isclosed',
+          line: i,
+          value: true
+        });
+        poWasUpdated = true;
+      }
+    }
+
+    if (!poWasUpdated) {
+      log.debug('CLOSE PO EXIT', 'PO was already closed/marked. PO ID=' + poId + ', reason=' + reason);
+      return false;
+    }
+
+    var savedId = poRecord.save({
+      enableSourcing: true,
+      ignoreMandatoryFields: true
+    });
+
+    log.debug('PO CLOSED', 'PO ID=' + savedId + ', reason=' + reason);
+    return true;
+  }
+
+  function callPurchaseOrderSuitelet(poId) {
+    try {
+      if (!poId) {
+        log.debug('SUITELET EXIT', 'Missing PO ID');
+        return;
+      }
+
+      var suiteletParams = {};
+      suiteletParams[PO_SUITELET_PO_PARAM] = poId;
+
+      var suiteletUrl = url.resolveScript({
+        scriptId: PO_SUITELET_SCRIPT_ID,
+        deploymentId: PO_SUITELET_DEPLOYMENT_ID,
+        returnExternalUrl: true,
+        params: suiteletParams
+      });
+
+      var response = https.post({
+        url: suiteletUrl
+      });
+
+      log.debug('SUITELET CALLED', JSON.stringify({
+        poId: poId,
+        code: response.code,
+        body: response.body
+      }));
+
+    } catch (e) {
+      log.error('SUITELET CALL ERROR', e.name + ': ' + e.message + ' | PO ID=' + poId);
+    }
+  }
+
+  function canUpdatePurchaseOrder(poRecord) {
+    var orderStatus = poRecord.getValue({ fieldId: 'orderstatus' });
+    var statusText = poRecord.getText({ fieldId: 'orderstatus' }) || '';
+
+    log.debug('PO STATUS CHECK', 'orderstatus=' + orderStatus + ', text=' + statusText);
+
+    return orderStatus === PO_STATUS_PENDING_APPROVAL ||
+      orderStatus === PO_STATUS_PENDING_RECEIPT;
+  }
+
+  function hasRelevantCsrChange(context) {
+    if (context.type === context.UserEventType.CREATE) {
+      return true;
+    }
+
+    if (!context.oldRecord) {
+      log.debug('CSR CHANGE CHECK', 'No oldRecord available, treating CSR as changed');
+      return true;
+    }
+
+    for (var i = 0; i < CSR_BODY_FIELDS_TO_WATCH.length; i++) {
+      var fieldId = CSR_BODY_FIELDS_TO_WATCH[i];
+      var oldValue = context.oldRecord.getValue({ fieldId: fieldId });
+      var newValue = context.newRecord.getValue({ fieldId: fieldId });
+
+      if (valuesAreDifferent(oldValue, newValue)) {
+        log.debug('CSR BODY CHANGE', fieldId + ': old=' + oldValue + ', new=' + newValue);
+        return true;
+      }
+    }
+
+    return csrLinesChanged(context.oldRecord, context.newRecord);
+  }
+
+  function csrLinesChanged(oldRecord, newRecord) {
+    var oldLineCount = oldRecord.getLineCount({ sublistId: 'line' });
+    var newLineCount = newRecord.getLineCount({ sublistId: 'line' });
+
+    if (oldLineCount !== newLineCount) {
+      log.debug('CSR LINE CHANGE', 'Line count changed. old=' + oldLineCount + ', new=' + newLineCount);
+      return true;
+    }
+
+    for (var i = 0; i < newLineCount; i++) {
+      for (var j = 0; j < CSR_LINE_FIELDS_TO_WATCH.length; j++) {
+        var fieldId = CSR_LINE_FIELDS_TO_WATCH[j];
+        var oldValue = oldRecord.getSublistValue({
+          sublistId: 'line',
+          fieldId: fieldId,
+          line: i
+        });
+        var newValue = newRecord.getSublistValue({
+          sublistId: 'line',
+          fieldId: fieldId,
+          line: i
+        });
+
+        if (valuesAreDifferent(oldValue, newValue)) {
+          log.debug('CSR LINE CHANGE', 'line=' + i + ', field=' + fieldId +
+            ', old=' + oldValue + ', new=' + newValue);
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  function getCsrHeaderValues(csrRecord) {
+    return {
+      trxId: csrRecord.id,
+      tranId: csrRecord.getValue({ fieldId: 'tranid' }),
+      carrier: csrRecord.getValue({ fieldId: 'custbody_tc_carrier' }),
+      customer: csrRecord.getValue({ fieldId: 'custbody_tc_customer' }),
+      memoText: csrRecord.getValue({ fieldId: 'memo' }),
+      shippingLocation: csrRecord.getValue({ fieldId: 'custbody_tc_shipping_loc' }),
+      deliveryAddress: csrRecord.getValue({ fieldId: 'custbody_tc_shipping_address' }),
+      oldPO: csrRecord.getValue({ fieldId: FIELD_LINKED_PO }),
+      poItem: csrRecord.getValue({ fieldId: 'custbody_tc_po_item' }),
+      owner: csrRecord.getValue({ fieldId: 'custbody_tc_load_owner' }),
+      subID: csrRecord.getValue({ fieldId: 'custbody_po_subsidiary' }),
+      isScrap: csrRecord.getValue({ fieldId: 'custbody_ds_scrap_record' }),
+      currency: csrRecord.getValue({ fieldId: 'custbodycustbody_vendor_fr_currency' }),
+      freightAmount: parseFloat(csrRecord.getValue({ fieldId: 'custbody_ts_vendor_freight' })) || 0,
+      csrPoItemChanged: csrRecord.getValue({ fieldId: 'custbody_csr_po_item_changed' }),
+      csrFreightChanged: csrRecord.getValue({ fieldId: 'custbody_csr_freight_changed' })
+    };
+  }
+
+  function getLocationState(locationId) {
+    try {
+      if (!locationId) return '';
+
+      var locRec = record.load({
+        type: record.Type.LOCATION,
+        id: locationId,
+        isDynamic: false
+      });
+
+      var addrSubrec = locRec.getSubrecord({
+        fieldId: 'mainaddress'
+      });
+
+      if (!addrSubrec) return '';
+
+      var stateCode = addrSubrec.getValue({
+        fieldId: 'state'
+      });
+
+      return stateCode ? getStateIdByCode(stateCode) : '';
+
+    } catch (e) {
+      log.error('LOCATION STATE ERROR', e.name + ': ' + e.message + ' | locationId=' + locationId);
       return '';
     }
   }
 
-  // added by sim
-  /**
-   * Extract state/province from address text
-   * Works with NetSuite address fields
-   *
-   * @param {string} address
-   * @returns {string}
-   */
   function getStateFromAddress(address) {
-
     if (!address) {
       return '';
     }
 
-    // Match: City, ST ZIP
-    // Example: Calgary, AB T2P 1J9
-    // Example: Dallas, TX 75201
-
-    var match = (address || '').match(/(?:,\s*|\s+)([A-Z]{2})\s+\d{5}(?:-\d{4})?/i);
-
+    var match = String(address).match(/(?:,\s*|\s+)([A-Z]{2})\s+(?:\d{5}(?:-\d{4})?|[A-Z]\d[A-Z][ -]?\d[A-Z]\d)/i);
     var stateCode = match ? match[1].toUpperCase() : '';
-    log.debug('getStateFromAddress 1', stateCode)
-    if (stateCode) {
-      var stateId = getStateIdByCode(stateCode);
-      log.debug('getStateFromAddress 2', stateId)
-      return stateId;
-    }
-    else {
-      return '';
-    }
+
+    return stateCode ? getStateIdByCode(stateCode) : '';
   }
 
-  // added by sim, common method to get State Internal id 
   function getStateIdByCode(stateCode, countryCode) {
     if (!stateCode) return '';
 
@@ -638,85 +577,39 @@ itemSearchObj.run().each(function(result){
     return '';
   }
 
-  function closePurchaseOrder(poId) {
-    try {
-      log.debug('CLOSE PO START', 'poId=' + poId);
+  function setBodyValueIfChanged(rec, fieldId, value) {
+    var currentValue = rec.getValue({ fieldId: fieldId });
 
-      var poRec = record.load({
-        type: record.Type.PURCHASE_ORDER,
-        id: poId,
-        isDynamic: false
-      });
-
-      var lineCount = poRec.getLineCount({ sublistId: 'item' });
-      log.debug('CLOSE PO', 'lineCount=' + lineCount);
-
-      for (var i = 0; i < lineCount; i++) {
-        var isClosed = poRec.getSublistValue({
-          sublistId: 'item',
-          fieldId: 'isclosed',
-          line: i
-        });
-
-        if (isClosed !== true && isClosed !== 'T') {
-          poRec.setSublistValue({
-            sublistId: 'item',
-            fieldId: 'isclosed',
-            line: i,
-            value: true
-          });
-          log.debug('CLOSE PO LINE', 'Closed line=' + i);
-        } else {
-          log.debug('CLOSE PO LINE', 'Already closed line=' + i);
-        }
-      }
-      // closing PO
-      var savedId = poRec.save({
-        enableSourcing: true,
-        ignoreMandatoryFields: true
-      });
-
-      log.debug('CLOSE PO END', 'PO closed successfully. savedId=' + savedId);
-
-    } catch (e) {
-      log.error('CLOSE PO ERROR', e.name + ': ' + e.message + ' | PO ID=' + poId);
-      throw e;
+    if (!valuesAreDifferent(currentValue, value)) {
+      return false;
     }
+
+    rec.setValue({
+      fieldId: fieldId,
+      value: value
+    });
+
+    log.debug('PO FIELD UPDATED', fieldId + ': old=' + currentValue + ', new=' + value);
+    return true;
   }
 
-  function getStateId(stateValue) {
-    try {
-      if (!stateValue) {
-        return '';
-      }
+  function valuesAreDifferent(oldValue, newValue) {
+    return normalizeValue(oldValue) !== normalizeValue(newValue);
+  }
 
-      var stateId = '';
+  function numericValuesAreDifferent(oldValue, newValue) {
+    return roundToTwo(oldValue) !== roundToTwo(newValue);
+  }
 
-      var stateSearchObj = search.create({
-        type: 'state',
-        filters: [
-          [
-            ['shortname', 'is', stateValue],
-            'OR',
-            ['fullname', 'is', stateValue]
-          ]
-        ],
-        columns: [
-          search.createColumn({ name: 'id' })
-        ]
-      });
+  function normalizeValue(value) {
+    if (value === true || value === 'T') return 'T';
+    if (value === false || value === 'F') return 'F';
+    if (value === null || value === undefined) return '';
+    return String(value);
+  }
 
-      stateSearchObj.run().each(function (result) {
-        stateId = result.getValue({ name: 'id' });
-        return false;
-      });
-
-      return stateId || '';
-
-    } catch (e) {
-      log.error('STATE ERROR', e.name + ': ' + e.message + ' | stateValue=' + stateValue);
-      return '';
-    }
+  function isTrue(value) {
+    return value === true || value === 'T';
   }
 
   function roundToTwo(value) {

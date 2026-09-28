@@ -97,7 +97,7 @@ define(['N/record', 'N/log', 'N/search', 'N/url', 'N/https'], function (record, 
   function updateLinkedPurchaseOrder(values, poGroups, relevantCsrChanged) {
     if (!relevantCsrChanged) {
       log.debug('OLD PO EXIT', 'No watched CSR fields or CSR line fields changed. PO ID=' + values.oldPO);
-      return;
+     // return;
     }
 
     var poRecord = record.load({

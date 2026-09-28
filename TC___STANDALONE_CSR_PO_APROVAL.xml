@@ -443,10 +443,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction188">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Approve</label>
           <saverecordfirst>T</saverecordfirst>
@@ -489,10 +491,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction189">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Reject</label>
           <saverecordfirst>T</saverecordfirst>
@@ -561,10 +565,12 @@
           </initcondition>
         </lockrecordaction>
         <addbuttonaction scriptid="workflowaction314">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>T</isinactive>
           <label>Reset Approval</label>
           <saverecordfirst>T</saverecordfirst>
@@ -594,10 +600,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction372">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Transfer To Next Approver</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1032,10 +1040,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction472">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Re-Submit For Approval</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1225,10 +1235,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction195">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Re-Submit For Approval</label>
           <saverecordfirst>T</saverecordfirst>
@@ -1407,10 +1419,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction474">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Approve</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1440,10 +1454,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction475">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Reject</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1614,10 +1630,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction477">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Approve</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1647,10 +1665,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction478">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Reject</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1786,10 +1806,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction480">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Approve</label>
           <saverecordfirst>F</saverecordfirst>
@@ -1824,10 +1846,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction481">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Reject</label>
           <saverecordfirst>F</saverecordfirst>

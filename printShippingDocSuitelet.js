@@ -11,6 +11,7 @@ define(['N/render', 'N/record', 'N/xml', 'N/search', 'N/runtime', 'N/file'], fun
 
         if (context.request.method == 'POST'){
           var pickwave = context.request.parameters.recid;
+          var poID = context.request.parameters.poid;
 
           if (pickwave) {
             log.debug('pickwave', pickwave)
@@ -63,6 +64,11 @@ picktaskSearchObj.run().each(function(result){
 
             
             return; 
+          }
+
+          if (poID) {
+            var poRec = record.load({ type: 'purchaseorder', id: poID});
+            poRec.save();
           }
          }
 

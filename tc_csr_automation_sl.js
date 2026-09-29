@@ -6,6 +6,25 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
 
     const HTML_FILE_ID = '2595176';
 
+    function getItemTracking(itemId) {
+        if (!itemId) throw new Error('Item is required.');
+        const fields = search.lookupFields({
+            type: search.Type.ITEM,
+            id: itemId,
+            columns: ['islotitem', 'isserialitem']
+        });
+        const checked = value => value === true || value === 'T';
+        return { isLotNumbered: checked(fields.islotitem), isSerialNumbered: checked(fields.isserialitem) };
+    }
+
+    function addItemTrackingToLines(lines) {
+        const byItem = {};
+        lines.forEach(line => {
+            if (!byItem[line.itemId]) byItem[line.itemId] = getItemTracking(line.itemId);
+            Object.assign(line, byItem[line.itemId]);
+        });
+    }
+
     const parseClientDate = (dateStr) => {
         if (!dateStr) return '';
         try {
@@ -261,6 +280,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 });
             }
 
+            addItemTrackingToLines(results);
             return {
                 results: results,
                 totalPages: totalPages,
@@ -569,6 +589,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 });
             }
 
+            addItemTrackingToLines(results);
             return {
                 results: results,
                 totalPages: totalPages,
@@ -589,7 +610,20 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
         log.debug('fulfillLine New Design', payload);
 
         try {
-            const lotInternalId = findLotInternalId(lotNumber, itemId);
+            const pickQuantity = Number(quantity);
+            if (!Number.isFinite(pickQuantity) || pickQuantity <= 0) throw new Error('Enter a valid positive quantity.');
+            const taskItem = search.lookupFields({
+                type: 'customrecord_tc_csr_pick', id: csrId, columns: ['custrecord_tc_cst_pt_item']
+            }).custrecord_tc_cst_pt_item;
+            if (!taskItem || !taskItem[0] || String(taskItem[0].value) !== String(itemId)) {
+                throw new Error('The item does not match this pick task. Refresh the app and try again.');
+            }
+            const tracking = getItemTracking(itemId);
+            if (tracking.isSerialNumbered) throw new Error('Serialized items require serial-number picking, which this app does not support.');
+            let lotInternalId = null;
+            if (tracking.isLotNumbered) {
+            if (!lotNumber) throw new Error('A Lot Number is required for this item.');
+            lotInternalId = findLotInternalId(lotNumber, itemId);
             if (!lotInternalId) {
                 throw new Error(`Inventory number '${lotNumber}' not found for this item.`);
             }
@@ -679,6 +713,8 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 throw new Error(`Lot ${lotNumber} only has ${trueAvail} available at this location (Total: ${totalAvail}, Reserved: ${totalPicked}), but you requested ${quantity}.`);
             }
 
+            } // Lot availability checks apply only to lot-numbered items.
+
             // Create a NEW child record for inventory details
             const childRecord = record.create({
                 type: 'customrecord_csr_pick_task_inventory_det'
@@ -686,8 +722,8 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             const soStr = salesOrderId ? `_SO-${salesOrderId}` : '';
             const lineStr = lineId ? `_L-${lineId}` : '';
             childRecord.setValue({ fieldId: 'name', value: `PT-${csrId}${soStr}${lineStr}_D-${Date.now()}` });
-            childRecord.setValue({ fieldId: 'custrecord_lot_', value: lotInternalId });
-            childRecord.setValue({ fieldId: 'custrecord__lot_quantity', value: quantity });
+            if (tracking.isLotNumbered) childRecord.setValue({ fieldId: 'custrecord_lot_', value: lotInternalId });
+            childRecord.setValue({ fieldId: 'custrecord__lot_quantity', value: pickQuantity });
             childRecord.setValue({ fieldId: 'custrecord_item', value: itemId });
             childRecord.setValue({ fieldId: 'custrecord_csr_pick_task', value: csrId });
             const childId = childRecord.save();
@@ -699,7 +735,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
 
             return {
                 success: true,
-                message: `Lot ${lotNumber} recorded on CSR.`
+                message: tracking.isLotNumbered ? `Lot ${lotNumber} recorded on CSR.` : `${pickQuantity} units recorded on CSR.`
             };
         } catch (e) {
             log.error('Error in fulfillLine', e);
@@ -995,12 +1031,23 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
 
                         log.debug('Syncing Line Qty', `SO: ${soId}, Line: ${currentLineId}, Total Picked: ${totalLineQty}`);
 
+                        const soItemId = soRecord.getCurrentSublistValue({ sublistId: 'item', fieldId: 'item' });
+                        const tracking = getItemTracking(soItemId);
+                        if (tracking.isSerialNumbered) throw new Error('Serialized items require serial-number assignments.');
+                        if (tracking.isLotNumbered && assignments.some(a => !a.lotId)) {
+                            throw new Error('Missing picked lot for Sales Order ' + soId + ', line ' + currentLineId + '.');
+                        }
+
                         // 1. Access Inventory Detail subrecord and clear assignments first (while line is selected)
                         let subrec = null;
+                        if (tracking.isLotNumbered) {
                         try {
                             subrec = soRecord.getCurrentSublistSubrecord({ sublistId: 'item', fieldId: 'inventorydetail' });
                         } catch (subErr) {
                             log.error('Inventory Detail Error', `Could not access subrecord for line ${currentLineId}: ${subErr.message}`);
+                        }
+
+                        if (!subrec) throw new Error('Cannot stage lot assignments for SO ' + soId + ', line ' + currentLineId + '.');
                         }
 
                         if (subrec) {

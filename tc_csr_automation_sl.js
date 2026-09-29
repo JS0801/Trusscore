@@ -309,6 +309,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                    AND csrline.custcol_csr_pick_task_link = pt.id
                 WHERE 
                     csr.custbody_ds_scrap_record = 'F'
+                    AND pt.custrecord_tc_csr_pt_status = 2
             `;
             const sqlParams = [];
 

@@ -1091,31 +1091,13 @@
           <scheduledelay></scheduledelay>
           <scheduletimeunit></scheduletimeunit>
           <tostate>[scriptid=customworkflow7_2.workflowstate48]</tostate>
-          <triggertype></triggertype>
+          <triggertype>AFTERSUBMIT</triggertype>
           <waitforworkflow></waitforworkflow>
           <waitforworkflowstate></waitforworkflowstate>
           <initcondition>
-            <formula><![CDATA[( "Type" IN ("Transaction Type1") AND "Approval Status" IN ("Approval Status1") AND ( isChecked("Is Vendor Freight Changed?") = 'T' OR isChecked("Is PO Item Changed?") = 'T' ))]]></formula>
+            <formula><![CDATA[( isChecked("Is Vendor Freight Changed?") = 'T' OR isChecked("Is PO Item Changed?") = 'T' )]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
-              <parameter>
-                <name>Type</name>
-                <value>STDBODYTRANTYPE</value>
-              </parameter>
-              <parameter>
-                <name>Transaction Type1</name>
-                <selectrecordtype>-100</selectrecordtype>
-                <value>PURCHASEORDER</value>
-              </parameter>
-              <parameter>
-                <name>Approval Status</name>
-                <value>STDBODYAPPROVALSTATUS</value>
-              </parameter>
-              <parameter>
-                <name>Approval Status1</name>
-                <selectrecordtype>-243</selectrecordtype>
-                <value>1</value>
-              </parameter>
               <parameter>
                 <name>Is Vendor Freight Changed?</name>
                 <value>[scriptid=custbody_is_ven_freight_changed]</value>

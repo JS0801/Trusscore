@@ -40,7 +40,7 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
         const pending = [];
         tasks.pageRanges.forEach(range => {
             tasks.fetch({ index: range.index }).data.forEach(result => {
-                if (String(result.getValue({ name: FLD_PICK_STATUS })) !== String(STATUS_CANCELLED)) {
+                if (String(result.getValue({ name: FLD_PICK_STATUS })) == String(STATUS_UNRELEASED)) {
                     pending.push(result.id);
                 }
             });

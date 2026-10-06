@@ -425,7 +425,7 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
 
         if(!isEmpty(resultArray[i].getValue('tosubsidiarynohierarchy'))){
         sublistObj.setSublistValue({id:'custpage_to_sub', line:i, value:resultArray[i].getValue('tosubsidiarynohierarchy')});
-        sublistObj.setSublistValue({id:'custpage_to_sub_id', line:i, value:resultArray[i].getValue('tosubsidiary')});  // SD - TO Change
+        sublistObj.setSublistValue({id:'custpage_to_sub_id', line:i, value:resultArray[i].getValue('tosubsidiary') || resultArray[i].getValue('subsidiarynohierarchy')});  // SD - TO Change
         }
         sublistObj.setSublistValue({id:'custpage_to_location', line:i, value:resultArray[i].getText('transferlocation')});
 

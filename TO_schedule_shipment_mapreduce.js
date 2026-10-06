@@ -104,6 +104,7 @@ function mapReduce(error, record, runtime,render,email,search,task,format) {
       var createShipingrec = selectedPurchaseOrder[0].create_shipping_rec
       var shipDate = selectedPurchaseOrder[0].shipment_date
       log.debug({title:'shipDate',details:shipDate})
+      log.debug('selectedPurchaseOrder', selectedPurchaseOrder[0])
       
       var subForConShipping = selectedPurchaseOrder[0].subidto
       var location_new = selectedPurchaseOrder[0].location_new

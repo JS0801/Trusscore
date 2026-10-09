@@ -154,7 +154,7 @@ function mapReduce(error, record, runtime,render,email,search,task,format) {
           //log.debug({title:'selectedPurchaseOrder',details:selectedPurchaseOrder})
           
           consolidateRecord.selectLine({sublistId:'line',line:i})
-          log.debug('i', i)
+          
           
           consolidateRecord.setCurrentSublistValue({sublistId:'line',fieldId:'custcol_tc_sales_order',value:selectedPurchaseOrder[i].internalID})
           consolidateRecord.setCurrentSublistValue({sublistId:'line',fieldId:'account',value:54})
@@ -181,8 +181,9 @@ function mapReduce(error, record, runtime,render,email,search,task,format) {
             log.debug({title:'coming after else',details:'coming after else'})
             
           }
-          
+          log.debug('i', i)
           consolidateRecord.commitLine({sublistId:'line'})
+          log.debug('Line Commited', i)
           log.debug({title:'Line',details:selectedPurchaseOrder[i]})
           
         }

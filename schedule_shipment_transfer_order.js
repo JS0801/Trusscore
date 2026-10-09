@@ -421,6 +421,7 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
           sublistObj.setSublistValue({id:'custpage_custrefnumber', line:i, value:resultArray[i].getValue('otherrefnum')});
         }
         sublistObj.setSublistValue({id:'custpage_from_sub', line:i, value:resultArray[i].getText('subsidiarynohierarchy')});
+        sublistObj.setSublistValue({id:'custpage_from_subid', line:i, value:resultArray[i].getValue('subsidiarynohierarchy')});
         sublistObj.setSublistValue({id:'custpage_location', line:i, value:resultArray[i].getText('locationnohierarchy')});
 
         if(!isEmpty(resultArray[i].getValue('tosubsidiarynohierarchy'))){
@@ -512,7 +513,7 @@ function suitelet(serverWidget, search, task, config, http, runtime,format,url,r
             locationfrom:context.request.getSublistValue({group:'custpage_salesorderlist', name:'custpage_location', line:selectedCount}),
             locationto:context.request.getSublistValue({group:'custpage_salesorderlist', name:'custpage_to_location', line:selectedCount}),
             subidto: context.request.getSublistValue({group:'custpage_salesorderlist', name:'custpage_to_sub_id', line:selectedCount}),  //  SD - TO Change
-
+            subidfromid: context.request.getSublistValue({group:'custpage_salesorderlist', name:'custpage_from_subid', line:selectedCount}),
             subidfrom: context.request.getSublistValue({group:'custpage_salesorderlist', name:'custpage_from_sub', line:selectedCount}),
           }
           selectedSalesOrder.push(object);

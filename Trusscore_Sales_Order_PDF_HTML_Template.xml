@@ -180,14 +180,17 @@
         <#-- Match the same condition used to display your lines. -->
         <#if item.isclosed?string != "No">
             <#assign lineAmount = toNumber((item.amount)!0)>
-            <#assign rate1 = toNumber((item.taxrate1)!0)>
-            <#assign rate2 = toNumber((item.taxrate2)!0)>
+            <#-- Convert percentage values: "13%" becomes 0.13. -->
+<#assign rate1 = toNumber((item.taxrate1)!0) / 100>
+<#assign rate2 = toNumber((item.taxrate2)!0) / 100>
 
-            <#assign closedSubtotal = closedSubtotal + lineAmount>
-            <#assign closedTax1 = closedTax1
-                + ((lineAmount * rate1)?round / 100)>
-            <#assign closedTax2 = closedTax2
-                + ((lineAmount * rate2)?round / 100)>
+<#-- Calculate each closed line's taxes, rounded to cents. -->
+<#assign lineTax1 = ((lineAmount * rate1 * 100)?round) / 100>
+<#assign lineTax2 = ((lineAmount * rate2 * 100)?round) / 100>
+
+<#assign closedSubtotal = closedSubtotal + lineAmount>
+<#assign closedTax1 = closedTax1 + lineTax1>
+<#assign closedTax2 = closedTax2 + lineTax2>
         </#if>
     </#list>
 </#if>

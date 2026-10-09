@@ -106,7 +106,7 @@ function mapReduce(error, record, runtime,render,email,search,task,format) {
       log.debug({title:'shipDate',details:shipDate})
       log.debug('selectedPurchaseOrder', selectedPurchaseOrder[0])
       
-      var subForConShipping = selectedPurchaseOrder[0].subidto
+      var subForConShipping = selectedPurchaseOrder[0].subidto || selectedPurchaseOrder[0].subidfromid
       var location_new = selectedPurchaseOrder[0].location_new
       var location_name = selectedPurchaseOrder[0].locationto
       

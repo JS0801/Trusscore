@@ -204,7 +204,7 @@
 <td align="right" width="20%"><strong>Delivery Instruction:</strong></td>
 <td colspan="3" width="55%"><strong>${record.custbody_bol_delivery_instructions}</strong></td>
 <td style="font-weight: bold; color: #333333;" align="right" width="15%">${record.subtotal@label}</td>
-<td align="right" width="15%">${openSubtotal?string["#,##0.00"]}</td>
+<td align="right" width="15%">$ ${openSubtotal?string["#,##0.00"]}</td>
 </tr>
 <!--<tr>
 	<td colspan="4" width="70%">&nbsp;</td>
@@ -214,18 +214,18 @@
 <tr>
 <td colspan="4" width="70%">&nbsp;</td>
 <td align="right" width="15%"><#if record.taxtotal?has_content><strong>GST/HST (${record.item[0].taxrate1})</strong><#else>&nbsp;</#if></td>
-<td align="right" width="15%"><#if record.taxtotal?has_content>${openTax1?string["#,##0.00"]}<#else>&nbsp;</#if></td>
+<td align="right" width="15%"><#if record.taxtotal?has_content>$ ${openTax1?string["#,##0.00"]}<#else>&nbsp;</#if></td>
 </tr>
 <tr>
 <td colspan="4" width="70%">&nbsp;</td>
 <td align="right" width="15%"><strong>${record.tax2total@label}</strong> <#if record.item[0].taxrate2!=0><strong>(${record.item[0].taxrate2})</strong><#else>&nbsp;</#if></td>
-<td align="right" width="15%"><#if record.taxtotal?has_content>${openTax2?string["#,##0.00"]}<#else>&nbsp;</#if></td>
+<td align="right" width="15%"><#if record.taxtotal?has_content>$ ${openTax2?string["#,##0.00"]}<#else>&nbsp;</#if></td>
 </tr>
 <#elseif record.subsidiary == "TCU" || record.subsidiary == "TRE">
 <tr>
 <td colspan="4" width="70%">&nbsp;</td>
 <td align="right" width="15%"><#if record.taxtotal?has_content><strong>US Sales Tax</strong><#else>&nbsp;</#if></td>
-<td align="right" width="15%"><#if record.taxtotal?has_content>${openTax1?string["#,##0.00"]}<#else>&nbsp;</#if></td>
+<td align="right" width="15%"><#if record.taxtotal?has_content>$ ${openTax1?string["#,##0.00"]}<#else>&nbsp;</#if></td>
 </tr>
 </#if>
 <tr>
@@ -237,7 +237,7 @@
 <td align="right" width="35%">${record.currencysymbol}</td>
 <td colspan="3" width="35%">&nbsp;</td>
 <td style="font-weight: bold; color: #333333;" align="right" width="15%">${record.total@label}</td>
-<td align="right" width="15%">${openTotal?string["#,##0.00"]}</td>
+<td align="right" width="15%">$ ${openTotal?string["#,##0.00"]}</td>
 </tr></table>
 <p><span style="font-size: 10px;"><strong>Please review items and estimated ship date and advise if there are any concerns within 1 business day.</strong><br /><br /><span class="ui-provider ed bhs bdq bwv bww bwx bwy bwz bxa bxb bxc bxd bxe bxf bxg bxh bxi bxj bxk bxl bxm bxn bxo bxp bxq bxr bxs bxt bxu bxv bxw bxx bxy bxz bya" dir="ltr">After then, please consider this order confirmed and no further changes will be accepted. We cannot accept cancellations on this order. Please consider this order confirmed and non-cancellable.&nbsp;</span><br /></span></p>
 <p><span style="font-size: 10px;"><br /><#if record.entity.entityid != "CUS13592">Reminder, please notify Trusscore, of any shipping discrepancies within 5 business days of receiving&nbsp;any&nbsp;shipments.<#else>Reminder, please notify, of any shipping discrepancies within 5 business days of receiving&nbsp;any&nbsp;shipments.</#if></span></p>

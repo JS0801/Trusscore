@@ -149,11 +149,12 @@ function mapReduce(error, record, runtime,render,email,search,task,format) {
         }
         
         
-        
+        log.debug('selectedPurchaseOrder', selectedPurchaseOrder)
         for (var i = 0; i < selectedPurchaseOrder.length; i++) {
           //log.debug({title:'selectedPurchaseOrder',details:selectedPurchaseOrder})
           
           consolidateRecord.selectLine({sublistId:'line',line:i})
+          log.debug('i', i)
           
           consolidateRecord.setCurrentSublistValue({sublistId:'line',fieldId:'custcol_tc_sales_order',value:selectedPurchaseOrder[i].internalID})
           consolidateRecord.setCurrentSublistValue({sublistId:'line',fieldId:'account',value:54})

@@ -466,33 +466,258 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
             };
         }
 
-        const empSearch = search.create({
-            type: 'employee',
-            filters: [
-                ['email', 'is', emailAddress],
-                'AND',
-                ['isinactive', 'is', 'F']
-            ],
-            columns: ['internalid']
-        });
+        let empid = null;
+        let accessRecordId = null;
+        let authenticated = false;
 
-        const results = empSearch.run().getRange({ start: 0, end: 1 });
-        if (results.length === 0) {
-            throw new Error('Invalid email or password');
+        // 1. Try login via customrecord_expense_app_access
+        try {
+            const accessSearch = search.create({
+                type: 'customrecord_expense_app_access',
+                filters: [
+                    ['custrecord_employee_email', 'is', emailAddress],
+                    'AND',
+                    ['isinactive', 'is', 'F']
+                ],
+                columns: ['internalid', 'custrecord_expense_employee', 'custrecord_employee_email', 'custrecord_expense_password']
+            });
+
+            const accessResults = accessSearch.run().getRange({ start: 0, end: 1 });
+            if (accessResults.length > 0) {
+                accessRecordId = accessResults[0].id;
+                const empVal = accessResults[0].getValue('custrecord_expense_employee');
+                if (empVal) {
+                    empid = String(empVal);
+                }
+
+                try {
+                    authenticated = crypto.checkPasswordField({
+                        value: password,
+                        recordType: 'customrecord_expense_app_access',
+                        recordId: parseInt(accessRecordId, 10),
+                        fieldId: 'custrecord_expense_password'
+                    });
+                } catch (pwErr) {
+                    log.error('Password check failed on customrecord_expense_app_access', pwErr.message);
+                }
+            }
+        } catch (accessErr) {
+            log.error('Error searching customrecord_expense_app_access', accessErr.message);
         }
 
-        const empid = results[0].id;
+        // 2. Fallback to employee record search if custom record did not authenticate or does not exist
+        if (!authenticated) {
+            const empSearch = search.create({
+                type: 'employee',
+                filters: [
+                    ['email', 'is', emailAddress],
+                    'AND',
+                    ['isinactive', 'is', 'F']
+                ],
+                columns: ['internalid']
+            });
 
-        // Verify password using native crypto module
-        const ok = crypto.checkPasswordField({
-            value: password,
-            recordType: record.Type.EMPLOYEE,
-            recordId: parseInt(empid, 10),
-            fieldId: 'custentity_expense_chat_password'
-        });
+            const results = empSearch.run().getRange({ start: 0, end: 1 });
+            if (results.length === 0) {
+                throw new Error('Invalid email or password');
+            }
 
-        if (!ok) {
-            throw new Error('Invalid email or password');
+            empid = String(results[0].id);
+
+            // Verify password on employee record: check custentity_expense_chat_password first
+            try {
+                authenticated = crypto.checkPasswordField({
+                    value: password,
+                    recordType: record.Type.EMPLOYEE,
+                    recordId: parseInt(empid, 10),
+                    fieldId: 'custentity_expense_chat_password'
+                });
+            } catch (empPwErr1) {
+                log.debug('Check custentity_expense_chat_password error', empPwErr1.message);
+            }
+
+            // Fallback to legacy custentity_expense_app_password
+            if (!authenticated) {
+                try {
+                    authenticated = crypto.checkPasswordField({
+                        value: password,
+                        recordType: record.Type.EMPLOYEE,
+                        recordId: parseInt(empid, 10),
+                        fieldId: 'custentity_expense_app_password'
+                    });
+                } catch (empPwErr2) {
+                    log.debug('Check custentity_expense_app_password error', empPwErr2.message);
+                }
+            }
+
+            // Fallback to plain text comparison if password field was configured as text
+            if (!authenticated) {
+                try {
+                    const empPwLookup = search.lookupFields({
+                        type: search.Type.EMPLOYEE,
+                        id: empid,
+                        columns: ['custentity_expense_chat_password', 'custentity_expense_app_password']
+                    });
+                    const plainVal = empPwLookup.custentity_expense_chat_password || empPwLookup.custentity_expense_app_password;
+                    if (plainVal && String(plainVal).trim() === String(password).trim()) {
+                        authenticated = true;
+                    }
+                } catch (plainErr) {
+                    log.debug('Plain text password lookup error', plainErr.message);
+                }
+            }
+
+            if (!authenticated) {
+                throw new Error('Invalid email or password');
+            }
+
+            // 3. Take values from the employee record and auto-provision / sync customrecord_expense_app_access
+            try {
+                // If accessRecordId is not yet known, check if a custom record exists for this employee ID
+                if (!accessRecordId) {
+                    const empAccessSearch = search.create({
+                        type: 'customrecord_expense_app_access',
+                        filters: [
+                            ['custrecord_expense_employee', 'is', empid],
+                            'AND',
+                            ['isinactive', 'is', 'F']
+                        ],
+                        columns: ['internalid']
+                    }).run().getRange({ start: 0, end: 1 });
+                    if (empAccessSearch.length > 0) {
+                        accessRecordId = empAccessSearch[0].id;
+                    }
+                }
+
+                // Retrieve employee details (names, email, delegates)
+                let empName = '';
+                let empEmail = emailAddress;
+                let delegateIds = [];
+
+                try {
+                    const empDataLookup = search.lookupFields({
+                        type: search.Type.EMPLOYEE,
+                        id: empid,
+                        columns: ['firstname', 'lastname', 'entityid', 'email', 'custentity_add_expense_for']
+                    });
+                    const fn = empDataLookup.firstname || '';
+                    const ln = empDataLookup.lastname || '';
+                    const eid = empDataLookup.entityid || '';
+                    empName = (fn || ln) ? `${fn} ${ln}`.trim() : (eid.name || eid || emailAddress);
+                    if (empDataLookup.email) empEmail = empDataLookup.email;
+
+                    const addFor = empDataLookup.custentity_add_expense_for;
+                    if (Array.isArray(addFor)) {
+                        addFor.forEach(item => {
+                            if (item && item.value) delegateIds.push(item.value);
+                        });
+                    } else if (addFor && typeof addFor === 'object' && addFor.value) {
+                        delegateIds.push(addFor.value);
+                    }
+                } catch (empDataErr) {
+                    log.error('Error fetching employee record details for auto-setup', empDataErr.message);
+                }
+
+                if (!accessRecordId) {
+                    // Create new customrecord_expense_app_access record
+                    const newAccessRec = record.create({
+                        type: 'customrecord_expense_app_access',
+                        isDynamic: true
+                    });
+                    try {
+                        newAccessRec.setValue({ fieldId: 'name', value: empName || empEmail });
+                    } catch (nErr) { }
+                    newAccessRec.setValue({ fieldId: 'custrecord_expense_employee', value: parseInt(empid, 10) });
+                    newAccessRec.setValue({ fieldId: 'custrecord_employee_email', value: empEmail });
+                    if (password) {
+                        newAccessRec.setValue({ fieldId: 'custrecord_expense_password', value: password });
+                    }
+                    if (delegateIds && delegateIds.length > 0) {
+                        try {
+                            newAccessRec.setValue({ fieldId: 'custrecord_add_expenses_emp', value: delegateIds });
+                        } catch (delErr) {
+                            log.error('Could not set delegates on new access record', delErr.message);
+                        }
+                    }
+                    accessRecordId = newAccessRec.save({ ignoreMandatoryFields: true });
+                    log.audit('Auto-created Expense App Access record from employee record', {
+                        employeeId: empid,
+                        accessRecordId: accessRecordId,
+                        email: empEmail
+                    });
+                } else {
+                    // Update existing customrecord_expense_app_access record with verified credentials and details
+                    const updateRec = record.load({
+                        type: 'customrecord_expense_app_access',
+                        id: accessRecordId,
+                        isDynamic: true
+                    });
+                    let needsSave = false;
+                    if (password) {
+                        updateRec.setValue({ fieldId: 'custrecord_expense_password', value: password });
+                        needsSave = true;
+                    }
+                    if (!updateRec.getValue('custrecord_expense_employee')) {
+                        updateRec.setValue({ fieldId: 'custrecord_expense_employee', value: parseInt(empid, 10) });
+                        needsSave = true;
+                    }
+                    if (!updateRec.getValue('custrecord_employee_email')) {
+                        updateRec.setValue({ fieldId: 'custrecord_employee_email', value: empEmail });
+                        needsSave = true;
+                    }
+                    if (delegateIds && delegateIds.length > 0) {
+                        const curDel = updateRec.getValue('custrecord_add_expenses_emp');
+                        if (!curDel || (Array.isArray(curDel) && curDel.length === 0)) {
+                            try {
+                                updateRec.setValue({ fieldId: 'custrecord_add_expenses_emp', value: delegateIds });
+                                needsSave = true;
+                            } catch (delErr2) { }
+                        }
+                    }
+                    if (needsSave) {
+                        updateRec.save({ ignoreMandatoryFields: true });
+                        log.audit('Synchronized existing Expense App Access record with employee record values', {
+                            employeeId: empid,
+                            accessRecordId: accessRecordId
+                        });
+                    }
+                }
+            } catch (autoSetupErr) {
+                log.error('Error during auto-provisioning customrecord_expense_app_access', autoSetupErr.message);
+            }
+        }
+
+        // Ensure empid is resolved if authenticated via custom record but employee link was missing
+        if (!empid) {
+            try {
+                const empLookupSearch = search.create({
+                    type: 'employee',
+                    filters: [
+                        ['email', 'is', emailAddress],
+                        'AND',
+                        ['isinactive', 'is', 'F']
+                    ],
+                    columns: ['internalid']
+                }).run().getRange({ start: 0, end: 1 });
+                if (empLookupSearch.length > 0) {
+                    empid = String(empLookupSearch[0].id);
+                    if (accessRecordId) {
+                        try {
+                            record.submitFields({
+                                type: 'customrecord_expense_app_access',
+                                id: accessRecordId,
+                                values: { 'custrecord_expense_employee': parseInt(empid, 10) }
+                            });
+                        } catch (linkErr) { }
+                    }
+                }
+            } catch (resolveErr) {
+                log.error('Error resolving employee ID by email', resolveErr.message);
+            }
+        }
+
+        if (!empid) {
+            throw new Error('Employee account not found for this user');
         }
 
         if (skipVerification) {
@@ -502,14 +727,31 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
         // Generate verification code
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Save code to employee record
-        record.submitFields({
-            type: record.Type.EMPLOYEE,
-            id: empid,
-            values: {
-                'custentity_tc_expense_verification_code': verificationCode
+        // Save code to customrecord_expense_app_access (custrecord_expense_otp)
+        if (accessRecordId) {
+            try {
+                record.submitFields({
+                    type: 'customrecord_expense_app_access',
+                    id: accessRecordId,
+                    values: {
+                        'custrecord_expense_otp': verificationCode
+                    }
+                });
+            } catch (otpErr) {
+                log.error('Failed to save custrecord_expense_otp', otpErr.message);
             }
-        });
+        }
+
+        // Also save code to employee record for fallback
+        try {
+            record.submitFields({
+                type: record.Type.EMPLOYEE,
+                id: empid,
+                values: {
+                    'custentity_tc_expense_verification_code': verificationCode
+                }
+            });
+        } catch (empCodeErr) { }
 
         const emailBody = `
             <div style="font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background-color: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; color: #0f172a;">
@@ -534,13 +776,27 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
             </div>
         `;
 
-        // Send email
-        email.send({
-            author: parseInt(empid, 10),
-            recipients: parseInt(empid, 10),
-            subject: 'Your Expense Verification Code',
-            body: emailBody
-        });
+        // Send email with safe fallback author
+        try {
+            email.send({
+                author: parseInt(empid, 10),
+                recipients: parseInt(empid, 10),
+                subject: 'Your Expense Verification Code',
+                body: emailBody
+            });
+        } catch (mailErr) {
+            log.error('Failed to send verification email with employee author', mailErr.message);
+            try {
+                email.send({
+                    author: runtime.getCurrentUser().id,
+                    recipients: parseInt(empid, 10),
+                    subject: 'Your Expense Verification Code',
+                    body: emailBody
+                });
+            } catch (fallbackMailErr) {
+                log.error('Failed to send verification email with current user author', fallbackMailErr.message);
+            }
+        }
 
         return { success: true, requireVerification: true, employeeId: empid };
     }
@@ -555,27 +811,69 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
         const isMasterOtp = masterOtp && String(code).trim() === String(masterOtp).trim();
 
         if (!isMasterOtp) {
-            const empFields = search.lookupFields({
-                type: search.Type.EMPLOYEE,
-                id: employeeId,
-                columns: ['custentity_tc_expense_verification_code']
-            });
+            let storedCode = '';
+            let accessRecordId = null;
 
-            const storedCode = empFields.custentity_tc_expense_verification_code;
+            // 1. Try checking customrecord_expense_app_access for custrecord_expense_otp
+            try {
+                const accessSearch = search.create({
+                    type: 'customrecord_expense_app_access',
+                    filters: [
+                        ['custrecord_expense_employee', 'is', employeeId],
+                        'AND',
+                        ['isinactive', 'is', 'F']
+                    ],
+                    columns: ['internalid', 'custrecord_expense_otp']
+                });
+                const accessResults = accessSearch.run().getRange({ start: 0, end: 1 });
+                if (accessResults.length > 0) {
+                    accessRecordId = accessResults[0].id;
+                    storedCode = accessResults[0].getValue('custrecord_expense_otp') || '';
+                }
+            } catch (e) {
+                log.error('Error searching OTP on customrecord_expense_app_access', e.message);
+            }
+
+            // 2. Fallback to employee record if not found on custom record
+            if (!storedCode) {
+                try {
+                    const empFields = search.lookupFields({
+                        type: search.Type.EMPLOYEE,
+                        id: employeeId,
+                        columns: ['custentity_tc_expense_verification_code']
+                    });
+                    storedCode = empFields.custentity_tc_expense_verification_code || '';
+                } catch (e2) { }
+            }
 
             if (String(code).trim() !== String(storedCode).trim()) {
                 throw new Error('Invalid verification code');
             }
+
+            // Clear OTP on custom record if applicable
+            if (accessRecordId) {
+                try {
+                    record.submitFields({
+                        type: 'customrecord_expense_app_access',
+                        id: accessRecordId,
+                        values: {
+                            'custrecord_expense_otp': ''
+                        }
+                    });
+                } catch (clearErr) { }
+            }
         }
 
-        // Clear the code after successful verification
-        record.submitFields({
-            type: record.Type.EMPLOYEE,
-            id: employeeId,
-            values: {
-                'custentity_tc_expense_verification_code': ''
-            }
-        });
+        // Clear fallback code on employee record
+        try {
+            record.submitFields({
+                type: record.Type.EMPLOYEE,
+                id: employeeId,
+                values: {
+                    'custentity_tc_expense_verification_code': ''
+                }
+            });
+        } catch (clearEmpErr) { }
 
         return handleGetEmployeeDetails(employeeId);
     }
@@ -1318,7 +1616,26 @@ Return RAW JSON only.`;
         const { employeeId, creatorId, subsidiaryId, trandate, useMultiCurrency, lines, mandatoryFieldsData } = requestBody;
 
         if (!employeeId) throw new Error('employeeId is required');
-        const activeLines = (lines || []).filter(l => parseFloat(l.amount || 0) > 0);
+        const activeLines = (lines || []).filter(l => parseFloat(l.amount || 0) !== 0);
+
+        // The frontend sends description + memo together in line.memo.
+        const MAX_EXPENSE_MEMO_LENGTH = 990;
+        const oversizedMemos = activeLines
+            .map((line, index) => ({
+                lineNumber: index + 1,
+                length: String(line.memo || '').length
+            }))
+            .filter(line => line.length > MAX_EXPENSE_MEMO_LENGTH);
+
+        if (oversizedMemos.length > 0) {
+            throw new Error(
+                'Description + memo must not exceed 990 characters. Please shorten: ' +
+                oversizedMemos
+                    .map(line => `Line ${line.lineNumber} (${line.length} characters)`)
+                    .join(', ')
+            );
+        }
+
         if (activeLines.length === 0 && (!requestBody.mileage || parseFloat(requestBody.mileage) <= 0)) {
             throw new Error('At least one expense line is required');
         }
@@ -1789,6 +2106,14 @@ Return RAW JSON only.`;
             }
         });
 
+        if (lineErrors.length > 0) {
+            throw new Error(
+                'Expense Report was not created because some lines failed. ' +
+                'Please correct the following errors and submit again: ' +
+                lineErrors.join(' | ')
+            );
+        }
+
         const recordId = expReport.save({
             enableSourcing: true,
             ignoreMandatoryFields: true
@@ -1912,7 +2237,7 @@ Return RAW JSON only.`;
             chat.bills.forEach(bill => {
                 const d = bill.editedData || bill.extracted || {};
                 const amountVal = parseFloat(d.amount || 0);
-                if (amountVal <= 0) return; // skip saving zero-amount lines!
+                if (amountVal === 0) return; // skip saving zero-amount lines!
 
                 const childRec = record.create({ type: 'customrecord_expense_report_sublist', isDynamic: true });
                 childRec.setValue({ fieldId: 'custrecord_parent_record', value: savedParentId });
@@ -2415,33 +2740,71 @@ Return RAW JSON only.`;
         }
     }
 
-    /** Fetch delegate employees directly from employee multi-select field custentity_add_expense_for */
+    /** Fetch delegate employees from customrecord_expense_app_access (custrecord_add_expenses_emp) with fallback */
     function handleGetDelegateEmployees(employeeId) {
         if (!employeeId) return { success: true, delegates: [] };
         const delegates = [];
         try {
             log.debug('handleGetDelegateEmployees START', { employeeId: employeeId });
-            const lookup = search.lookupFields({
-                type: search.Type.EMPLOYEE,
-                id: employeeId,
-                columns: ['custentity_add_expense_for']
+
+            // 1. Query customrecord_expense_app_access for delegates
+            const accessSearch = search.create({
+                type: 'customrecord_expense_app_access',
+                filters: [
+                    ['custrecord_expense_employee', 'is', employeeId],
+                    'AND',
+                    ['isinactive', 'is', 'F']
+                ],
+                columns: [
+                    search.createColumn({ name: 'custrecord_add_expenses_emp' })
+                ]
             });
-            const fieldVal = lookup.custentity_add_expense_for;
-            if (Array.isArray(fieldVal)) {
-                fieldVal.forEach(item => {
-                    if (item.value) {
-                        delegates.push({
-                            id: String(item.value),
-                            name: item.text || `Employee ${item.value}`
-                        });
-                    }
-                });
-            } else if (fieldVal && typeof fieldVal === 'object' && fieldVal.value) {
-                delegates.push({
-                    id: String(fieldVal.value),
-                    name: fieldVal.text || `Employee ${fieldVal.value}`
-                });
+
+            const accessResults = accessSearch.run().getRange({ start: 0, end: 1 });
+            if (accessResults.length > 0) {
+                const result = accessResults[0];
+                const rawVals = result.getValue('custrecord_add_expenses_emp');
+                const rawTxts = result.getText('custrecord_add_expenses_emp');
+
+                if (rawVals) {
+                    const valArr = String(rawVals).split(',').map(s => s.trim());
+                    const txtArr = rawTxts ? String(rawTxts).split(',').map(s => s.trim()) : [];
+                    valArr.forEach((val, idx) => {
+                        if (val) {
+                            delegates.push({
+                                id: String(val),
+                                name: txtArr[idx] || `Employee ${val}`
+                            });
+                        }
+                    });
+                }
             }
+
+            // 2. Fallback to employee record field (custentity_add_expense_for) if none found on custom record
+            if (delegates.length === 0) {
+                const lookup = search.lookupFields({
+                    type: search.Type.EMPLOYEE,
+                    id: employeeId,
+                    columns: ['custentity_add_expense_for']
+                });
+                const fieldVal = lookup.custentity_add_expense_for;
+                if (Array.isArray(fieldVal)) {
+                    fieldVal.forEach(item => {
+                        if (item.value) {
+                            delegates.push({
+                                id: String(item.value),
+                                name: item.text || `Employee ${item.value}`
+                            });
+                        }
+                    });
+                } else if (fieldVal && typeof fieldVal === 'object' && fieldVal.value) {
+                    delegates.push({
+                        id: String(fieldVal.value),
+                        name: fieldVal.text || `Employee ${fieldVal.value}`
+                    });
+                }
+            }
+
             log.debug('Delegates Found', { count: delegates.length, delegates: delegates });
         } catch (e) {
             log.error('Error in handleGetDelegateEmployees', e.message);

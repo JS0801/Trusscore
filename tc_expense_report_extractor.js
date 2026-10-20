@@ -490,6 +490,11 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
                     empid = String(empVal);
                 }
 
+
+                log.debug('Employee', {
+                  emailAddress, accessRecordId, password
+                })
+
                 try {
                     authenticated = crypto.checkPasswordField({
                         value: password,
@@ -497,6 +502,8 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
                         recordId: parseInt(accessRecordId, 10),
                         fieldId: 'custrecord_expense_password'
                     });
+
+                  log.debug('authenticated', authenticated)
                 } catch (pwErr) {
                     log.error('Password check failed on customrecord_expense_app_access', pwErr.message);
                 }

@@ -543,17 +543,17 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
                 log.debug('Check custentity_expense_chat_password error', empPwErr1.message);
             }
 
-            // Fallback to legacy custentity_expense_app_password
+            // Fallback to legacy custentity_expense_chat_password
             if (!authenticated) {
                 try {
                     authenticated = crypto.checkPasswordField({
                         value: password,
                         recordType: record.Type.EMPLOYEE,
                         recordId: parseInt(empid, 10),
-                        fieldId: 'custentity_expense_app_password'
+                        fieldId: 'custentity_expense_chat_password'
                     });
                 } catch (empPwErr2) {
-                    log.debug('Check custentity_expense_app_password error', empPwErr2.message);
+                    log.debug('Check custentity_expense_chat_password error', empPwErr2.message);
                 }
             }
 
@@ -563,9 +563,9 @@ define(['N/file', 'N/record', 'N/https', 'N/log', 'N/search', 'N/format', 'N/que
                     const empPwLookup = search.lookupFields({
                         type: search.Type.EMPLOYEE,
                         id: empid,
-                        columns: ['custentity_expense_chat_password', 'custentity_expense_app_password']
+                        columns: ['custentity_expense_chat_password', 'custentity_expense_chat_password']
                     });
-                    const plainVal = empPwLookup.custentity_expense_chat_password || empPwLookup.custentity_expense_app_password;
+                    const plainVal = empPwLookup.custentity_expense_chat_password || empPwLookup.custentity_expense_chat_password;
                     if (plainVal && String(plainVal).trim() === String(password).trim()) {
                         authenticated = true;
                     }

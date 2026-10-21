@@ -106,6 +106,10 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                     const data = getChildInventoryDetails(body.payload.csrPickTaskId);
                     context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
                     context.response.write(JSON.stringify({ success: true, data: data }));
+                } else if (action === 'updateChildCrate') {
+                    const result = updateChildCrate(body.payload || {});
+                    context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
+                    context.response.write(JSON.stringify(result));
                 } else if (action === 'updateChildInventory') {
                     const result = updateChildInventory(body.payload);
                     context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
@@ -1617,7 +1621,8 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 search.createColumn({ name: 'custrecord_lot_' }),
                 search.createColumn({ name: 'custrecord__lot_quantity' }),
                 search.createColumn({ name: 'custrecord_item' }),
-                search.createColumn({ name: 'created' })
+                search.createColumn({ name: 'created' }),
+                search.createColumn({ name: 'custrecord_crate_' })
             ]
         });
 
@@ -1628,7 +1633,8 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 lotText: result.getText({ name: 'custrecord_lot_' }) || result.getValue({ name: 'custrecord_lot_' }),
                 quantity: result.getValue({ name: 'custrecord__lot_quantity' }),
                 itemText: result.getText({ name: 'custrecord_item' }),
-                dateCreated: result.getValue({ name: 'created' })
+                dateCreated: result.getValue({ name: 'created' }),
+                crateNumber: result.getValue({ name: 'custrecord_crate_' }) || ''
             });
             return true;
         });
@@ -1700,6 +1706,30 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             return { success: true };
         } catch (e) {
             log.error('Error in deleteChildInventory', e);
+            return { success: false, error: e.message };
+        }
+    }
+
+    // Optional crate metadata only; quantity, lot and task status are not edited here.
+    function updateChildCrate(payload) {
+        try {
+            if (!payload.detailId || !payload.pickTaskId || typeof payload.crateNumber !== 'string') {
+                throw new Error('Pick detail, pick task and crate number are required. Use an empty crate number to clear it.');
+            }
+            var childRec = record.load({
+                type: 'customrecord_csr_pick_task_inventory_det',
+                id: payload.detailId,
+                isDynamic: false
+            });
+            if (String(childRec.getValue('custrecord_csr_pick_task')) !== String(payload.pickTaskId)) {
+                throw new Error('This picked detail does not belong to the selected pick task.');
+            }
+            var crateNumber = payload.crateNumber.trim();
+            childRec.setValue({ fieldId: 'custrecord_crate_', value: crateNumber });
+            childRec.save();
+            return { success: true, crateNumber: crateNumber };
+        } catch (e) {
+            log.error('Error in updateChildCrate', e);
             return { success: false, error: e.message };
         }
     }

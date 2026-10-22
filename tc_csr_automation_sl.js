@@ -1773,7 +1773,23 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
         }
         const csrNumber = String(header.tranid || '').trim();
         if (!csrNumber || csrNumber.length > 32) throw new Error('CSR number must contain 1–32 characters for this label.');
-        const columns = ['internalid', 'custrecord_crate_', 'custrecord_item', 'custrecord_lot_', 'custrecord__lot_quantity'];
+        // Match by the CSR's pick-task link, not item alone: repeated items may have different unit weights.
+        const weightByTask = new Map();
+        const weightPages = query.runSuiteQLPaged({
+            query: `SELECT id, custcol_csr_pick_task_link AS task_id,
+                custcol_if_bol_col_weight_item AS unit_weight
+                FROM TransactionLine
+                WHERE transaction = ? AND custcol_csr_pick_task_link IS NOT NULL
+                ORDER BY id`, params: [Number(csrId)], pageSize: 1000
+        });
+        for (const range of weightPages.pageRanges) {
+            for (const line of weightPages.fetch({ index: range.index }).data.asMappedResults()) {
+                const taskId = String(line.task_id);
+                if (weightByTask.has(taskId)) throw new Error('Multiple CSR lines link to pick task ' + taskId + '.');
+                weightByTask.set(taskId, line.unit_weight);
+            }
+        }
+        const columns = ['internalid', 'custrecord_crate_', 'custrecord_item', 'custrecord_lot_', 'custrecord__lot_quantity', 'custrecord_csr_pick_task'];
         const paged = search.create({
             type: 'customrecord_csr_pick_task_inventory_det',
             filters: [
@@ -1791,13 +1807,24 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             if (runtime.getCurrentScript().getRemainingUsage() < 150) throw new Error('Too many pick details for one print request. Contact your administrator.');
             for (const row of paged.fetch({ index: range.index }).data) {
                 const crateNumber = String(row.getValue({ name: 'custrecord_crate_' }) || '').trim();
+                const itemName = String(row.getText({ name: 'custrecord_item' }) || '').trim();
+                if (itemName.toUpperCase() === 'CRATING') continue;
                 if (!crateNumber) { unassignedCount++; continue; }
-                if (!crates.has(crateNumber)) crates.set(crateNumber, { crateNumber, lines: new Map(), detailCount: 0 });
+                if (!crates.has(crateNumber)) crates.set(crateNumber, { crateNumber, lines: new Map(), detailCount: 0, weight: 0, missingWeightCount: 0 });
                 const crate = crates.get(crateNumber);
                 const item = String(row.getValue({ name: 'custrecord_item' }) || '');
                 const lot = String(row.getValue({ name: 'custrecord_lot_' }) || '');
                 const quantity = Number(row.getValue({ name: 'custrecord__lot_quantity' }));
                 if (!item || !Number.isFinite(quantity) || quantity <= 0) throw new Error('Invalid picked detail ' + row.id + '.');
+                const taskId = String(row.getValue({ name: 'custrecord_csr_pick_task' }) || '');
+                const rawWeight = weightByTask.get(taskId);
+                const unitWeight = Number(rawWeight);
+                if (rawWeight === undefined || rawWeight === null || String(rawWeight).trim() === '') {
+                    crate.missingWeightCount++;
+                } else {
+                    if (!Number.isFinite(unitWeight) || unitWeight < 0) throw new Error('Invalid CSR unit weight for pick task ' + taskId + '.');
+                    crate.weight += unitWeight * quantity;
+                }
                 const key = JSON.stringify([item, lot]);
                 if (!crate.lines.has(key)) crate.lines.set(key, {
                     itemid: String(row.getText({ name: 'custrecord_item' }) || item),
@@ -1809,6 +1836,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
         }
         const result = { csrId, csrNumber, unassignedCount, crates: Array.from(crates.values()).map(crate => ({
             crateNumber: crate.crateNumber, detailCount: crate.detailCount,
+            weight: Number(crate.weight.toFixed(6)), missingWeightCount: crate.missingWeightCount,
             lines: Array.from(crate.lines.values()).map(line => ({ ...line, quantity: Number(line.quantity.toFixed(6)) }))
                 .sort((a, b) => a.itemid.localeCompare(b.itemid) || a.lotnumber.localeCompare(b.lotnumber))
         })).sort((a, b) => a.crateNumber.localeCompare(b.crateNumber, undefined, { numeric: true })) };
@@ -1823,9 +1851,9 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
         let submitted = false;
         context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
         printLog(traceId, 'START', { action, userId: runtime.getCurrentUser().id,
-            csrId: payload.csrId, crateNumber: payload.crateNumber, printerId: payload.printerId, copies: payload.copies,
-            testOnly: payload.testOnly === true });
+            csrId: payload.csrId, crateNumber: payload.crateNumber, printerId: payload.printerId, copies: payload.copies });
         try {
+            if (payload.testOnly === true) throw new Error('Test generation has been removed. Refresh the Picking App and use Print Label.');
             const data = getCratePrintData(payload.csrId, traceId);
             if (action === 'getCratePrintOptions') {
                 context.response.write(JSON.stringify({ success: true, traceId, data: { ...data, printers: CRATE_PRINT.printers } }));
@@ -1834,6 +1862,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             const crateNumber = String(payload.crateNumber || '').trim();
             const crate = data.crates.find(c => c.crateNumber === crateNumber);
             if (!crate || !crate.lines.length) throw new Error('No saved picked quantities exist for this crate. Refresh and check crate assignments.');
+            if (crate.missingWeightCount) throw new Error('Enter CSR unit weights for all items in this crate before printing. Zero is allowed.');
             const printerId = printId(payload.printerId, 'Printer');
             if (!CRATE_PRINT.printers.some(p => p.id === printerId)) throw new Error('Select a configured 300-DPI printer.');
             const copies = Number(payload.copies);
@@ -1842,11 +1871,11 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 throw new Error('An item, lot, quantity or crate number is too long for this label. Ask your administrator to adjust the layout.');
             }
             const dataSet = [{ csrnumber: data.csrNumber, cratenumber: crateNumber,
-                netweight: '', grossweight: '', printqty: String(copies), lines: crate.lines, lines_json: JSON.stringify(crate.lines) }];
+                netweight: String(crate.weight), grossweight: String(crate.weight), printqty: String(copies), lines: crate.lines, lines_json: JSON.stringify(crate.lines) }];
             const pageCount = Math.ceil(crate.lines.length / 12);
             const options = { source: 'Trusscore Picking ' + traceId, templateId: CRATE_PRINT.templateId,
                 printer: Number(printerId), async: false,
-                processType: payload.testOnly === true ? 'GENERATE_AND_RETURN' : 'GENERATE_BEFORE_SEND', dataSet };
+                processType: 'GENERATE_BEFORE_SEND', dataSet };
             printLog(traceId, 'RF_REQUEST', { csrId: data.csrId, crateNumber, printerId, templateId: CRATE_PRINT.templateId,
                 processType: options.processType, copies, pageCount, lines: crate.lines.length, detailCount: crate.detailCount });
             // Debug-level row details are optional; Audit keeps routine diagnostics compact.
@@ -1867,17 +1896,16 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             if (Number(response.code) < 200 || Number(response.code) >= 300 || result.success !== true) {
                 throw new Error('RF-SMART: ' + String(result.message || result.code || 'Request failed.').slice(0, 500));
             }
-            const receipt = { testOnly: payload.testOnly === true, csrNumber: data.csrNumber, crateNumber,
+            const receipt = { csrNumber: data.csrNumber, crateNumber,
                 printerId, copies, pageCount, apiRecId: rfPayload.apiRecId || null, logId: rfPayload.logId || null,
-                message: payload.testOnly === true ? 'Labels generated successfully. Nothing sent to the printer.' :
-                    'RF-SMART accepted the print request. Check the printer or RF-SMART print log for delivery.' };
+                message: 'RF-SMART accepted the print request. Check the printer or RF-SMART print log for delivery.' };
             printLog(traceId, 'COMPLETE', receipt);
             context.response.write(JSON.stringify({ success: true, traceId, data: receipt }));
         } catch (e) {
             printLog(traceId, 'FAILED', { message: e.message, stack: e.stack, durationMs: Date.now() - started,
-                submissionAttempted: submitted, testOnly: payload.testOnly === true }, true);
+                submissionAttempted: submitted }, true);
             context.response.write(JSON.stringify({ success: false, traceId, error: e.message,
-                uncertainSubmission: submitted && payload.testOnly !== true }));
+                uncertainSubmission: submitted }));
         }
     }
 

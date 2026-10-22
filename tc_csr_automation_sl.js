@@ -1842,7 +1842,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                 throw new Error('An item, lot, quantity or crate number is too long for this label. Ask your administrator to adjust the layout.');
             }
             const dataSet = [{ csrnumber: data.csrNumber, cratenumber: crateNumber,
-                netweight: '', grossweight: '', printqty: String(copies), lines: crate.lines }];
+                netweight: '', grossweight: '', printqty: String(copies), lines: crate.lines, lines_json: JSON.stringify(crate.lines) }];
             const pageCount = Math.ceil(crate.lines.length / 12);
             const options = { source: 'Trusscore Picking ' + traceId, templateId: CRATE_PRINT.templateId,
                 printer: Number(printerId), async: false,

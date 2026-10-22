@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  */
-define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/query'], (search, record, file, log, runtime, format, query) => {
+define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/query', 'N/https'], (search, record, file, log, runtime, format, query, https) => {
 
     const HTML_FILE_ID = '2595176';
 
@@ -68,6 +68,10 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             }
 
             const action = body.action;
+            if (action === 'getCratePrintOptions' || action === 'printCrateLabel') {
+                handleCratePrint(action, body.payload || {}, context);
+                return;
+            }
 
             try {
                 if (action === 'getData') {
@@ -1731,6 +1735,149 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
         } catch (e) {
             log.error('Error in updateChildCrate', e);
             return { success: false, error: e.message };
+        }
+    }
+
+    // Sandbox RF-SMART configuration. Change these IDs when deploying to another account.
+    const CRATE_PRINT = {
+        templateId: 18,
+        printers: [
+            { id: '101', name: 'Calg Zebra ZT410 — 300 DPI' },
+            { id: '102', name: 'Calg Shipping Zebra ZT410 — 300 DPI' }
+        ]
+    };
+
+    function printLog(traceId, stage, details, error) {
+        log[error ? 'error' : 'audit']({
+            title: 'CSR_PRINT ' + stage + ' ' + traceId,
+            details: JSON.stringify(details).slice(0, 3900)
+        });
+    }
+
+    function printId(value, name) {
+        if (!/^[1-9]\d*$/.test(String(value || ''))) throw new Error(name + ' must be a valid internal ID.');
+        return String(value);
+    }
+
+    function getCratePrintData(csrId, traceId) {
+        csrId = printId(csrId, 'CSR');
+        const header = search.lookupFields({ type: search.Type.TRANSACTION, id: csrId,
+            columns: ['tranid', 'subsidiary', 'custbody_ds_scrap_record'] });
+        const user = runtime.getCurrentUser();
+        const subsidiary = header.subsidiary && header.subsidiary[0] && header.subsidiary[0].value;
+        if (Number(user.role) !== 3 && (!subsidiary || String(subsidiary) !== String(user.subsidiary))) {
+            throw new Error('You cannot print labels for this CSR subsidiary.');
+        }
+        if (header.custbody_ds_scrap_record === true || header.custbody_ds_scrap_record === 'T') {
+            throw new Error('This CSR is cancelled.');
+        }
+        const csrNumber = String(header.tranid || '').trim();
+        if (!csrNumber || csrNumber.length > 32) throw new Error('CSR number must contain 1–32 characters for this label.');
+        const columns = ['internalid', 'custrecord_crate_', 'custrecord_item', 'custrecord_lot_', 'custrecord__lot_quantity'];
+        const paged = search.create({
+            type: 'customrecord_csr_pick_task_inventory_det',
+            filters: [
+                ['isinactive', 'is', 'F'], 'AND',
+                ['custrecord_csr_pick_task.custrecord_tc_csr_pt_csr', 'anyof', csrId], 'AND',
+                ['custrecord_csr_pick_task.isinactive', 'is', 'F'], 'AND',
+                ['custrecord_csr_pick_task.custrecord_tc_csr_pt_status', 'anyof', ['2', '3', '5']], 'AND',
+                ['custrecord__lot_quantity', 'greaterthan', '0']
+            ],
+            columns: columns.map(name => search.createColumn(name === 'internalid' ? { name, sort: search.Sort.ASC } : { name }))
+        }).runPaged({ pageSize: 1000 });
+        const crates = new Map();
+        let unassignedCount = 0;
+        for (const range of paged.pageRanges) {
+            if (runtime.getCurrentScript().getRemainingUsage() < 150) throw new Error('Too many pick details for one print request. Contact your administrator.');
+            for (const row of paged.fetch({ index: range.index }).data) {
+                const crateNumber = String(row.getValue({ name: 'custrecord_crate_' }) || '').trim();
+                if (!crateNumber) { unassignedCount++; continue; }
+                if (!crates.has(crateNumber)) crates.set(crateNumber, { crateNumber, lines: new Map(), detailCount: 0 });
+                const crate = crates.get(crateNumber);
+                const item = String(row.getValue({ name: 'custrecord_item' }) || '');
+                const lot = String(row.getValue({ name: 'custrecord_lot_' }) || '');
+                const quantity = Number(row.getValue({ name: 'custrecord__lot_quantity' }));
+                if (!item || !Number.isFinite(quantity) || quantity <= 0) throw new Error('Invalid picked detail ' + row.id + '.');
+                const key = JSON.stringify([item, lot]);
+                if (!crate.lines.has(key)) crate.lines.set(key, {
+                    itemid: String(row.getText({ name: 'custrecord_item' }) || item),
+                    lotnumber: String(row.getText({ name: 'custrecord_lot_' }) || lot || 'N/A'), quantity: 0
+                });
+                crate.lines.get(key).quantity += quantity;
+                crate.detailCount++;
+            }
+        }
+        const result = { csrId, csrNumber, unassignedCount, crates: Array.from(crates.values()).map(crate => ({
+            crateNumber: crate.crateNumber, detailCount: crate.detailCount,
+            lines: Array.from(crate.lines.values()).map(line => ({ ...line, quantity: Number(line.quantity.toFixed(6)) }))
+                .sort((a, b) => a.itemid.localeCompare(b.itemid) || a.lotnumber.localeCompare(b.lotnumber))
+        })).sort((a, b) => a.crateNumber.localeCompare(b.crateNumber, undefined, { numeric: true })) };
+        printLog(traceId, 'DATA_READY', { csrId, csrNumber, detailCount: paged.count,
+            unassignedCount, crates: result.crates.map(c => ({ crate: c.crateNumber, lines: c.lines.length })) });
+        return result;
+    }
+
+    function handleCratePrint(action, payload, context) {
+        const traceId = 'CP-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+        const started = Date.now();
+        let submitted = false;
+        context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
+        printLog(traceId, 'START', { action, userId: runtime.getCurrentUser().id,
+            csrId: payload.csrId, crateNumber: payload.crateNumber, printerId: payload.printerId, copies: payload.copies,
+            testOnly: payload.testOnly === true });
+        try {
+            const data = getCratePrintData(payload.csrId, traceId);
+            if (action === 'getCratePrintOptions') {
+                context.response.write(JSON.stringify({ success: true, traceId, data: { ...data, printers: CRATE_PRINT.printers } }));
+                return;
+            }
+            const crateNumber = String(payload.crateNumber || '').trim();
+            const crate = data.crates.find(c => c.crateNumber === crateNumber);
+            if (!crate || !crate.lines.length) throw new Error('No saved picked quantities exist for this crate. Refresh and check crate assignments.');
+            const printerId = printId(payload.printerId, 'Printer');
+            if (!CRATE_PRINT.printers.some(p => p.id === printerId)) throw new Error('Select a configured 300-DPI printer.');
+            const copies = Number(payload.copies);
+            if (!Number.isInteger(copies) || copies < 1 || copies > 20) throw new Error('Copies must be a whole number from 1 to 20.');
+            if (crateNumber.length > 24 || crate.lines.some(l => l.itemid.length > 34 || l.lotnumber.length > 30 || String(l.quantity).length > 10)) {
+                throw new Error('An item, lot, quantity or crate number is too long for this label. Ask your administrator to adjust the layout.');
+            }
+            const dataSet = [{ csrnumber: data.csrNumber, cratenumber: crateNumber,
+                netweight: '', grossweight: '', printqty: String(copies), lines: crate.lines }];
+            const pageCount = Math.ceil(crate.lines.length / 12);
+            const options = { source: 'Trusscore Picking ' + traceId, templateId: CRATE_PRINT.templateId,
+                printer: Number(printerId), async: false,
+                processType: payload.testOnly === true ? 'GENERATE_AND_RETURN' : 'GENERATE_BEFORE_SEND', dataSet };
+            printLog(traceId, 'RF_REQUEST', { csrId: data.csrId, crateNumber, printerId, templateId: CRATE_PRINT.templateId,
+                processType: options.processType, copies, pageCount, lines: crate.lines.length, detailCount: crate.detailCount });
+            // Debug-level row details are optional; Audit keeps routine diagnostics compact.
+            log.debug({ title: 'CSR_PRINT DATASET ' + traceId, details: JSON.stringify(dataSet).slice(0, 3900) });
+            submitted = true;
+            const response = https.requestRestlet({
+                scriptId: 'customscript_sit_lpc_rest_api', deploymentId: 'customdeploy_sit_lpc_rest_api',
+                method: https.Method.POST, headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ api: 'printLabels', options })
+            });
+            let result;
+            try { result = JSON.parse(response.body); }
+            catch (_) { throw new Error('RF-SMART returned a non-JSON response (HTTP ' + response.code + ').'); }
+            const rfPayload = result.payload || {};
+            printLog(traceId, 'RF_RESPONSE', { httpCode: response.code, success: result.success,
+                code: result.code, message: String(result.message || '').slice(0, 1000),
+                apiRecId: rfPayload.apiRecId, logId: rfPayload.logId, durationMs: Date.now() - started });
+            if (Number(response.code) < 200 || Number(response.code) >= 300 || result.success !== true) {
+                throw new Error('RF-SMART: ' + String(result.message || result.code || 'Request failed.').slice(0, 500));
+            }
+            const receipt = { testOnly: payload.testOnly === true, csrNumber: data.csrNumber, crateNumber,
+                printerId, copies, pageCount, apiRecId: rfPayload.apiRecId || null, logId: rfPayload.logId || null,
+                message: payload.testOnly === true ? 'Labels generated successfully. Nothing sent to the printer.' :
+                    'RF-SMART accepted the print request. Check the printer or RF-SMART print log for delivery.' };
+            printLog(traceId, 'COMPLETE', receipt);
+            context.response.write(JSON.stringify({ success: true, traceId, data: receipt }));
+        } catch (e) {
+            printLog(traceId, 'FAILED', { message: e.message, stack: e.stack, durationMs: Date.now() - started,
+                submissionAttempted: submitted, testOnly: payload.testOnly === true }, true);
+            context.response.write(JSON.stringify({ success: false, traceId, error: e.message,
+                uncertainSubmission: submitted && payload.testOnly !== true }));
         }
     }
 

@@ -4,7 +4,7 @@
  */
 define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/query', 'N/https'], (search, record, file, log, runtime, format, query, https) => {
 
-    const HTML_FILE_ID = '2595176';
+    const HTML_FILE_ID = '3399943';
 
     function getItemTracking(itemId) {
         if (!itemId) throw new Error('Item is required.');

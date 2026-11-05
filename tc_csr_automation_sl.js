@@ -1256,8 +1256,9 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                     filters: [
                         ['item', 'anyof', binItemIds], 'AND',
                         ['location', 'anyof', Array.from(locationIds)], 'AND',
-                        ['binnumber', 'noneof', '@NONE@'], 'AND',
-                        ['binnumber.isinactive', 'is', 'F']
+                        ['binnumber', 'noneof', '@NONE@']
+                         , 'AND',
+                        ['binnumber.inactive', 'is', 'F']
                     ],
                     columns
                 }), result => {

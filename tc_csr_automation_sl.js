@@ -1148,6 +1148,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
             log.debug('createItemFulfillment soMap', soMap);
 
             const ifIds = [];
+            const pendingFulfillments = [];
             for (const soId in soMap) {
                 const soLines = soMap[soId];
                 try {
@@ -1199,70 +1200,159 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                         throw new Error(`Could not transform Sales Order ${soMeta.tranid} to Item Fulfillment. This usually means no lines are committed or fulfillable. (Error: ${transformErr.name})`);
                     }
 
-                    const lineCount = ifRecord.getLineCount({ sublistId: 'item' });
-                    let fulfilledAny = false;
-
-                    for (let i = 0; i < lineCount; i++) {
-                        ifRecord.selectLine({ sublistId: 'item', line: i });
-
-                        const orderLine = ifRecord.getCurrentSublistValue({
-                            sublistId: 'item',
-                            fieldId: 'orderline'
-                        });
-
-                        const match = fulfillMap[String(orderLine)];
-
-                        if (match) {
-                            log.debug(`Match found for line ${orderLine}`, match);
-                            ifRecord.setCurrentSublistValue({
-                                sublistId: 'item',
-                                fieldId: 'itemreceive',
-                                value: true
-                            });
-
-                            if (match.quantity != null) {
-                                ifRecord.setCurrentSublistValue({
-                                    sublistId: 'item',
-                                    fieldId: 'quantity',
-                                    value: match.quantity
-                                });
-                            }
-
-                            if (match.location != null) {
-                                ifRecord.setCurrentSublistValue({
-                                    sublistId: 'item',
-                                    fieldId: 'location',
-                                    value: match.location
-                                });
-                            }
-
-                            fulfilledAny = true;
-                        } else {
-                            ifRecord.setCurrentSublistValue({
-                                sublistId: 'item',
-                                fieldId: 'itemreceive',
-                                value: false
-                            });
-                        }
-
-                        ifRecord.commitLine({ sublistId: 'item' });
-                    }
-
-                    if (fulfilledAny) {
-                        const ifId = ifRecord.save({
-                            enableSourcing: true,
-                            ignoreMandatoryFields: true // Sometimes mandatory fields prevent save via script
-                        });
-                        log.debug('Item Fulfillment Created', ifId);
-                        ifIds.push(ifId);
-                    } else {
-                        log.error(`No matching lines fulfilled for SO ${soId}`, 'Check orderline mapping.');
-                    }
+                    pendingFulfillments.push({ ifRecord, fulfillMap });
                 } catch (tranErr) {
                     log.error(`Error processing SO ${soId}`, tranErr);
                     throw tranErr; // Rethrow to provide feedback to UI
                 }
             }
+
+            // Plan all bin assignments before saving any fulfillment.
+            const itemIds = new Set();
+            const locationIds = new Set();
+            const fulfillmentLines = [];
+            const asId = value => value == null ? '' : String(value);
+            const isTrue = value => value === true || value === 'T';
+            const eachPage = (s, callback) => {
+                const pages = s.runPaged({ pageSize: 1000 });
+                pages.pageRanges.forEach(range => pages.fetch({ index: range.index }).data.forEach(callback));
+            };
+            pendingFulfillments.forEach(({ ifRecord, fulfillMap }) => {
+                for (let i = 0; i < ifRecord.getLineCount({ sublistId: 'item' }); i++) {
+                    const orderLine = asId(ifRecord.getSublistValue({ sublistId: 'item', fieldId: 'orderline', line: i }));
+                    const match = fulfillMap[orderLine];
+                    if (!match) continue;
+                    const itemId = asId(ifRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i }));
+                    const locationId = asId(match.location || ifRecord.getSublistValue({ sublistId: 'item', fieldId: 'location', line: i }));
+                    itemIds.add(itemId);
+                    if (locationId) locationIds.add(locationId);
+                    fulfillmentLines.push({ ifRecord, line: i, itemId, locationId, match });
+                }
+            });
+
+            const binItems = {};
+            if (itemIds.size) eachPage(search.create({
+                type: 'item',
+                filters: [['internalid', 'anyof', Array.from(itemIds)]],
+                columns: [search.createColumn({ name: 'internalid', sort: search.Sort.ASC }), 'itemid', 'usebins', 'islotitem', 'isserialitem']
+            }), result => {
+                binItems[asId(result.id)] = {
+                    name: result.getValue('itemid'),
+                    useBins: isTrue(result.getValue('usebins')),
+                    numbered: isTrue(result.getValue('islotitem')) || isTrue(result.getValue('isserialitem'))
+                };
+            });
+
+            const statusEnabled = runtime.isFeatureInEffect({ feature: 'INVENTORYSTATUS' });
+            const balances = {};
+            const binItemIds = Array.from(itemIds).filter(id => binItems[id] && binItems[id].useBins);
+            if (binItemIds.length && locationIds.size) {
+                const dimensions = ['item', 'location', 'inventorynumber', 'binnumber'];
+                if (statusEnabled) dimensions.push('status');
+                const columns = dimensions.map(name => search.createColumn({ name, summary: search.Summary.GROUP, sort: search.Sort.ASC }));
+                columns.push(search.createColumn({ name: 'available', summary: search.Summary.SUM }));
+                eachPage(search.create({
+                    type: 'inventorybalance',
+                    filters: [
+                        ['item', 'anyof', binItemIds], 'AND',
+                        ['location', 'anyof', Array.from(locationIds)], 'AND',
+                        ['binnumber', 'noneof', '@NONE@'], 'AND',
+                        ['binnumber.isinactive', 'is', 'F']
+                    ],
+                    columns
+                }), result => {
+                    const value = name => result.getValue({ name, summary: search.Summary.GROUP });
+                    const key = [value('item'), value('location'), value('inventorynumber') || ''].join('|');
+                    const available = Number(result.getValue({ name: 'available', summary: search.Summary.SUM })) || 0;
+                    if (available <= 0) return;
+                    if (!balances[key]) balances[key] = [];
+                    balances[key].push({
+                        binId: asId(value('binnumber')),
+                        main: String(result.getText({ name: 'binnumber', summary: search.Summary.GROUP }) || '').trim().toLowerCase() === 'main',
+                        statusId: statusEnabled ? asId(value('status')) : '',
+                        remaining: available
+                    });
+                });
+                Object.keys(balances).forEach(key => balances[key].sort((a, b) =>
+                    Number(b.main) - Number(a.main) || Number(a.binId) - Number(b.binId) || a.statusId.localeCompare(b.statusId)));
+            }
+
+            fulfillmentLines.forEach(entry => {
+                const item = binItems[entry.itemId];
+                if (!item) throw new Error('Could not check bin settings for item ' + entry.itemId + '.');
+                const { ifRecord, line, itemId, locationId, match } = entry;
+                const context = 'item ' + item.name + ' at location ' + (locationId || '(missing)');
+                ifRecord.selectLine({ sublistId: 'item', line });
+                ifRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'itemreceive', value: true });
+                if (match.quantity != null) ifRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: match.quantity });
+                if (match.location != null) ifRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'location', value: match.location });
+                if (!item.useBins) {
+                    ifRecord.commitLine({ sublistId: 'item' });
+                    return;
+                }
+                const detail = ifRecord.getCurrentSublistSubrecord({ sublistId: 'item', fieldId: 'inventorydetail' });
+                const demands = [];
+                const count = detail.getLineCount({ sublistId: 'inventoryassignment' });
+                for (let j = 0; j < count; j++) {
+                    const lotId = asId(detail.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', line: j }));
+                    const qty = Number(detail.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', line: j }));
+                    const statusId = statusEnabled ? asId(detail.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'inventorystatus', line: j })) : '';
+                    if (qty > 0) demands.push({ lotId, qty, statusId });
+                }
+                if (item.numbered && (!demands.length || demands.some(d => !d.lotId))) {
+                    throw new Error('Missing staged lot/serial assignment for ' + context + '. Push picks to Sales Order first.');
+                }
+                if (!demands.length) {
+                    demands.push({ lotId: '', statusId: '', qty: Number(ifRecord.getCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity' })) });
+                }
+                const planned = [];
+                demands.forEach(demand => {
+                    if (!(demand.qty > 0)) throw new Error('Invalid fulfillment quantity for ' + context + '.');
+                    const candidates = (balances[[itemId, locationId, demand.lotId].join('|')] || [])
+                        .filter(balance => !demand.statusId || balance.statusId === demand.statusId);
+                    const available = candidates.reduce((sum, balance) => sum + balance.remaining, 0);
+                    if (!candidates.length || available <= 0) {
+                        throw new Error('No bin assignment is available for ' + context + (demand.lotId ? ', lot/serial ' + demand.lotId : '') + '.');
+                    }
+                    if (available + 0.00000001 < demand.qty) {
+                        throw new Error('Insufficient bin quantity for ' + context + (demand.lotId ? ', lot/serial ' + demand.lotId : '') +
+                            ': required ' + demand.qty + ', available ' + available + '.');
+                    }
+                    let needed = demand.qty;
+                    candidates.forEach(balance => {
+                        if (needed <= 0.00000001 || balance.remaining <= 0) return;
+                        const qty = Math.min(needed, balance.remaining);
+                        planned.push({ lotId: demand.lotId, binId: balance.binId, statusId: balance.statusId, qty });
+                        balance.remaining -= qty;
+                        needed -= qty;
+                    });
+                });
+                for (let j = count - 1; j >= 0; j--) detail.removeLine({ sublistId: 'inventoryassignment', line: j });
+                planned.forEach(assignment => {
+                    detail.selectNewLine({ sublistId: 'inventoryassignment' });
+                    if (assignment.lotId) detail.setCurrentSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', value: assignment.lotId });
+                    detail.setCurrentSublistValue({ sublistId: 'inventoryassignment', fieldId: 'binnumber', value: assignment.binId });
+                    if (assignment.statusId) detail.setCurrentSublistValue({ sublistId: 'inventoryassignment', fieldId: 'inventorystatus', value: assignment.statusId });
+                    detail.setCurrentSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', value: assignment.qty });
+                    detail.commitLine({ sublistId: 'inventoryassignment' });
+                });
+                ifRecord.commitLine({ sublistId: 'item' });
+            });
+
+            pendingFulfillments.forEach(({ ifRecord, fulfillMap }) => {
+                let fulfilledAny = false;
+                for (let i = 0; i < ifRecord.getLineCount({ sublistId: 'item' }); i++) {
+                    const orderLine = asId(ifRecord.getSublistValue({ sublistId: 'item', fieldId: 'orderline', line: i }));
+                    if (fulfillMap[orderLine]) { fulfilledAny = true; continue; }
+                    ifRecord.selectLine({ sublistId: 'item', line: i });
+                    ifRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'itemreceive', value: false });
+                    ifRecord.commitLine({ sublistId: 'item' });
+                }
+                if (!fulfilledAny) return;
+                const ifId = ifRecord.save({ enableSourcing: true, ignoreMandatoryFields: true });
+                log.debug('Item Fulfillment Created', ifId);
+                ifIds.push(ifId);
+            });
 
             if (ifIds.length > 0) {
                 if (csrId) {

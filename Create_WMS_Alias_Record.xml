@@ -1,0 +1,147 @@
+<workflow scriptid="customworkflow23">
+  <description></description>
+  <initcontexts>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</initcontexts>
+  <initeventtypes></initeventtypes>
+  <initlocalizationcontext></initlocalizationcontext>
+  <initoncreate>T</initoncreate>
+  <initonvieworupdate>F</initonvieworupdate>
+  <initsavedsearchcondition></initsavedsearchcondition>
+  <inittriggertype>AFTERSUBMIT</inittriggertype>
+  <isinactive>F</isinactive>
+  <islogenabled>F</islogenabled>
+  <keephistory>ONLYWHENTESTING</keephistory>
+  <name>Create WMS Alias Record</name>
+  <recordtypes>ASSEMBLYITEM|INVENTORYITEM|LOTNUMBEREDASSEMBLYITEM|LOTNUMBEREDINVENTORYITEM|NONINVENTORYITEM</recordtypes>
+  <releasestatus>RELEASED</releasestatus>
+  <runasadmin>F</runasadmin>
+  <initcondition>
+    <formula></formula>
+    <type>VISUAL_BUILDER</type>
+  </initcondition>
+  <workflowstates>
+    <workflowstate scriptid="workflowstate127">
+      <description></description>
+      <donotexitworkflow>F</donotexitworkflow>
+      <name>New Item</name>
+      <positionx>243</positionx>
+      <positiony>133</positiony>
+      <workflowtransitions>
+        <workflowtransition scriptid="workflowtransition303">
+          <buttonaction></buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow23.workflowstate128]</tostate>
+          <triggertype></triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula><![CDATA["Type" IN ("Item Type1","Item Type2")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Type</name>
+                <value>STDITEMITEMTYPE</value>
+              </parameter>
+              <parameter>
+                <name>Item Type1</name>
+                <selectrecordtype>-106</selectrecordtype>
+                <value>5</value>
+              </parameter>
+              <parameter>
+                <name>Item Type2</name>
+                <selectrecordtype>-106</selectrecordtype>
+                <value>1</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </workflowtransition>
+      </workflowtransitions>
+    </workflowstate>
+    <workflowstate scriptid="workflowstate128">
+      <description></description>
+      <donotexitworkflow>F</donotexitworkflow>
+      <name>Create WMS Alias</name>
+      <positionx>243</positionx>
+      <positiony>273</positiony>
+      <workflowactions triggertype="ONENTRY">
+        <createrecordaction scriptid="workflowaction278">
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <recordtype>[scriptid=customrecord_wmsse_sku_alias]</recordtype>
+          <resultfield></resultfield>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+          <fieldsettings>
+            <fieldsetting>
+              <targetfield>STDRECORDNAME</targetfield>
+              <valuechecked></valuechecked>
+              <valuedate></valuedate>
+              <valuefield></valuefield>
+              <valueformula>LPAD({internalid},14,&apos;0&apos;)</valueformula>
+              <valuejoinfield></valuejoinfield>
+              <valueselect></valueselect>
+              <valuetext></valuetext>
+            </fieldsetting>
+            <fieldsetting>
+              <targetfield>[scriptid=customrecord_wmsse_sku_alias.custrecord_wmsse_alias_item]</targetfield>
+              <valuechecked></valuechecked>
+              <valuedate></valuedate>
+              <valuefield></valuefield>
+              <valueformula>{internalid}</valueformula>
+              <valuejoinfield></valuejoinfield>
+              <valueselect></valueselect>
+              <valuetext></valuetext>
+            </fieldsetting>
+            <fieldsetting>
+              <targetfield>[scriptid=customrecord_wmsse_sku_alias.custrecord_wms_alias_unit]</targetfield>
+              <valuechecked></valuechecked>
+              <valuedate></valuedate>
+              <valuefield>STDITEMSALEUNIT</valuefield>
+              <valueformula></valueformula>
+              <valuejoinfield></valuejoinfield>
+              <valueselect></valueselect>
+              <valuetext></valuetext>
+            </fieldsetting>
+          </fieldsettings>
+        </createrecordaction>
+        <setfieldvalueaction scriptid="workflowaction279">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custitem_tc_item_upc]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>F</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula>LPAD({internalid},14,&apos;0&apos;)</valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect></valueselect>
+          <valuetext></valuetext>
+          <valuetype>FORMULA</valuetype>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </setfieldvalueaction>
+      </workflowactions>
+    </workflowstate>
+  </workflowstates>
+</workflow>

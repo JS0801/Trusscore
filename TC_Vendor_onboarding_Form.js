@@ -569,8 +569,8 @@ stateSearchObj.run().each(function(result){
                     });
 
                     if (existingIdFromUrl) {
-                        recField.defaultValue = existingIdFromUrl;
-                        try {
+recField.defaultValue = String(existingIdFromUrl);
+                      try {
                             var rec = record.load({ type: 'customrecord_vendor_onboarding', id: existingIdFromUrl, isDynamic: true });
                             var isDraftStillOpen = !!rec.getValue(DRAFT_FIELD);
                             if (!isDraftStillOpen) {
@@ -1504,7 +1504,11 @@ toggleIndividualUI();
                     }
 
                     // Create or load custom record
-                    var existingId = (context.request.parameters.custpage_record_id || '').trim();
+                    var rawId = String(
+    req.parameters.custpage_record_id || ''
+).trim();
+
+var existingId = rawId ? Number(rawId) : null;
                     log.debug('existingId', existingId)
                     var rec;
                     if (existingId) {

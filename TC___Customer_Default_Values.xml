@@ -1,0 +1,512 @@
+<workflow scriptid="customworkflow30">
+  <description></description>
+  <initcontexts>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</initcontexts>
+  <initeventtypes></initeventtypes>
+  <initlocalizationcontext></initlocalizationcontext>
+  <initoncreate>T</initoncreate>
+  <initonvieworupdate>T</initonvieworupdate>
+  <initsavedsearchcondition></initsavedsearchcondition>
+  <inittriggertype></inittriggertype>
+  <isinactive>F</isinactive>
+  <islogenabled>T</islogenabled>
+  <keephistory>ALWAYS</keephistory>
+  <name>TC | Customer Default Values</name>
+  <recordtypes>CUSTOMER</recordtypes>
+  <releasestatus>RELEASED</releasestatus>
+  <runasadmin>T</runasadmin>
+  <initcondition>
+    <formula></formula>
+    <type>VISUAL_BUILDER</type>
+  </initcondition>
+  <workflowstates>
+    <workflowstate scriptid="workflowstate154">
+      <description></description>
+      <donotexitworkflow>F</donotexitworkflow>
+      <name>State 1</name>
+      <positionx>443</positionx>
+      <positiony>173</positiony>
+      <workflowactions triggertype="BEFORELOAD">
+        <setdisplaytypeaction scriptid="workflowaction354">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <displaytype>DISABLED</displaytype>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_shipping_charges]</field>
+          <isinactive>F</isinactive>
+          <issublistfield>F</issublistfield>
+          <initcondition>
+            <formula><![CDATA[isEmpty("Salesforce Id (IO)") = 'F']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Salesforce Id (IO)</name>
+                <value>[appid=com.celigo.salesforceio, scriptid=custentity_celigo_sfio_sf_id]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setdisplaytypeaction>
+        <setdisplaytypeaction scriptid="workflowaction355">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <displaytype>DISABLED</displaytype>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_backorder_policy]</field>
+          <isinactive>F</isinactive>
+          <issublistfield>F</issublistfield>
+          <initcondition>
+            <formula><![CDATA[isEmpty("Salesforce Id (IO)") = 'F']]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Salesforce Id (IO)</name>
+                <value>[appid=com.celigo.salesforceio, scriptid=custentity_celigo_sfio_sf_id]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setdisplaytypeaction>
+      </workflowactions>
+      <workflowactions triggertype="AFTERFIELDEDIT">
+        <setfieldmandatoryaction scriptid="workflowaction356">
+          <clienttriggerfields>[scriptid=custentity_tc_account_shipment_hold]</clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_ship_hold_reason]</field>
+          <isinactive>F</isinactive>
+          <ismandatory>T</ismandatory>
+          <issublistfield>F</issublistfield>
+          <initcondition>
+            <formula><![CDATA["Account Shipment Hold" IN ("Account Shipment Hold1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Account Shipment Hold</name>
+                <value>[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Account Shipment Hold1</name>
+                <selectrecordtype>[scriptid=customlist1940]</selectrecordtype>
+                <value>[scriptid=customlist1940.val_230614_6518122_sb1_958]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldmandatoryaction>
+        <setfieldmandatoryaction scriptid="workflowaction357">
+          <clienttriggerfields>[scriptid=custentity_tc_account_shipment_hold]</clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_ship_hold_reason]</field>
+          <isinactive>F</isinactive>
+          <ismandatory>F</ismandatory>
+          <issublistfield>F</issublistfield>
+          <initcondition>
+            <formula><![CDATA["Account Shipment Hold" IN ("Account Shipment Hold1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Account Shipment Hold</name>
+                <value>[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Account Shipment Hold1</name>
+                <selectrecordtype>[scriptid=customlist1940]</selectrecordtype>
+                <value>[scriptid=customlist1940.val_230615_6518122_sb1_893]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldmandatoryaction>
+        <setfieldvalueaction scriptid="workflowaction358">
+          <clienttriggerfields>[scriptid=custentity_tc_account_shipment_hold]</clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_ship_hold_reason]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>F</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valuemultiselect></valuemultiselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA["Account Shipment Hold" IN ("Account Shipment Hold1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Account Shipment Hold</name>
+                <value>[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Account Shipment Hold1</name>
+                <selectrecordtype>[scriptid=customlist1940]</selectrecordtype>
+                <value>[scriptid=customlist1940.val_230615_6518122_sb1_893]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+        <setfieldvalueaction scriptid="workflowaction359">
+          <clienttriggerfields>[scriptid=custentity_tc_account_shipment_hold]</clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <field>STDENTITYCREDITHOLDOVERRIDE</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>F</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect>2</valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA["Account Shipment Hold" IN ("Account Shipment Hold1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Account Shipment Hold</name>
+                <value>[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Account Shipment Hold1</name>
+                <selectrecordtype>[scriptid=customlist1940]</selectrecordtype>
+                <value>[scriptid=customlist1940.val_230614_6518122_sb1_958]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+        <setfieldvalueaction scriptid="workflowaction360">
+          <clienttriggerfields>[scriptid=custentity_tc_account_shipment_hold]</clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <field>STDENTITYCREDITHOLDOVERRIDE</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>F</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect>1</valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA["Account Shipment Hold" IN ("Account Shipment Hold1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Account Shipment Hold</name>
+                <value>[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Account Shipment Hold1</name>
+                <selectrecordtype>[scriptid=customlist1940]</selectrecordtype>
+                <value>[scriptid=customlist1940.val_230615_6518122_sb1_893]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+      </workflowactions>
+      <workflowactions triggertype="AFTERSUBMIT">
+        <setfieldvalueaction scriptid="workflowaction361">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT|USEREVENT|USERINTERFACE</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_send_credit_term]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>T</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect></valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA[(( "Credit Limit" != "Old Record:Credit Limit" OR "Terms" NOT IN ("Old Record:Terms") OR "Credit Type" NOT IN ("Old Record:Credit Type") OR "Credit Hold" NOT IN ("Old Record:Credit Hold") ) AND ( "Customer Status" IN ("TC | Customer Status1","TC | Customer Status2") ))]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Credit Limit</name>
+                <value>STDENTITYCREDITLIMIT</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Credit Limit</name>
+                <value>@OLDRECORD@:STDENTITYCREDITLIMIT</value>
+              </parameter>
+              <parameter>
+                <name>Terms</name>
+                <value>STDENTITYTERMS</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Terms</name>
+                <value>@OLDRECORD@:STDENTITYTERMS</value>
+              </parameter>
+              <parameter>
+                <name>Credit Type</name>
+                <value>[scriptid=custentity_tc_credit_type]</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Credit Type</name>
+                <value>@OLDRECORD@:[scriptid=custentity_tc_credit_type]</value>
+              </parameter>
+              <parameter>
+                <name>Credit Hold</name>
+                <value>STDENTITYCREDITHOLDOVERRIDE</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Credit Hold</name>
+                <value>@OLDRECORD@:STDENTITYCREDITHOLDOVERRIDE</value>
+              </parameter>
+              <parameter>
+                <name>Customer Status</name>
+                <value>[scriptid=custentity_tc_customer_status]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status1</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_59341_6518122_sb1_560]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status2</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_59339_6518122_sb1_156]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+        <setfieldvalueaction scriptid="workflowaction362">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT|USEREVENT|USERINTERFACE</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_send_address_details_to_sf]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>T</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect></valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA[(( "Address" != "Old Record:Address" OR "Address 1" != "Old Record:Address 1" OR "State" NOT IN ("Old Record:State") OR "City" != "Old Record:City" OR "Country" NOT IN ("Old Record:Country") OR "Zip" != "Old Record:Zip" OR "Address 2" != "Old Record:Address 2" ) AND ( "Customer Status" IN ("TC | Customer Status1","TC | Customer Status2") ))]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Address</name>
+                <value>STDENTITYDEFAULTADDRESS</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Address</name>
+                <value>@OLDRECORD@:STDENTITYDEFAULTADDRESS</value>
+              </parameter>
+              <parameter>
+                <name>Address 1</name>
+                <value>STDENTITYADDRESS1</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Address 1</name>
+                <value>@OLDRECORD@:STDENTITYADDRESS1</value>
+              </parameter>
+              <parameter>
+                <name>State</name>
+                <value>STDENTITYSTATE</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:State</name>
+                <value>@OLDRECORD@:STDENTITYSTATE</value>
+              </parameter>
+              <parameter>
+                <name>City</name>
+                <value>STDENTITYCITY</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:City</name>
+                <value>@OLDRECORD@:STDENTITYCITY</value>
+              </parameter>
+              <parameter>
+                <name>Country</name>
+                <value>STDENTITYCOUNTRY</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Country</name>
+                <value>@OLDRECORD@:STDENTITYCOUNTRY</value>
+              </parameter>
+              <parameter>
+                <name>Zip</name>
+                <value>STDENTITYZIP</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Zip</name>
+                <value>@OLDRECORD@:STDENTITYZIP</value>
+              </parameter>
+              <parameter>
+                <name>Address 2</name>
+                <value>STDENTITYADDRESS2</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Address 2</name>
+                <value>@OLDRECORD@:STDENTITYADDRESS2</value>
+              </parameter>
+              <parameter>
+                <name>Customer Status</name>
+                <value>[scriptid=custentity_tc_customer_status]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status1</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_59341_6518122_sb1_560]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status2</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_59339_6518122_sb1_156]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+        <setfieldvalueaction scriptid="workflowaction363">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT|USEREVENT|USERINTERFACE</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_tc_send_shipmenthol]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>T</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect></valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA[(( "Account Shipment Hold" NOT IN ("Old Record:Account Shipment Hold") OR "Credit Hold" NOT IN ("Old Record:Credit Hold") ) AND ( "Customer Status" IN ("TC | Customer Status1","TC | Customer Status2") ))]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Account Shipment Hold</name>
+                <value>[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Account Shipment Hold</name>
+                <value>@OLDRECORD@:[scriptid=custentity_tc_account_shipment_hold]</value>
+              </parameter>
+              <parameter>
+                <name>Credit Hold</name>
+                <value>STDENTITYCREDITHOLDOVERRIDE</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Credit Hold</name>
+                <value>@OLDRECORD@:STDENTITYCREDITHOLDOVERRIDE</value>
+              </parameter>
+              <parameter>
+                <name>Customer Status</name>
+                <value>[scriptid=custentity_tc_customer_status]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status1</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_59341_6518122_sb1_560]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status2</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_59339_6518122_sb1_156]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+        <setfieldvalueaction scriptid="workflowaction364">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT|USEREVENT|USERINTERFACE</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[appid=com.celigo.salesforceio, scriptid=custentity_celigo_sfio_test_mode_record]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>T</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect></valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA[( "Phone" != "Old Record:Phone" OR "E-mail" != "Old Record:E-mail" OR "Web Address" != "Old Record:Web Address" )]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Phone</name>
+                <value>STDENTITYPHONE</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Phone</name>
+                <value>@OLDRECORD@:STDENTITYPHONE</value>
+              </parameter>
+              <parameter>
+                <name>E-mail</name>
+                <value>STDENTITYEMAIL</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:E-mail</name>
+                <value>@OLDRECORD@:STDENTITYEMAIL</value>
+              </parameter>
+              <parameter>
+                <name>Web Address</name>
+                <value>STDENTITYURL</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Web Address</name>
+                <value>@OLDRECORD@:STDENTITYURL</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+      </workflowactions>
+    </workflowstate>
+  </workflowstates>
+</workflow>

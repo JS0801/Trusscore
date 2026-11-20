@@ -1,0 +1,113 @@
+<workflow scriptid="customworkflow24">
+  <description></description>
+  <initcontexts>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</initcontexts>
+  <initeventtypes></initeventtypes>
+  <initlocalizationcontext></initlocalizationcontext>
+  <initoncreate>F</initoncreate>
+  <initonvieworupdate>T</initonvieworupdate>
+  <initsavedsearchcondition></initsavedsearchcondition>
+  <inittriggertype></inittriggertype>
+  <isinactive>F</isinactive>
+  <islogenabled>T</islogenabled>
+  <keephistory>ALWAYS</keephistory>
+  <name>TC | Contact Update - NS to SF</name>
+  <recordtypes>CONTACT</recordtypes>
+  <releasestatus>RELEASED</releasestatus>
+  <runasadmin>T</runasadmin>
+  <initcondition>
+    <formula><![CDATA[isEmpty("Salesforce Id (IO)") = 'F']]></formula>
+    <type>VISUAL_BUILDER</type>
+    <parameters>
+      <parameter>
+        <name>Salesforce Id (IO)</name>
+        <value>[appid=com.celigo.salesforceio, scriptid=custentity_celigo_sfio_sf_id]</value>
+      </parameter>
+    </parameters>
+  </initcondition>
+  <workflowstates>
+    <workflowstate scriptid="workflowstate133">
+      <description></description>
+      <donotexitworkflow>F</donotexitworkflow>
+      <name>State 1</name>
+      <positionx>643</positionx>
+      <positiony>133</positiony>
+      <workflowactions triggertype="AFTERSUBMIT">
+        <setfieldvalueaction scriptid="workflowaction309">
+          <clienttriggerfields></clienttriggerfields>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>CSVIMPORT|USEREVENT|USERINTERFACE</contexttypes>
+          <eventtypes></eventtypes>
+          <field>[scriptid=custentity_ds_send_to_sf]</field>
+          <isinactive>F</isinactive>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <valuechecked>T</valuechecked>
+          <valuedate></valuedate>
+          <valuefield></valuefield>
+          <valueformula></valueformula>
+          <valuejoinfield></valuejoinfield>
+          <valueselect></valueselect>
+          <valuetext></valuetext>
+          <valuetype>STATIC</valuetype>
+          <initcondition>
+            <formula><![CDATA[( "Name/ID" != "Old Record:Name/ID" OR "E-mail" != "Old Record:E-mail" OR "Phone" != "Old Record:Phone" OR "Mobile Phone" != "Old Record:Mobile Phone" OR "Address" != "Old Record:Address" OR "Company" NOT IN ("Old Record:Company") )]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Name/ID</name>
+                <value>STDENTITYENTITYID</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Name/ID</name>
+                <value>@OLDRECORD@:STDENTITYENTITYID</value>
+              </parameter>
+              <parameter>
+                <name>E-mail</name>
+                <value>STDENTITYEMAIL</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:E-mail</name>
+                <value>@OLDRECORD@:STDENTITYEMAIL</value>
+              </parameter>
+              <parameter>
+                <name>Phone</name>
+                <value>STDENTITYPHONE</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Phone</name>
+                <value>@OLDRECORD@:STDENTITYPHONE</value>
+              </parameter>
+              <parameter>
+                <name>Mobile Phone</name>
+                <value>STDENTITYMOBILEPHONE</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Mobile Phone</name>
+                <value>@OLDRECORD@:STDENTITYMOBILEPHONE</value>
+              </parameter>
+              <parameter>
+                <name>Address</name>
+                <value>STDENTITYDEFAULTADDRESS</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Address</name>
+                <value>@OLDRECORD@:STDENTITYDEFAULTADDRESS</value>
+              </parameter>
+              <parameter>
+                <name>Company</name>
+                <value>STDENTITYCOMPANY</value>
+              </parameter>
+              <parameter>
+                <name>Old Record:Company</name>
+                <value>@OLDRECORD@:STDENTITYCOMPANY</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </setfieldvalueaction>
+      </workflowactions>
+    </workflowstate>
+  </workflowstates>
+</workflow>

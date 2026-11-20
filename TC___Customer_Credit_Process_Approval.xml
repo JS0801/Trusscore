@@ -15,19 +15,8 @@
   <releasestatus>RELEASED</releasestatus>
   <runasadmin>T</runasadmin>
   <initcondition>
-    <formula><![CDATA["Customer Status" IN ("TC | Customer Status1")]]></formula>
+    <formula></formula>
     <type>VISUAL_BUILDER</type>
-    <parameters>
-      <parameter>
-        <name>Customer Status</name>
-        <value>[scriptid=custentity_tc_customer_status]</value>
-      </parameter>
-      <parameter>
-        <name>TC | Customer Status1</name>
-        <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
-        <value>[scriptid=customlist_tc_customer_status.val_59340_6518122_sb1_422]</value>
-      </parameter>
-    </parameters>
   </initcondition>
   <workflowstates>
     <workflowstate scriptid="workflowstate21">
@@ -38,10 +27,12 @@
       <positiony>43</positiony>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction63">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Send Credit Application</label>
           <saverecordfirst>T</saverecordfirst>
@@ -200,6 +191,33 @@
             </parameters>
           </initcondition>
         </workflowtransition>
+        <workflowtransition scriptid="workflowtransition387">
+          <buttonaction></buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|CUSTOMTOOL|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow_tc_trusscore_credit_pro.workflowstate17]</tostate>
+          <triggertype>AFTERSUBMIT</triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula><![CDATA["Customer Status" IN ("TC | Customer Status1")]]></formula>
+            <type>VISUAL_BUILDER</type>
+            <parameters>
+              <parameter>
+                <name>Customer Status</name>
+                <value>[scriptid=custentity_tc_customer_status]</value>
+              </parameter>
+              <parameter>
+                <name>TC | Customer Status1</name>
+                <selectrecordtype>[scriptid=customlist_tc_customer_status]</selectrecordtype>
+                <value>[scriptid=customlist_tc_customer_status.val_109970_6518122_sb1_324]</value>
+              </parameter>
+            </parameters>
+          </initcondition>
+        </workflowtransition>
       </workflowtransitions>
     </workflowstate>
     <workflowstate scriptid="workflowstate17">
@@ -276,10 +294,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction58">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Submit For Approval</label>
           <saverecordfirst>T</saverecordfirst>
@@ -739,15 +759,17 @@
           </initcondition>
         </setdisplaytypeaction>
         <addbuttonaction scriptid="workflowaction371">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Re-Submit For Approval</label>
           <saverecordfirst>T</saverecordfirst>
           <initcondition>
-            <formula><![CDATA["User Role" IN ("Role1","Role2","Role3")]]></formula>
+            <formula><![CDATA["User Role" IN ("Role1","Role2","Role3","Role4")]]></formula>
             <type>VISUAL_BUILDER</type>
             <parameters>
               <parameter>
@@ -768,6 +790,11 @@
                 <name>Role3</name>
                 <selectrecordtype>-118</selectrecordtype>
                 <value>ADMINISTRATOR</value>
+              </parameter>
+              <parameter>
+                <name>Role4</name>
+                <selectrecordtype>-118</selectrecordtype>
+                <value>[scriptid=customrole1926]</value>
               </parameter>
             </parameters>
           </initcondition>
@@ -1242,10 +1269,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction66">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Approve</label>
           <saverecordfirst>T</saverecordfirst>
@@ -1275,10 +1304,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction67">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Reject</label>
           <saverecordfirst>T</saverecordfirst>
@@ -1533,10 +1564,12 @@
       </workflowactions>
       <workflowactions triggertype="BEFORELOAD">
         <addbuttonaction scriptid="workflowaction70">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Approve</label>
           <saverecordfirst>T</saverecordfirst>
@@ -1557,10 +1590,12 @@
           </initcondition>
         </addbuttonaction>
         <addbuttonaction scriptid="workflowaction71">
+          <buttondescription></buttondescription>
           <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
           <conditionsavedsearch></conditionsavedsearch>
           <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
           <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
           <isinactive>F</isinactive>
           <label>Reject</label>
           <saverecordfirst>T</saverecordfirst>

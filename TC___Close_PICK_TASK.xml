@@ -1,0 +1,91 @@
+<workflow scriptid="customworkflow13">
+  <description></description>
+  <initcontexts>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</initcontexts>
+  <initeventtypes></initeventtypes>
+  <initlocalizationcontext></initlocalizationcontext>
+  <initoncreate>F</initoncreate>
+  <initonvieworupdate>T</initonvieworupdate>
+  <initsavedsearchcondition></initsavedsearchcondition>
+  <inittriggertype></inittriggertype>
+  <isinactive>F</isinactive>
+  <islogenabled>T</islogenabled>
+  <keephistory>ALWAYS</keephistory>
+  <name>TC | Close PICK TASK</name>
+  <recordtypes>WAVE</recordtypes>
+  <releasestatus>TESTING</releasestatus>
+  <runasadmin>T</runasadmin>
+  <initcondition>
+    <formula></formula>
+    <type>VISUAL_BUILDER</type>
+  </initcondition>
+  <workflowstates>
+    <workflowstate scriptid="workflowstate62">
+      <description></description>
+      <donotexitworkflow>F</donotexitworkflow>
+      <name>State 1</name>
+      <positionx>483</positionx>
+      <positiony>123</positiony>
+      <workflowactions triggertype="BEFORELOAD">
+        <addbuttonaction scriptid="workflowaction186">
+          <buttondescription></buttondescription>
+          <checkconditionbeforeexecution>T</checkconditionbeforeexecution>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <exposetorecordactionapi>F</exposetorecordactionapi>
+          <isinactive>F</isinactive>
+          <label>Close Pick Task</label>
+          <saverecordfirst>T</saverecordfirst>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </addbuttonaction>
+      </workflowactions>
+      <workflowtransitions>
+        <workflowtransition scriptid="workflowtransition269">
+          <buttonaction>[scriptid=customworkflow13.workflowstate62.workflowaction186]</buttonaction>
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <scheduledelay></scheduledelay>
+          <scheduletimeunit></scheduletimeunit>
+          <tostate>[scriptid=customworkflow13.workflowstate63]</tostate>
+          <triggertype></triggertype>
+          <waitforworkflow></waitforworkflow>
+          <waitforworkflowstate></waitforworkflowstate>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </workflowtransition>
+      </workflowtransitions>
+    </workflowstate>
+    <workflowstate scriptid="workflowstate63">
+      <description></description>
+      <donotexitworkflow>F</donotexitworkflow>
+      <name>State 2</name>
+      <positionx>483</positionx>
+      <positiony>273</positiony>
+      <workflowactions triggertype="ONENTRY">
+        <customaction scriptid="workflowaction187">
+          <conditionsavedsearch></conditionsavedsearch>
+          <contexttypes>ACTION|BANKCONNECTIVITY|BANKSTATEMENTPARSER|BUNDLEINSTALLATION|CLIENT|CSVIMPORT|CUSTOMGLLINES|CUSTOMMASSUPDATE|RECORDACTION|DATASETBUILDER|DEBUGGER|EMAILCAPTURE|FICONNECTIVITY|FIPARSER|MAPREDUCE|OCRPLUGIN|OFFLINECLIENT|OTHER|PAYMENTPOSTBACK|PAYMENTGATEWAY|PLATFORMEXTENSION|PORTLET|PROMOTIONS|CONSOLRATEADJUSTOR|RESTWEBSERVICES|RESTLET|ADVANCEDREVREC|SCHEDULED|SDFINSTALLATION|SHIPPINGPARTNERS|WEBSERVICES|SUITELET|TAXCALCULATION|USEREVENT|USERINTERFACE|WORKBOOKBUILDER|WORKFLOW</contexttypes>
+          <eventtypes></eventtypes>
+          <isinactive>F</isinactive>
+          <resultfield></resultfield>
+          <scheduledelay></scheduledelay>
+          <schedulemode>DELAY</schedulemode>
+          <schedulerecurrence></schedulerecurrence>
+          <scheduletimeofday></scheduletimeofday>
+          <scheduletimeunit></scheduletimeunit>
+          <scripttype>[scriptid=customscript3584]</scripttype>
+          <initcondition>
+            <formula></formula>
+            <type>VISUAL_BUILDER</type>
+          </initcondition>
+        </customaction>
+      </workflowactions>
+    </workflowstate>
+  </workflowstates>
+</workflow>

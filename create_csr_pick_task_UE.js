@@ -187,7 +187,7 @@ define(['N/record', 'N/log', 'N/search'], (record, log, search) => {
 
                 const qty = newRec.getSublistValue({
                     sublistId: ITEM_SUBLIST,
-                    fieldId: 'custcol_tc_item_qty',
+                    fieldId: 'custcol_tc_shipping_qty',
                     line: i
                 });
 

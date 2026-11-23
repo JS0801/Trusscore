@@ -1067,8 +1067,12 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                             }
                         }
 
-                        // 2. Set the new line quantity
-                        soRecord.setCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity', value: totalLineQty });
+                        // Keep the customer's ordered quantity and remaining backorder intact.
+                        const orderedQty = Number(soRecord.getCurrentSublistValue({ sublistId: 'item', fieldId: 'quantity' })) || 0;
+                        const fulfilledQty = Number(soRecord.getCurrentSublistValue({ sublistId: 'item', fieldId: 'quantityfulfilled' })) || 0;
+                        if (!(totalLineQty > 0) || totalLineQty > orderedQty - fulfilledQty + 0.00000001) {
+                            throw new Error('Picked quantity exceeds the open quantity for SO ' + soId + ', line ' + currentLineId + '.');
+                        }
 
                         // 3. Re-populate assignments on the subrecord
                         if (subrec) {

@@ -200,6 +200,27 @@ define(['N/record', 'N/log', 'N/search', 'N/url', 'N/https'], function (record, 
     return poWasUpdated;
   }
 
+
+function getItemDepartment(itemId) {
+  if (!itemId) return DEPARTMENT_ID;
+
+  var itemFields = search.lookupFields({
+    type: search.Type.ITEM,
+    id: itemId,
+    columns: ['department']
+  });
+
+  var department = itemFields.department;
+
+  if (Array.isArray(department)) {
+    department = department.length ? department[0].value : '';
+  } else if (department && typeof department === 'object') {
+    department = department.value;
+  }
+
+  return department || DEPARTMENT_ID;
+}
+
   function buildCsrPoGroups(csrRecord) {
     var uniqueGroups = {};
     var orderedKeys = [];
@@ -257,6 +278,7 @@ define(['N/record', 'N/log', 'N/search', 'N/url', 'N/https'], function (record, 
   function buildDesiredPoLines(values, poGroups) {
     var desiredLines = [];
     var allocatedTotal = 0;
+    var itemDepartmentCache = {};
 
     poGroups.forEach(function (group, index) {
       var lineAmount;
@@ -268,6 +290,14 @@ define(['N/record', 'N/log', 'N/search', 'N/url', 'N/https'], function (record, 
         allocatedTotal = roundToTwo(allocatedTotal + lineAmount);
       }
 
+
+      if (!Object.prototype.hasOwnProperty.call(
+  itemDepartmentCache, group.poItemId
+)) {
+  itemDepartmentCache[group.poItemId] =
+    getItemDepartment(group.poItemId);
+}
+
       desiredLines.push({
         item: group.poItemId,
         customer: values.customer || '',
@@ -276,7 +306,7 @@ define(['N/record', 'N/log', 'N/search', 'N/url', 'N/https'], function (record, 
         quantity: 1,
         rate: lineAmount,
         amount: lineAmount,
-        department: DEPARTMENT_ID
+        department: itemDepartmentCache[group.poItemId]
       });
     });
 

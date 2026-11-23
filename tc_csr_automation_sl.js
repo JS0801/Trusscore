@@ -422,7 +422,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                         BUILTIN.DF(csrline.custcol_tc_item) AS item,
 
                         csrline.custcol_tc_item_qty AS quantity,
-                        csrline.custcol_tc_qty_bo AS qty_bo,
+                        (TO_NUMBER(csrline.custcol_tc_item_qty) - csrline.custcol_tc_shipping_qty) AS qty_bo,
 
                         csr.custbody_tc_schedule_shipment_date AS ship_date,
                         csr.custbody_tc_shipping_loc AS ship_loc_id,

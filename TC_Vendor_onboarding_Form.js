@@ -390,7 +390,21 @@ stateSearchObj.run().each(function(result){
                 return null;
             }
         }
+function setCountry(rec, fieldId, countryName) {
+    var name = String(countryName || '').trim();
 
+    if (name) {
+        rec.setText({
+            fieldId: fieldId,
+            text: name
+        });
+    } else {
+        rec.setValue({
+            fieldId: fieldId,
+            value: ''
+        });
+    }
+}
 
 
         function countryOptions(selected) {
@@ -400,6 +414,7 @@ stateSearchObj.run().each(function(result){
                 { code: 'US', name: 'United States' },
                 { code: 'MX', name: 'Mexico' },
                 { code: 'GB', name: 'United Kingdom' }, // use GB not UK (NetSuite uses GB)
+                { code: 'DE', name: 'Germany' },
                 { code: 'LC', name: 'Saint Lucia' },
                 { code: 'PR', name: 'Puerto Rico' },
                 { code: 'GY', name: 'Guyana' },
@@ -1212,20 +1227,18 @@ function populateStates(countryText, selectId, selectedValue) {
 
   var list = STATE_DATA[countryText] || [];
 
-  if (!list.length) {
-    if (sel.tagName.toLowerCase() === 'select') {
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.id = sel.id;
-      input.name = sel.name;
-      input.value = selectedValue || '';
-      input.required = sel.required;
-      sel.parentNode.replaceChild(input, sel);
-    } else {
-      sel.value = selectedValue || '';
-    }
+if (!list.length) {
+    sel.innerHTML = '';
+
+    var emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.text = countryText && countryText !== 'Select'
+        ? 'No states available — please contact support'
+        : 'Select a country first';
+
+    sel.appendChild(emptyOption);
     return;
-  }
+}
 
   if (sel.tagName.toLowerCase() !== 'select') {
     var newSel = document.createElement('select');
@@ -1245,7 +1258,8 @@ function populateStates(countryText, selectId, selectedValue) {
   for (var i = 0; i < list.length; i++) {
     var st = list[i];
     var opt = document.createElement('option');
-    opt.value = st.c || st.n;  // store short code if present, else full name
+    if (!st.c) continue;
+    opt.value = String(st.c); // NetSuite State internal ID
     opt.text  = st.n;
     if (selectedValue && (selectedValue === st.c || selectedValue === st.n)) opt.selected = true;
     sel.appendChild(opt);
@@ -1571,15 +1585,15 @@ var existingId = rawId ? Number(rawId) : null;
                     rec.setValue({ fieldId: 'custrecord_vendor_city', value: req.parameters.city });
                     rec.setValue({ fieldId: 'custrecord_vendor_state', value: req.parameters.state });
                     rec.setValue({ fieldId: 'custrecord_vendor_zip', value: req.parameters.zip });
-                    rec.setValue({ fieldId: 'custrecord_vendor_country', value: countryId(req.parameters.ven_country) });
-
+                    setCountry(rec, 'custrecord_vendor_country', req.parameters.ven_country);
+                  
                     // Mailing Address
                     rec.setValue({ fieldId: 'custrecord_vendor_mail_street', value: req.parameters.mail_street });
                     rec.setValue({ fieldId: 'custrecord_vendor_mail_po_box', value: req.parameters.mail_po_box });
                     rec.setValue({ fieldId: 'custrecord_vendor_mail_city', value: req.parameters.mail_city });
                     rec.setValue({ fieldId: 'custrecord_vendor_mail_state', value: req.parameters.mail_state });
                     rec.setValue({ fieldId: 'custrecord_vendor_mail_zip', value: req.parameters.mail_zip });
-                    rec.setValue({ fieldId: 'custrecord_vendor_mail_country', value: countryId(req.parameters.ven_mail_country) });
+                    setCountry(rec, 'custrecord_vendor_mail_country', req.parameters.ven_mail_country);
 
                     // Purchasing Contact
                     rec.setValue({ fieldId: 'custrecord_vendor_purch_name', value: req.parameters.purch_contact_name });
@@ -1606,7 +1620,7 @@ var existingId = rawId ? Number(rawId) : null;
                     rec.setValue({ fieldId: 'custrecord_vendor_bank_city', value: req.parameters.bank_city });
                     rec.setValue({ fieldId: 'custrecord_vendor_bank_state', value: req.parameters.bank_state });
                     rec.setValue({ fieldId: 'custrecord_vendor_bank_zip', value: req.parameters.bank_zip });
-                    rec.setValue({ fieldId: 'custrecord_vendor_bank_country', value: countryId(req.parameters.bank_country) });
+                    setCountry(rec, 'custrecord_vendor_bank_country', req.parameters.bank_country);
                     rec.setValue({ fieldId: 'custrecord_vendor_branch_phone', value: req.parameters.branch_telephone });
                     rec.setValue({ fieldId: 'custrecord_vendor_bank_contact', value: req.parameters.bank_contact });
                     rec.setValue({ fieldId: 'custrecord_vendor_bank_contact_email', value: req.parameters.bank_contact_email });

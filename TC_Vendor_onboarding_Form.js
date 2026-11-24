@@ -399,6 +399,7 @@ stateSearchObj.run().each(function(result){
                 { code: 'CA', name: 'Canada' },
                 { code: 'US', name: 'United States' },
                 { code: 'MX', name: 'Mexico' },
+                { code: 'DE', name: 'Germany' },
                 { code: 'GB', name: 'United Kingdom' }, // use GB not UK (NetSuite uses GB)
                 { code: 'LC', name: 'Saint Lucia' },
                 { code: 'PR', name: 'Puerto Rico' },
@@ -1212,20 +1213,18 @@ function populateStates(countryText, selectId, selectedValue) {
 
   var list = STATE_DATA[countryText] || [];
 
-  if (!list.length) {
-    if (sel.tagName.toLowerCase() === 'select') {
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.id = sel.id;
-      input.name = sel.name;
-      input.value = selectedValue || '';
-      input.required = sel.required;
-      sel.parentNode.replaceChild(input, sel);
-    } else {
-      sel.value = selectedValue || '';
-    }
+if (!list.length) {
+    sel.innerHTML = '';
+
+    var emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.text = countryText && countryText !== 'Select'
+        ? 'No states available — please contact support'
+        : 'Select a country first';
+
+    sel.appendChild(emptyOption);
     return;
-  }
+}
 
   if (sel.tagName.toLowerCase() !== 'select') {
     var newSel = document.createElement('select');
@@ -1245,8 +1244,9 @@ function populateStates(countryText, selectId, selectedValue) {
   for (var i = 0; i < list.length; i++) {
     var st = list[i];
     var opt = document.createElement('option');
-    opt.value = st.c || st.n;  // store short code if present, else full name
-    opt.text  = st.n;
+if (!st.c) continue;
+opt.value = String(st.c); // NetSuite State internal ID
+opt.text  = st.n;
     if (selectedValue && (selectedValue === st.c || selectedValue === st.n)) opt.selected = true;
     sel.appendChild(opt);
   }

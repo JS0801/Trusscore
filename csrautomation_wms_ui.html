@@ -2191,9 +2191,11 @@
                     const lPicked = parseFloat(l.pickedQty || 0);
                     const lStaged = parseFloat(l.stagingQty || 0);
  
-                    totalQty += lQty;
-                    totalAllocated += lAllocated;
-                    totalCommitted += lCommitted;
+                    if (l.isCratingItem !== true && l.isCratingItem !== 'T') {
+                        totalQty += lQty;
+                        totalAllocated += lAllocated;
+                        totalCommitted += lCommitted;
+                    }
  
                     if (lQty !== lPicked) isFullyPicked = false;
                     if (requiresLot(l) && lQty !== lStaged) isFullyStaged = false;

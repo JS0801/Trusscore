@@ -1264,9 +1264,9 @@
 
     <!-- Child Inventory Detail Modal -->
     <div class="modal-overlay" id="childInvModal">
-        <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-content" style="max-width: 1000px;">
             <div class="modal-header inv-modal-header">
-                <div>&nbsp;</div>
+                <div>Picked Lot Details</div>
                 <button class="modal-close" onclick="closeModal('childInvModal')">&times;</button>
             </div>
             <div class="modal-body" style="padding: 25px;">
@@ -1280,6 +1280,7 @@
                                 <th>Name</th>
                                 <th>Lot Number</th>
                                 <th>Quantity</th>
+                                <th>Crate #</th>
                                 <th>Date Picked</th>
                                 <th>Actions</th>
                             </tr>
@@ -2240,6 +2241,7 @@
                     container.appendChild(warnBanner);
                 }
  
+                let csrActionBar;
                 if (group.ifCreated) {
                     const bulkFulfill = document.createElement('div');
                     bulkFulfill.style = 'padding:12px; background:#e8f5e9; border-bottom:1px solid #c8e6c9; display:flex; justify-content:center; align-items:center; color: #2e7d32; font-weight: 600; font-size: 14px;';
@@ -2249,6 +2251,7 @@
                         </svg>
                         Fulfillment Completed
                     `;
+                    csrActionBar = bulkFulfill;
                     container.appendChild(bulkFulfill);
                 } else if (isFullyPicked) {
                     const bulkFulfill = document.createElement('div');
@@ -2266,8 +2269,22 @@
                             </button>
                         `;
                     }
+                    csrActionBar = bulkFulfill;
                     container.appendChild(bulkFulfill);
                 }
+                if (!csrActionBar) {
+                    csrActionBar = document.createElement('div');
+                    csrActionBar.style.cssText = 'padding:12px;display:flex;justify-content:flex-end;background:#f8fafc;';
+                    container.appendChild(csrActionBar);
+                }
+                csrActionBar.style.gap = '8px';
+                csrActionBar.style.alignItems = 'center';
+                csrActionBar.style.flexWrap = 'wrap';
+                const printButton = document.createElement('button');
+                printButton.type = 'button'; printButton.className = 'btn btn-outline';
+                printButton.textContent = '▣ Print Label';
+                printButton.addEventListener('click', () => openCratePrintModal(groupId));
+                csrActionBar.insertBefore(printButton, csrActionBar.firstChild);
             }
 
             const header = document.createElement('div');
@@ -2620,6 +2637,118 @@
             }
         }
 
+        let cratePrintBusy = false;
+        async function cratePrintApi(action, payload) {
+            const started = Date.now();
+            console.info('[CSR_PRINT] Request', { action, ...payload });
+            const response = await fetch(suiteletUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, payload }) });
+            const text = await response.text();
+            let result;
+            try { result = JSON.parse(text); }
+            catch (_) { throw new Error('The server returned a page instead of JSON. Check your NetSuite login. If printing was requested, check RF-SMART logs before trying again.'); }
+            console.info('[CSR_PRINT] Response', { action, traceId: result.traceId, success: result.success,
+                durationMs: Date.now() - started, data: result.data && !result.data.crates ? result.data : undefined, error: result.error });
+            if (!response.ok || !result.success) {
+                throw new Error((result.error || 'Print request failed.') +
+                    (result.uncertainSubmission ? '\nCheck RF-SMART print logs before retrying; the job may have been submitted.' : ''));
+            }
+            return result;
+        }
+
+        async function openCratePrintModal(csrId) {
+            if (cratePrintBusy || document.getElementById('cratePrintModal')) return;
+            cratePrintBusy = true;
+            showLoading('Loading saved crates and printers...');
+            try {
+                const result = await cratePrintApi('getCratePrintOptions', { csrId });
+                const data = result.data;
+                const overlay = document.createElement('div');
+                overlay.id = 'cratePrintModal'; overlay.className = 'modal-overlay active';
+                const panel = document.createElement('div'); panel.className = 'modal-content';
+                panel.style.cssText = 'max-width:760px;padding:24px;max-height:90vh;overflow:auto;';
+                panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true');
+                panel.setAttribute('aria-label', 'Print crate labels'); overlay.appendChild(panel);
+                const heading = document.createElement('h2'); heading.textContent = 'Print Labels — ' + data.csrNumber; panel.appendChild(heading);
+                const controls = [];
+                const addField = (caption, element) => {
+                    const label = document.createElement('label'); label.style.cssText = 'display:block;margin:12px 0;';
+                    const span = document.createElement('span'); span.textContent = caption; span.style.display = 'block'; label.appendChild(span);
+                    element.style.cssText = 'width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;';
+                    label.appendChild(element); panel.appendChild(label); controls.push(element); return element;
+                };
+                const crateSelect = addField('Crate #', document.createElement('select'));
+                data.crates.forEach(c => { const option = document.createElement('option'); option.value = c.crateNumber;
+                    option.textContent = c.crateNumber; crateSelect.appendChild(option); });
+                const printerSelect = addField('Printer', document.createElement('select'));
+                data.printers.forEach(p => { const option = document.createElement('option'); option.value = p.id;
+                    option.textContent = p.name; printerSelect.appendChild(option); });
+                const copies = addField('Copies', document.createElement('input'));
+                copies.type = 'number'; copies.min = '1'; copies.max = '20'; copies.step = '1'; copies.value = '1';
+                const preview = document.createElement('div'); panel.appendChild(preview);
+                const refreshPreview = () => {
+                    preview.replaceChildren();
+                    const crate = data.crates.find(c => c.crateNumber === crateSelect.value);
+                    if (!crate) { preview.textContent = 'No assigned crates found. Assign crate numbers in Picked Qty details first.'; return; }
+                    const weight = document.createElement('p');
+                    weight.textContent = 'Net / Gross Weight: ' + crate.weight + (crate.missingWeightCount ? ' — missing CSR unit weights; update before printing.' : '');
+                    preview.appendChild(weight);
+                    const tableWrap = document.createElement('div');
+                    tableWrap.style.cssText = 'overflow-x:auto;border:1px solid #e2e8f0;border-radius:8px;margin-top:12px;';
+                    const table = document.createElement('table');
+                    table.style.cssText = 'width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px;';
+                    const thead = document.createElement('thead');
+                    const head = document.createElement('tr');
+                    ['Item', 'Lot #', 'Picked Qty'].forEach((text, index) => {
+                        const th = document.createElement('th'); th.textContent = text; th.scope = 'col';
+                        th.style.cssText = 'padding:12px;background:#f1f5f9;border-bottom:1px solid #cbd5e1;text-align:' + (index === 2 ? 'right;width:22%;' : 'left;width:39%;');
+                        head.appendChild(th);
+                    });
+                    thead.appendChild(head); table.appendChild(thead);
+                    const tbody = document.createElement('tbody');
+                    crate.lines.forEach((line, rowIndex) => {
+                        const row = document.createElement('tr');
+                        row.style.background = rowIndex % 2 ? '#f8fafc' : '#fff';
+                        [line.itemid, line.lotnumber, line.quantity].forEach((value, index) => {
+                            const cell = document.createElement('td'); cell.textContent = value;
+                            cell.style.cssText = 'padding:12px;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere;vertical-align:top;text-align:' + (index === 2 ? 'right;font-variant-numeric:tabular-nums;' : 'left;');
+                            row.appendChild(cell);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody); tableWrap.appendChild(table); preview.appendChild(tableWrap);
+                };
+                crateSelect.addEventListener('change', refreshPreview); refreshPreview();
+                const status = document.createElement('div'); status.setAttribute('role', 'status');
+                status.style.cssText = 'white-space:pre-wrap;font-size:14px;margin-top:12px;';
+                status.textContent = ''; panel.appendChild(status);
+                const actions = document.createElement('div'); actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;'; panel.appendChild(actions);
+                const makeButton = (text, handler) => { const button = document.createElement('button'); button.type = 'button';
+                    button.className = 'btn btn-outline'; button.textContent = text; button.addEventListener('click', handler); actions.appendChild(button); return button; };
+                let pending = false;
+                const close = makeButton('Close', () => { if (!pending) overlay.remove(); });
+                const submit = async () => {
+                    if (pending) return;
+                    const quantity = Number(copies.value);
+                    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) { status.textContent = 'Enter copies from 1 to 20.'; return; }
+                    pending = true; controls.forEach(el => el.disabled = true); print.disabled = close.disabled = true;
+                    status.textContent = 'Sending print request…';
+                    try {
+                        const response = await cratePrintApi('printCrateLabel', { csrId, crateNumber: crateSelect.value,
+                            printerId: printerSelect.value, copies: quantity });
+                        status.textContent = 'Print request sent.';
+                    } catch (error) {
+                        console.error('[CSR_PRINT] Failed', error);
+                        status.textContent = error.message + '\nCheck the printer before trying again.';
+                    } finally { pending = false; close.disabled = false; }
+                };
+                const print = makeButton('▣ Print Label', () => submit()); print.className = 'btn btn-primary';
+                print.disabled = !data.crates.length || !data.printers.length;
+                document.body.appendChild(overlay); crateSelect.focus();
+            } catch (error) { console.error('[CSR_PRINT] Load failed', error); showToast(error.message, 'error'); }
+            finally { cratePrintBusy = false; hideLoading(); }
+        }
+
         async function openChildInventoryModal(pickTaskId) {
             if (!pickTaskId) return showToast('No Pick Task associated.', 'error');
             showLoading('Fetching Pick Details...');
@@ -2640,23 +2769,36 @@
 
                     const detailsData = result.data || [];
                     if (detailsData.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No inventory details found.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No inventory details found.</td></tr>';
                     } else {
                         detailsData.forEach(row => {
                             const tr = document.createElement('tr');
-                            
-                            const actionsHtml = `
-                                <button class="btn btn-outline" style="padding: 2px 8px; font-size: 12px; margin-right: 5px; min-width: auto; height: auto; display: inline-block;" onclick="editPickedLot('${row.id}', '${row.lotText}', ${row.quantity}, '${pickTaskId}')">Edit</button>
-                                <button class="btn btn-outline" style="padding: 2px 8px; font-size: 12px; border-color: #e74c3c; color: #e74c3c; min-width: auto; height: auto; display: inline-block;" onclick="deletePickedLot('${row.id}', '${pickTaskId}')">Delete</button>
-                            `;
-
-                            tr.innerHTML = `
-                                <td>${row.name || '-'}</td>
-                                <td><span style="color:#3b82f6; font-weight:600;">${row.lotText || 'Quantity only'}</span></td>
-                                <td>${row.quantity || 0}</td>
-                                <td>${row.dateCreated || '-'}</td>
-                                <td>${actionsHtml}</td>
-                            `;
+                            // Text nodes and event handlers keep lot/crate values out of HTML and JS strings.
+                            [row.name || '-', row.lotText || 'Quantity only', row.quantity || 0,
+                                row.crateNumber || 'Not assigned', row.dateCreated || '-'].forEach(value => {
+                                const td = document.createElement('td');
+                                td.textContent = value;
+                                tr.appendChild(td);
+                            });
+                            const actions = document.createElement('td');
+                            actions.style.minWidth = '260px';
+                            const addAction = (label, title, handler, danger) => {
+                                const button = document.createElement('button');
+                                button.type = 'button';
+                                button.className = 'btn btn-outline';
+                                button.textContent = label;
+                                button.title = title;
+                                button.setAttribute('aria-label', title);
+                                button.style.cssText = 'padding:5px 8px;font-size:12px;margin:2px;min-width:auto;height:auto;display:inline-block;';
+                                if (danger) { button.style.color = '#c0392b'; button.style.borderColor = '#c0392b'; }
+                                button.addEventListener('click', handler);
+                                actions.appendChild(button);
+                            };
+                            addAction('✎ Qty', 'Edit picked quantity', () => editPickedLot(row.id, row.lotText, row.quantity, pickTaskId));
+                            addAction('▣ Crate', row.crateNumber ? 'Edit or clear crate number' : 'Assign crate number',
+                                () => editPickedCrate(row.id, row.lotText, row.crateNumber || '', pickTaskId));
+                            addAction('🗑 Delete', 'Delete this picked detail record', () => deletePickedLot(row.id, pickTaskId), true);
+                            tr.appendChild(actions);
                             tbody.appendChild(tr);
                         });
                     }
@@ -2670,6 +2812,32 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        async function editPickedCrate(detailId, lotText, currentCrate, pickTaskId) {
+            const value = prompt(`Crate # for ${lotText ? 'Lot ' + lotText : 'this picked detail'}:\nLeave blank to remove the crate number.`, currentCrate);
+            if (value === null) return;
+            showLoading('Saving crate number...');
+            let saved = false;
+            try {
+                const response = await fetch(suiteletUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'updateChildCrate',
+                        payload: { detailId, pickTaskId, crateNumber: value.trim() }
+                    })
+                });
+                const result = await response.json();
+                if (!result.success) throw new Error(result.error || 'Unable to save crate number.');
+                saved = true;
+                showToast(value.trim() ? 'Crate number saved.' : 'Crate number removed.', 'success');
+            } catch (err) {
+                showToast('Crate update failed: ' + err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+            if (saved) await openChildInventoryModal(pickTaskId);
         }
 
         async function editPickedLot(detailId, lotText, currentQty, pickTaskId) {

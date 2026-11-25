@@ -420,6 +420,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
 
                         csrline.custcol_tc_item AS item_id,
                         BUILTIN.DF(csrline.custcol_tc_item) AS item,
+                        csrItem.custitem_tc_is_crating_item AS is_crating_item,
 
                         csrline.custcol_tc_shipping_qty AS quantity,
                         (TO_NUMBER(csrline.custcol_tc_item_qty) - csrline.custcol_tc_shipping_qty) AS qty_bo,
@@ -441,6 +442,9 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                     INNER JOIN TransactionLine csrline
                         ON csrline.transaction = csr.id
                     AND csrline.custcol_csr_pick_task_link = pt.id
+
+                    LEFT JOIN Item csrItem
+                        ON csrItem.id = csrline.custcol_tc_item
 
                     WHERE pt.id IN (${pagePtIds.map(() => "?").join(",")})
                       AND pt.custrecord_tc_csr_pt_status IN (2, 3, 5)
@@ -577,6 +581,7 @@ define(['N/search', 'N/record', 'N/file', 'N/log', 'N/runtime', 'N/format', 'N/q
                         item: r.item,
                         itemId: r.item_id,
                         quantity: r.quantity,
+                        isCratingItem: r.is_crating_item === true || r.is_crating_item === 'T',
                         quantityAllocated: Math.min(Number(r.quantity) || 0, Number(soStatus.allocated) || 0),
                         quantityCommitted: Math.min(Number(r.quantity) || 0, Number(soStatus.committed) || 0),
                         quantityBackOrdered: r.qty_bo,
